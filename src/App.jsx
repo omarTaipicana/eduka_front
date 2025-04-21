@@ -1,42 +1,83 @@
 // App.jsx
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import {
   FaFacebookF,
   FaTwitter,
   FaInstagram,
   FaWhatsapp,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const App = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
+  };
+  
+
   return (
     <div className="app">
       <nav className="navbar">
         <img
           src="/images/eduka_sf.png"
           alt="Logo Eduka"
-          className="logo-navbar"
+          className="logo_navbar"
         />
-        <div className="navbar-links">
-          <a href="#inicio">Inicio</a>
-          <a href="#cursos">Cursos</a>
-          <a href="#nosotros">Nosotros</a>
-          <a href="#contacto">Contacto</a>
+        <div className="menu_icon" onClick={toggleMenu}>
+          {menuOpen ? <FaTimes /> : <FaBars />}
+        </div>
+
+        <div className={`navbar_links ${menuOpen ? "open" : ""}`}>
+          <a href="#inicio" onClick={toggleMenu}>
+            Inicio
+          </a>
+          <a href="#cursos" onClick={toggleMenu}>
+            Cursos
+          </a>
+          <a href="#nosotros" onClick={toggleMenu}>
+            Nosotros
+          </a>
+          <a href="#contacto" onClick={toggleMenu}>
+            Contacto
+          </a>
         </div>
       </nav>
 
       <header className="header" id="inicio">
-        <img src="/images/eduka_sf.png" alt="Logo Eduka" className="logo" />
-        <h1>Tu camino al conocimiento empieza aquí</h1>
+        <motion.img
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.8 }}
+          src="/images/eduka_sf.png"
+          alt="Logo Eduka"
+          className="logo"
+        />
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          Tu camino al conocimiento empieza aquí
+        </motion.h1>
         <p>Aprende, crece, y mejora con nuestros cursos.</p>
-        <a href="#contacto" className="cta-button">
+        <a href="#contacto" className="cta_button">
           Contáctanos
         </a>
       </header>
 
-      <section className="cursos" id="cursos">
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="cursos"
+        id="cursos"
+      >
         <h2>Nuestros Cursos</h2>
-        <div className="curso-lista">
+        <div className="curso_lista">
           <div className="curso">
             <h3>Curso de React</h3>
             <p>Aprende React desde cero hasta avanzado.</p>
@@ -50,9 +91,15 @@ const App = () => {
             <p>Desarrolla aplicaciones backend escalables.</p>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="nosotros" id="nosotros">
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="nosotros"
+        id="nosotros"
+      >
         <h2>Nosotros</h2>
         <p>
           Eduka es una organización dedicada a ofrecer cursos de alta calidad en
@@ -60,9 +107,15 @@ const App = () => {
           para ayudar a los estudiantes a adquirir nuevas habilidades y avanzar
           en sus carreras profesionales.
         </p>
-      </section>
+      </motion.section>
 
-      <section className="contacto" id="contacto">
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="contacto"
+        id="contacto"
+      >
         <h2>Contáctanos</h2>
         <form className="formulario">
           <input type="text" placeholder="Nombre" required />
@@ -70,11 +123,11 @@ const App = () => {
           <textarea rows="4" placeholder="Mensaje" required></textarea>
           <button type="submit">Enviar</button>
         </form>
-      </section>
+      </motion.section>
 
       <footer className="footer">
         <p>Síguenos en redes sociales</p>
-        <div className="redes-sociales">
+        <div className="redes_sociales">
           <a
             href="https://facebook.com"
             target="_blank"
@@ -97,14 +150,26 @@ const App = () => {
             <FaInstagram />
           </a>
         </div>
-        <a
-          className="whatsapp-button"
-          href="https://wa.me/593999999999"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Contáctanos por WhatsApp
-        </a>
+        <div className="btn_acceso">
+          <a
+            className="whatsapp_button"
+            href="https://wa.me/593983029083"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Contáctanos por WhatsApp
+          </a>
+
+          <a
+            className="plataforma_button"
+            href="https://acadexeduc.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Accede a nuestra Plataforma Educativa MOODLE ACADEX
+          </a>
+        </div>
+
         <p>&copy; 2025 Eduka. Todos los derechos reservados.</p>
       </footer>
     </div>
