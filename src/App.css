@@ -3,7 +3,7 @@ body {
   margin: 0;
   font-family: "Segoe UI", sans-serif;
   scroll-behavior: smooth;
-  background: url('images/fondo.gif') center center fixed;
+  background: url('/public/images/fondo.gif') center center fixed;
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
