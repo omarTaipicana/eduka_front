@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./styles/LandingPage.css";
 import {
   FaFacebookF,
@@ -11,12 +11,23 @@ import {
 import { motion } from "framer-motion";
 
 const LandingPage = () => {
- const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const inicioRef = useRef(null);
+  const cursosRef = useRef(null);
+  const nosotrosRef = useRef(null);
+  const contactoRef = useRef(null);
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
   };
-  
+
+  const scrollToSection = (ref) => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth" });
+      setMenuOpen(false);
+    }
+  };
 
   return (
     <div className="app">
@@ -31,22 +42,14 @@ const LandingPage = () => {
         </div>
 
         <div className={`navbar_links ${menuOpen ? "open" : ""}`}>
-          <a href="#inicio" onClick={toggleMenu}>
-            Inicio
-          </a>
-          <a href="#cursos" onClick={toggleMenu}>
-            Cursos
-          </a>
-          <a href="#nosotros" onClick={toggleMenu}>
-            Nosotros
-          </a>
-          <a href="#contacto" onClick={toggleMenu}>
-            Contacto
-          </a>
+          <button onClick={() => scrollToSection(inicioRef)}>Inicio</button>
+          <button onClick={() => scrollToSection(cursosRef)}>Cursos</button>
+          <button onClick={() => scrollToSection(nosotrosRef)}>Nosotros</button>
+          <button onClick={() => scrollToSection(contactoRef)}>Contacto</button>
         </div>
       </nav>
 
-      <header className="header" id="inicio">
+      <header className="header" ref={inicioRef}>
         <motion.img
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -63,7 +66,7 @@ const LandingPage = () => {
           Tu camino al conocimiento empieza aquí
         </motion.h1>
         <p>Aprende, crece, y mejora con nuestros cursos.</p>
-        <a href="#contacto" className="cta_button">
+        <a onClick={() => scrollToSection(contactoRef)} className="cta_button">
           Contáctanos
         </a>
       </header>
@@ -73,7 +76,7 @@ const LandingPage = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="cursos"
-        id="cursos"
+        ref={cursosRef}
       >
         <h2>Nuestros Cursos</h2>
         <div className="curso_lista">
@@ -97,7 +100,7 @@ const LandingPage = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="nosotros"
-        id="nosotros"
+        ref={nosotrosRef}
       >
         <h2>Nosotros</h2>
         <p>
@@ -113,7 +116,7 @@ const LandingPage = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="contacto"
-        id="contacto"
+        ref={contactoRef}
       >
         <h2>Contáctanos</h2>
         <form className="formulario">
@@ -174,4 +177,5 @@ const LandingPage = () => {
     </div>
   );
 };
-export default LandingPage
+
+export default LandingPage;

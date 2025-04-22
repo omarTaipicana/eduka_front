@@ -34,16 +34,39 @@
     gap: 2rem;
   }
   
-  .navbar_links a {
+
+  .navbar_links button {
+    background: none;
+    border: none;
     color: white;
-    font-weight: bold;
-    text-decoration: none;
-    transition: color 0.3s;
+    font-size: 1rem;
+    padding: 8px 12px;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
   }
   
-  .navbar_links a:hover {
-    color: #00a8ff;
+  .navbar_links button::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #00a8ff;
+    transition: width 0.3s ease;
   }
+  
+  .navbar_links button:hover {
+    color: #00a8ff;
+    font-weight: bold;
+  }
+  
+  .navbar_links button:hover::after {
+    width: 100%;
+  }
+  
+  
   
   /* Header */
   .header {
@@ -75,7 +98,7 @@
   
   /* Secciones */
   section {
-    scroll-margin-top: 5rem;
+    scroll-margin-top: 10rem;
     padding: 2rem;
     margin: 0 auto 2rem;
     width: 95%;
