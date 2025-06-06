@@ -131,7 +131,7 @@ const Register = () => {
               <img
                 className="img__show"
                 onClick={() => setHidePassword(!hidePassword)}
-                src={`../../../public/${hidePassword ? "show" : "hide"}.png`}
+                src={`../../../${hidePassword ? "show" : "hide"}.png`}
                 alt=""
               />
             </div>
@@ -152,7 +152,7 @@ const Register = () => {
               <img
                 className="img__show"
                 onClick={() => setHidePasswordVerify(!hidePasswordVerify)}
-                src={`../../../public/${
+                src={`../../../${
                   hidePasswordVerify ? "show" : "hide"
                 }.png`}
                 alt=""
