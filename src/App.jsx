@@ -12,9 +12,9 @@ import ResetPasswordSendEmail from "./pages/auth/ResetPasswordSendEmail";
 import ChangePassword from "./pages/auth/ChangePassword";
 import Footer from "./components/shared/Footer";
 import Giscopnsc from "./components/Cursos/Giscopnsc";
-import Prueba from "./components/Cursos/Prueba";
 import RegistroAlumnos from "./components/Formularios/RegistroAlumnos";
 import { RegistroPagos } from "./components/Formularios/RegistroPagos";
+import Accv from "./components/Cursos/Accv";
 
 const App = () => {
   return (
@@ -32,8 +32,7 @@ const App = () => {
         <Route path="/register_pago/:code" element={<RegistroPagos />} />
 
         <Route path="/giscopnsc" element={<Giscopnsc />} />
-        <Route path="/prueba" element={<Prueba />} />
-
+        <Route path="/accv" element={<Accv />} />
         <Route path="/login" element={<Login />} />
       </Routes>
       <Footer />
