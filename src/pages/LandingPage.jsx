@@ -105,7 +105,7 @@ const LandingPage = () => {
               </div>
             </div>
           </Link>
-          <Link to="/prueba">
+          <Link to="/accv">
             <div className="curso_card accv">
               <div className="curso_card_overlay">
                 <h3 className="curso_title">
