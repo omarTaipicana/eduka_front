@@ -50,7 +50,7 @@ const LandingPage = () => {
           <button onClick={() => scrollToSection(cursosRef)}>Cursos</button>
           <button onClick={() => scrollToSection(nosotrosRef)}>Nosotros</button>
           <button onClick={() => scrollToSection(contactoRef)}>Contacto</button>
-          <Link to="/register">Registrarse</Link>
+          {/* <Link to="/register">Registrarse</Link> */}
         </div>
       </nav>
 
@@ -173,7 +173,7 @@ const LandingPage = () => {
         ref={contactoRef}
       >
         <h2>Contáctanos</h2>
-        <form className="formulario">
+        <form className="formulario_landing">
           <input type="text" placeholder="Nombre" required />
           <input type="email" placeholder="Correo electrónico" required />
           <textarea rows="4" placeholder="Mensaje" required></textarea>

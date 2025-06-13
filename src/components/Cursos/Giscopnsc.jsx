@@ -73,6 +73,18 @@ const Giscopnsc = () => {
         </a>
       </div>
 
+      <div className="pagination_controls">
+        <button onClick={goToPrevPage} disabled={pageNumber <= 1}>
+          Anterior
+        </button>
+        <span>
+          Página {pageNumber} de {numPages || "--"}
+        </span>
+        <button onClick={goToNextPage} disabled={pageNumber >= numPages}>
+          Siguiente
+        </button>
+      </div>
+
       <div className="giscopnsc_container" ref={containerRef}>
         <div className="pdf_container">
           {" "}

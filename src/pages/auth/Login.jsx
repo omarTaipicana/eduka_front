@@ -76,9 +76,15 @@ const Login = () => {
 
   const handleLogout = () => {
     if (userLogged) {
+      const capitalizeWord = (str) =>
+        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+
+      const firstName = capitalizeWord(userLogged?.firstName);
+      const lastName = capitalizeWord(userLogged?.lastName);
+
       dispatch(
         showAlert({
-          message: `⚠️ Estimado ${userLogged?.firstName} ${userLogged?.lastName}, no olvides registrar tus avances`,
+          message: `⚠️ Hasta pronto ${firstName} ${lastName}, te esperamos.`,
           alertType: 4,
         })
       );
@@ -105,9 +111,15 @@ const Login = () => {
 
   useEffect(() => {
     if (userLogged && prevUser === null && isNewLogin) {
+      const capitalizeWord = (str) =>
+        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+
+      const firstName = capitalizeWord(userLogged?.firstName);
+      const lastName = capitalizeWord(userLogged?.lastName);
+
       dispatch(
         showAlert({
-          message: `⚠️ Bienvenido ${userLogged?.firstName} ${userLogged?.lastName} a tu App Web Registros BPA`,
+          message: `⚠️ Bienvenido ${firstName} ${lastName} a EDUKA, tu Plataforma Educativa`,
           alertType: 2,
         })
       );
@@ -119,10 +131,16 @@ const Login = () => {
 
   useEffect(() => {
     if (userUpdate) {
+      const capitalizeWord = (str) =>
+        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+
+      const firstName = capitalizeWord(userLogged?.firstName);
+      const lastName = capitalizeWord(userLogged?.lastName);
+
       loggedUser();
       dispatch(
         showAlert({
-          message: `⚠️ ${userUpdate?.firstName} ${userUpdate?.lastName}, se actualizo tu información correctamente`,
+          message: `⚠️ Estimado ${firstName} ${lastName}, se actualizo tu información correctamente`,
           alertType: 2,
         })
       );
@@ -427,9 +445,7 @@ const Login = () => {
                       <img
                         className="img__show"
                         onClick={() => setHidePassword(!hidePassword)}
-                        src={`../../../${
-                          hidePassword ? "show" : "hide"
-                        }.png`}
+                        src={`../../../${hidePassword ? "show" : "hide"}.png`}
                         alt=""
                       />
                     </div>

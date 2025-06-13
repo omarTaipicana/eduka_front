@@ -20,9 +20,15 @@ const PrincipalHeader = () => {
 
   const handleLogout = () => {
     if (user) {
+      const capitalizeWord = (str) =>
+        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+
+      const firstName = capitalizeWord(user?.firstName);
+      const lastName = capitalizeWord(user?.lastName);
+
       dispatch(
         showAlert({
-          message: `⚠️ Estimado ${user?.firstName} ${user?.lastName}, no olvides registrar tus avances`,
+          message: `⚠️ Hasta pronto ${firstName} ${lastName}, te esperamos.`,
           alertType: 4,
         })
       );
@@ -47,8 +53,8 @@ const PrincipalHeader = () => {
         <article className="link_content">
           {" "}
           {/* <Link to="/home">Home</Link> */}
-          {!token && <Link to="/register">Register</Link>}
-          {!token && <Link to="/login">Login</Link>}
+          {/* {!token && <Link to="/register">Register</Link>} */}
+          {/* {!token && <Link to="/login">Login</Link>} */}
         </article>
         <article className="login_content">
           <Link to="/login">

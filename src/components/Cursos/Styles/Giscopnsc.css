@@ -1,9 +1,8 @@
 .giscopnsc_wrapper {
   max-width: 70%;
   margin: 2rem auto;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #3a3f55; /* plomo oscuro */
-  background-color: #f5f8fc; /* azul muy claro */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f8fcbe;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
@@ -11,7 +10,7 @@
 
 .giscopnsc_title {
   font-size: 1.7rem;
-  color: #00509e; /* azul intenso */
+  color: #00509e;
   margin-bottom: 1rem;
   text-align: center;
 }
@@ -22,6 +21,8 @@
   margin-bottom: 2rem;
   padding: 0 10px;
   text-align: justify;
+  color: #0c0d0d;
+  font-weight: 500;
 }
 
 .button_group {
@@ -33,20 +34,26 @@
 
 .btn_inscribirse,
 .btn_registrar_pago {
-  background-color: #00509e;
+  text-decoration: none;
+  background-color: #031e39;
   color: white;
   border: none;
   padding: 0.6rem 1.5rem;
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn_inscribirse:hover,
 .btn_registrar_pago:hover {
-  background-color: #003d66;
+  background-color: #0a76c1; /* azul más brillante */
+  color: white;
+  text-decoration: none;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
+
 
 .giscopnsc_container {
   width: 100%;
