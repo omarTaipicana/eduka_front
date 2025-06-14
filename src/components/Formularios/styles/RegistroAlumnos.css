@@ -122,6 +122,7 @@
   margin-bottom: 1.2rem;
   font-weight: 500;
   width: 100%;
+  font-size: 0.8rem;
 }
 
 .form_column input,
@@ -133,7 +134,7 @@ select {
   border-radius: 8px;
   background-color: #eaf2fb;
   color: #003366;
-  font-size: 1rem;
+  font-size: 0.6rem;
 }
 
 .form_check_container {
@@ -148,7 +149,7 @@ select {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #ffffff;
   line-height: 1.4;
   cursor: pointer;
@@ -282,4 +283,76 @@ select {
 
 .animate_slide_right {
   animation: slideRight 0.8s ease-out;
+}
+
+/* Responsivo para RegistroAlumnos */
+
+@media screen and (max-width: 992px) {
+  .registro_wrapper {
+    flex-direction: column;
+    height: auto;
+    border-radius: 15px;
+  }
+
+  .registro_right,
+  .registro_left {
+    width: 100%;
+    padding: 1.5rem 1rem;
+  }
+
+  .formulario_registro {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form_column {
+    width: 100%;
+  }
+
+  .curso_fondo {
+    min-height: 200px;
+  }
+
+  .curso_overlay h2 {
+    font-size: 1.5rem;
+  }
+
+  .curso_overlay p {
+    font-size: 0.9rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .registro_container {
+    padding: 0 1rem;
+  }
+
+  .registro_right h2 {
+    font-size: 1.5rem;
+  }
+
+  .registro_right p {
+    font-size: 0.9rem;
+  }
+
+  .form_column input,
+  select {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .form_button button {
+    width: 100%;
+    padding: 0.7rem 0;
+    font-size: 1rem;
+  }
+
+  .usuario_existente {
+    max-width: 90%;
+    padding: 1.5rem;
+  }
+
+  .curso_fondo {
+    min-height: 150px;
+  }
 }

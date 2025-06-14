@@ -21,6 +21,13 @@ const Register = () => {
     userRegister,
     isLoading,
     error,
+    verified,
+    sendEmail,
+    userResetPassword,
+    changePassword,
+    userUpdate,
+    userLogged,
+    setUserLogged,
   ] = useAuth();
 
   const {
@@ -33,6 +40,17 @@ const Register = () => {
     setError,
     formState: { errors },
   } = useForm();
+
+
+
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    navigate("/login");
+  }
+}, [navigate]);
+
+
 
   useEffect(() => {
     if (error) {
@@ -56,6 +74,8 @@ const Register = () => {
       navigate("/login");
     }
   }, [userRegister]);
+
+
 
   const submit = (data) => {
     const frontBaseUrl = `${location.protocol}//${location.host}/#/verify`;
@@ -152,9 +172,7 @@ const Register = () => {
               <img
                 className="img__show"
                 onClick={() => setHidePasswordVerify(!hidePasswordVerify)}
-                src={`../../../${
-                  hidePasswordVerify ? "show" : "hide"
-                }.png`}
+                src={`../../../${hidePasswordVerify ? "show" : "hide"}.png`}
                 alt=""
               />
             </div>

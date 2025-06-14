@@ -22,6 +22,10 @@ const LandingPage = () => {
   const nosotrosRef = useRef(null);
   const contactoRef = useRef(null);
 
+  const handleRegisterClick = () => {
+    navigate("/login");
+  };
+
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
   };
@@ -50,7 +54,7 @@ const LandingPage = () => {
           <button onClick={() => scrollToSection(cursosRef)}>Cursos</button>
           <button onClick={() => scrollToSection(nosotrosRef)}>Nosotros</button>
           <button onClick={() => scrollToSection(contactoRef)}>Contacto</button>
-          {/* <Link to="/register">Registrarse</Link> */}
+          <button onClick={handleRegisterClick}>Login</button>
         </div>
       </nav>
 
@@ -172,12 +176,16 @@ const LandingPage = () => {
         className="contacto"
         ref={contactoRef}
       >
-        <h2>Contáctanos</h2>
         <form className="formulario_landing">
-          <input type="text" placeholder="Nombre" required />
+          <h2 className="formulario_titulo">Contáctanos</h2>
+          <input type="text" placeholder="Nombre completo" required />
           <input type="email" placeholder="Correo electrónico" required />
-          <textarea rows="4" placeholder="Mensaje" required></textarea>
-          <button type="submit">Enviar</button>
+          <textarea
+            rows="4"
+            placeholder="¿Cómo podemos ayudarte?"
+            required
+          ></textarea>
+          <button type="submit">📩 Enviar mensaje</button>
         </form>
       </motion.section>
 

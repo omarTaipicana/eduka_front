@@ -56,12 +56,12 @@
   flex: 1;
   border: none;
   outline: none;
-  font-size: 1em;
+  font-size: 0.8em;
 }
 
 .input__password {
   text-align: center;
-  font-size: 1em;
+  font-size: 0.8em;
 }
 
 .input__form__register img {
@@ -95,19 +95,32 @@
   height: 20px;
 }
 
+/* Responsividad para pantallas medianas (tablets y móviles grandes) */
+@media (max-width: 1024px) {
+  .form__register {
+    max-width: 70%; /* Más ancho para pantallas medianas */
+    padding: 1em 1.5em;
+  }
+
+  .btn__form__register {
+    width: 60%;
+  }
+}
+
+/* Responsividad para tablets y móviles pequeños */
 @media (max-width: 768px) {
-  .contenedor-bpa {
-    flex-direction: column;
+  .contenedor_register {
+    padding: 1.5em;
   }
 
   .form__register {
-    gap: 0.3em;
-    width: 100%;
+    max-width: 90%;
+    gap: 0.5em;
+    padding: 1em 1em;
   }
 
-  .input__password {
-    text-align: center;
-    width: 100%;
+  .btn__form__register {
+    width: 70%;
   }
 
   .register__title {
@@ -115,6 +128,41 @@
   }
 
   .input__form__register {
-    font-size: 1em;
+    font-size: 0.95em;
+  }
+
+  .input__password {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Responsividad para móviles muy pequeños (teléfonos) */
+@media (max-width: 480px) {
+  .contenedor_register {
+    padding: 1em;
+  }
+
+  .form__register {
+    max-width: 100%;
+    padding: 0.8em 1em;
+    gap: 0.4em;
+  }
+
+  .btn__form__register {
+    width: 100%;
+  }
+
+  .register__title {
+    font-size: 1.3em;
+  }
+
+  .input__form__register {
+    font-size: 0.9em;
+  }
+
+  .input__form__register img {
+    width: 1.2em;
+    height: 1.2em;
   }
 }

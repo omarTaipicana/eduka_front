@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { showAlert } from "../../store/states/alert.slice";
 import { useParams } from "react-router-dom";
 import "./styles/RegistroAlumnos.css";
+import IsLoading from "../shared/isLoading";
 
 const RegistroAlumnos = () => {
   const PATH_INSCRIPCIONES = "/inscripcion";
@@ -15,9 +16,10 @@ const RegistroAlumnos = () => {
   const { code } = useParams();
 
   const [idCourse, setIdCourse] = useState();
-  const [course, getCourse] = useCrud();
+  const [course, getCourse, , , , , isLoading, , , ,] = useCrud();
   const [variables, getVariables] = useCrud();
-  const [response, getInscripcion, postInscripcion] = useCrud();
+  const [response, getInscripcion, postInscripcion, , , , , newInscripcion] =
+    useCrud();
   const [usuarioExistente, setUsuarioExistente] = useState(null);
 
   const {
@@ -32,6 +34,17 @@ const RegistroAlumnos = () => {
     getCourse(PATH_COURSES);
     getVariables(PATH_VARIABLES);
   }, []);
+
+  useEffect(() => {
+    if (newInscripcion) {
+      dispatch(
+        showAlert({
+          message: `⚠️ Estimad@ ${newInscripcion.nombres} ${newInscripcion.apellidos}, se realizo tu inscripción correctamente`,
+          alertType: 2,
+        })
+      );
+    }
+  }, [newInscripcion]);
 
   useEffect(() => {
     if (course.length && code) {
@@ -64,15 +77,18 @@ const RegistroAlumnos = () => {
 
     if (!isValidCedula)
       return dispatch(
-        showAlert({ message: "⚠️ Cédula no válida.", alertType: 1 })
+        showAlert({
+          message: "⚠️ La cédula ingresada es incorrecta.",
+          alertType: 1,
+        })
       );
     if (!isValidEmail)
       return dispatch(
-        showAlert({ message: "⚠️ Email no válido.", alertType: 1 })
+        showAlert({ message: "⚠️ El email es incorrecto.", alertType: 1 })
       );
     if (data.email !== data.confirmEmail)
       return dispatch(
-        showAlert({ message: "⚠️ Correos no coinciden.", alertType: 1 })
+        showAlert({ message: "⚠️ Los correos no coinciden.", alertType: 1 })
       );
     if (!isValidCellular)
       return dispatch(
@@ -119,6 +135,8 @@ const RegistroAlumnos = () => {
   if (!cursoActivo) {
     return (
       <div className="registro_container curso_no_encontrado">
+        {isLoading && <IsLoading />}
+
         <div className="mensaje_curso_caja">
           <h2>❌ Curso no disponible</h2>
           <p>

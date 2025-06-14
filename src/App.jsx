@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/auth/Login";
@@ -17,11 +17,12 @@ import { RegistroPagos } from "./components/Formularios/RegistroPagos";
 import Accv from "./components/Cursos/Accv";
 
 const App = () => {
+    const location = useLocation();
+
   return (
     <div>
-      <PrincipalHeader />
+      {location.pathname === "/" ? <LandingPage /> : <PrincipalHeader />}
       <Routes>
-        <Route path="/" element={<LandingPage />} />
         <Route path="/home" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify/:code" element={<Verify />} />
