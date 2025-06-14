@@ -18,8 +18,16 @@ const RegistroAlumnos = () => {
   const [idCourse, setIdCourse] = useState();
   const [course, getCourse, , , , , isLoading, , , ,] = useCrud();
   const [variables, getVariables] = useCrud();
-  const [response, getInscripcion, postInscripcion, , , , , newInscripcion] =
-    useCrud();
+  const [
+    response,
+    getInscripcion,
+    postInscripcion,
+    ,
+    ,
+    ,
+    isLoading2,
+    newInscripcion,
+  ] = useCrud();
   const [usuarioExistente, setUsuarioExistente] = useState(null);
 
   const {
@@ -154,6 +162,8 @@ const RegistroAlumnos = () => {
       className="registro_container"
       style={{ backgroundImage: `url(/images/fondo_${code}.jpg)` }}
     >
+      { isLoading2 && <IsLoading />}
+
       <div className="registro_wrapper">
         <div className="registro_left animate_slide_left">
           <form className="formulario_registro" onSubmit={handleSubmit(submit)}>
