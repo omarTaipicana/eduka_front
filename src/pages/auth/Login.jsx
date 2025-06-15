@@ -225,7 +225,6 @@ const Login = () => {
       <section className="content_background">
         {userLogged ? (
           <section className="user__info__content">
-            <h2 className="title__user__info">{`Hola ${userLogged.firstName} ${userLogged.lastName}`}</h2>
             <form
               onSubmit={handleSubmit(submitUpdate)}
               className="form__user__info"
@@ -419,7 +418,7 @@ const Login = () => {
           </section>
         ) : (
           <div>
-            <section className="iser__login__content">
+            <section className="user__login__content">
               <h2 className="login__title">Iniciar Sesión</h2>
               <form className="form__login" onSubmit={handleSubmit(submit)}>
                 <label className="label__form__login">

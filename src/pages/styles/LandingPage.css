@@ -477,6 +477,18 @@ a:hover {
     display: block;
   }
 
+  .logo {
+    width: 10em;
+  }
+
+  .header > h1 {
+    font-size: 1.6em;
+  }
+
+  .header > p {
+    font-size: 1.6em;
+  }
+
   .navbar_links {
     position: absolute;
     top: 5em; /* Altura de la navbar */
@@ -499,7 +511,7 @@ a:hover {
     font-size: 1.2rem;
   }
   .curso_lista {
-    flex-direction: column;
+    flex-direction: row;
     width: 100%;
   }
   .curso_lista > a {
@@ -507,8 +519,29 @@ a:hover {
   }
 
   .curso_card {
+    width: 100%;
     height: 30em;
     padding: 0;
     margin: 0;
+  }
+
+  .nosotros > p {
+    font-size: 0.8em;
+  }
+
+  .formulario_landing {
+    margin: 0;
+  }
+
+  .formulario_landing > h2 {
+    font-size: 1.3em;
+  }
+
+  .formulario_landing > input {
+    font-size: 0.7em;
+  }
+
+  .formulario_landing > textarea {
+    font-size: 0.6em;
   }
 }
