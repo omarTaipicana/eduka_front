@@ -212,7 +212,7 @@ const RegistroAlumnos = () => {
               </label>
 
               <label>
-                Subsistema:
+                Eje Policial:
                 <select required {...register("subsistema")}>
                   <option value="">Seleccione una opción</option>
                   {[
