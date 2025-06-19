@@ -9,6 +9,7 @@ import {
   FaWhatsapp,
   FaBars,
   FaTimes,
+  FaTiktok,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 
@@ -193,21 +194,21 @@ const LandingPage = () => {
         <p>Síguenos en redes sociales</p>
         <div className="redes_sociales">
           <a
-            href="https://facebook.com"
+            href="https://www.facebook.com/share/19srLS1HBi/"
             target="_blank"
             rel="noopener noreferrer"
           >
             <FaFacebookF />
           </a>
           <a
-            href="https://twitter.com"
+            href="https://www.tiktok.com/@eduka397?_t=ZM-8xGVPfqbdOK&_r=1"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <FaTwitter />
+            <FaTiktok />
           </a>
           <a
-            href="https://instagram.com"
+            href="https://www.instagram.com/eduka_ce?igsh=cDR2dnM5ejZnZnc4"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -217,7 +218,7 @@ const LandingPage = () => {
         <div className="btn_acceso">
           <a
             className="whatsapp_button"
-            href="https://wa.me/593983029083"
+            href="https://wa.me/593980773229"
             target="_blank"
             rel="noopener noreferrer"
           >

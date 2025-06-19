@@ -12,18 +12,18 @@ const Footer = () => {
       <section>
         <ul className="ul_footer">
           <li className="li_footer">
-            <a href="tel:+593983029083" className="link_footer">
+            <a href="tel:+593980773229" className="link_footer">
               <img
                 className="img_footer"
                 src="../../../smartphone.png"
                 alt="Llamar"
               />
-              <span className="span_footer">+593983029083</span>
+              <span className="span_footer">+593980773229</span>
             </a>
           </li>
           <li className="li_footer">
             <a
-              href="mailto:eduka.corporacioneducativa@gmail.com"
+              href="mailto:edukacorporacion@edukacorporacioneducativa.com"
               className="link_footer"
             >
               <img
@@ -32,13 +32,13 @@ const Footer = () => {
                 alt="Correo"
               />
               <span className="span_footer">
-                eduka.corporacioneducativa@gmail.com
+                edukacorporacion@edukacorporacioneducativa.com
               </span>
             </a>
           </li>
           <li className="li_footer">
             <a
-              href="https://www.google.com/maps?q=Mitad+del+Mundo,+Quito,+Ecuador"
+              href="https://www.google.com/maps?q=-0.200737103819847,-78.4886245727539"
               target="_blank"
               rel="noopener noreferrer"
               className="link_footer"
@@ -49,13 +49,13 @@ const Footer = () => {
                 alt="Ubicación"
               />
               <span className="span_footer">
-                Mitad del Mundo - Quito, Ecuador
+                Reina Victoria y Cristobal Colón - Quito, Ecuador
               </span>
             </a>
           </li>
           <li className="li_footer_icon">
             <a
-              href="https://wa.me/593983029083"
+              href="https://wa.me/593980773229"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -66,7 +66,7 @@ const Footer = () => {
               />
             </a>
             <a
-              href="https://www.tiktok.com"
+              href="https://www.tiktok.com/@eduka397?_t=ZM-8xGVPfqbdOK&_r=1"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -77,7 +77,7 @@ const Footer = () => {
               />
             </a>
             <a
-              href="https://web.facebook.com"
+              href="https://www.facebook.com/share/19srLS1HBi/"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -85,6 +85,17 @@ const Footer = () => {
                 className="img_footer"
                 src="../../../facebook.png"
                 alt="Facebook"
+              />
+            </a>
+            <a
+              href="https://www.instagram.com/eduka_ce?igsh=cDR2dnM5ejZnZnc4"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                className="img_footer"
+                src="../../../instagram.png"
+                alt="Instagram"
               />
             </a>
           </li>
