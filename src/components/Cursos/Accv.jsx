@@ -77,8 +77,8 @@ const Accv = () => {
           Registrar pago
         </a>
         <a
-          href="/files/giscopnsc_c.pdf"
-          download="Giscopnsc_Plan_Curso.pdf"
+          href="/files/accv_c.pdf"
+          download="Brochure-Accv.pdf"
           className="btn_descargar_pdf"
         >
           Descargar PDF
