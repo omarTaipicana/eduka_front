@@ -17,13 +17,15 @@ import { RegistroPagos } from "./components/Formularios/RegistroPagos";
 import Accv from "./components/Cursos/Accv";
 
 const App = () => {
-    const location = useLocation();
+  const location = useLocation();
 
   return (
     <div>
-      {location.pathname === "/" ? <LandingPage /> : <PrincipalHeader />}
+      {location.pathname !== "/" && <PrincipalHeader />}
       <Routes>
         <Route path="/home" element={<Home />} />
+
+        <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify/:code" element={<Verify />} />
         <Route path="/reset_password" element={<ResetPasswordSendEmail />} />
