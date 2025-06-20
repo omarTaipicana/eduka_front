@@ -3,12 +3,14 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import "./Styles/Giscopnsc.css";
+import IsLoading from "../shared/isLoading";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `../../../files/pdf.worker.min.js`;
 
 const Giscopnsc = () => {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [loadingPdf, setLoadingPdf] = useState(true); // Nuevo estado
 
   const containerRef = useRef(null);
   const [pdfWidth, setPdfWidth] = useState(740);
@@ -27,6 +29,7 @@ const Giscopnsc = () => {
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
     setPageNumber(1);
+    setLoadingPdf(false); // PDF cargado
   }
 
   function goToPrevPage() {
@@ -39,6 +42,8 @@ const Giscopnsc = () => {
 
   return (
     <div className="giscopnsc_wrapper">
+      {loadingPdf && <IsLoading />}
+
       <h3 className="giscopnsc_title">
         Gestión Integral de la Seguridad Ciudadana y el Orden Público con
         enfoque en Negociación en Situación de Crisis
@@ -71,6 +76,13 @@ const Giscopnsc = () => {
         >
           Registrar pago
         </a>
+        <a
+          href="/files/giscopnsc_c.pdf"
+          download="Giscopnsc_Plan_Curso.pdf"
+          className="btn_descargar_pdf"
+        >
+          Descargar PDF
+        </a>
       </div>
 
       <div className="pagination_controls">
@@ -89,7 +101,7 @@ const Giscopnsc = () => {
         <div className="pdf_container">
           {" "}
           <Document
-            file="/files/giscopnsc.pdf"
+            file="/files/giscopnsc_c.pdf"
             onLoadSuccess={onDocumentLoadSuccess}
             loading="Cargando PDF..."
           >

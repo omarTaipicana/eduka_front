@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./styles/LandingPage.css";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -12,9 +12,53 @@ import {
   FaTiktok,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import useCrud from "../hooks/useCrud";
+import IsLoading from "../components/shared/isLoading";
+import { useDispatch } from "react-redux";
+import { showAlert } from "../store/states/alert.slice";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const PATH_CONTACTANOS = "/contactanos";
+
+  const [
+    response,
+    getApi,
+    postApi,
+    deleteApi,
+    updateApi,
+    error,
+    isLoading,
+    newReg,
+    deleteReg,
+    updateReg,
+  ] = useCrud();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+
+  const submit = (data) => {
+    postApi(PATH_CONTACTANOS, data);
+    reset();
+  };
+
+  useEffect(() => {
+    if (newReg) {
+      dispatch(
+        showAlert({
+          message: `⚠️ Estimad@ ${newReg?.nombres}, recibimos tu mensaje exitosamente`,
+          alertType: 2,
+        })
+      );
+    }
+  }, [newReg]);
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -40,6 +84,8 @@ const LandingPage = () => {
 
   return (
     <div className="app">
+      {isLoading && <IsLoading />}
+
       <nav className="navbar">
         <img
           src="/images/eduka_sf.png"
@@ -107,6 +153,7 @@ const LandingPage = () => {
                   construcción de entornos seguros y pacíficos para la
                   ciudadanía.
                 </p>
+                <button className="curso_btn">Ver mas</button>
               </div>
             </div>
           </Link>
@@ -124,6 +171,7 @@ const LandingPage = () => {
                   dinámicas de victimización, promoviendo una atención ética,
                   interdisciplinaria y centrada en los derechos de las víctimas.
                 </p>
+                <button className="curso_btn">Ver mas</button>
               </div>
             </div>
           </Link>
@@ -177,14 +225,25 @@ const LandingPage = () => {
         className="contacto"
         ref={contactoRef}
       >
-        <form className="formulario_landing">
+        <form onSubmit={handleSubmit(submit)} className="formulario_landing">
           <h2 className="formulario_titulo">Contáctanos</h2>
-          <input type="text" placeholder="Nombre completo" required />
-          <input type="email" placeholder="Correo electrónico" required />
+          <input
+            type="text"
+            placeholder="Nombre completo"
+            required
+            {...register("nombres")}
+          />
+          <input
+            type="email"
+            placeholder="Correo electrónico"
+            required
+            {...register("email")}
+          />
           <textarea
             rows="4"
             placeholder="¿Cómo podemos ayudarte?"
             required
+            {...register("mensaje")}
           ></textarea>
           <button type="submit">📩 Enviar mensaje</button>
         </form>

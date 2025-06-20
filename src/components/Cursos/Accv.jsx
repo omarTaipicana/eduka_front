@@ -4,6 +4,7 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { Link, useNavigate } from "react-router-dom";
 import "./Styles/Accv.css";
+import IsLoading from "../shared/isLoading";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `../../../files/pdf.worker.min.js`;
 
@@ -14,6 +15,7 @@ const Accv = () => {
 
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [loadingPdf, setLoadingPdf] = useState(true); // Nuevo estado
 
   const containerRef = useRef(null);
   const [pdfWidth, setPdfWidth] = useState(740);
@@ -32,6 +34,7 @@ const Accv = () => {
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
     setPageNumber(1);
+    setLoadingPdf(false); // PDF cargado
   }
 
   function goToPrevPage() {
@@ -44,6 +47,7 @@ const Accv = () => {
 
   return (
     <div className="giscopnsc_wrapper">
+      {loadingPdf && <IsLoading />}
       <h3 className="giscopnsc_title">
         ANALISIS EN CONDUCTA CRIMINAL Y VICTIMOLOGÍA
       </h3>
@@ -72,6 +76,13 @@ const Accv = () => {
         >
           Registrar pago
         </a>
+        <a
+          href="/files/giscopnsc_c.pdf"
+          download="Giscopnsc_Plan_Curso.pdf"
+          className="btn_descargar_pdf"
+        >
+          Descargar PDF
+        </a>
       </div>
 
       <div className="pagination_controls">
@@ -90,7 +101,7 @@ const Accv = () => {
         <div className="pdf_container">
           {" "}
           <Document
-            file="/files/accv.pdf"
+            file="/files/accv_c.pdf"
             onLoadSuccess={onDocumentLoadSuccess}
             loading="Cargando PDF..."
           >

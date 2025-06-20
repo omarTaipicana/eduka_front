@@ -33,7 +33,8 @@
 }
 
 .btn_inscribirse,
-.btn_registrar_pago {
+.btn_registrar_pago,
+  .btn_descargar_pdf {
   text-decoration: none;
   background-color: #031e39;
   color: white;
@@ -46,7 +47,8 @@
 }
 
 .btn_inscribirse:hover,
-.btn_registrar_pago:hover {
+.btn_registrar_pago:hover,
+  .btn_descargar_pdf:hover {
   background-color: #0a76c1; /* azul más brillante */
   color: white;
   text-decoration: none;
@@ -123,7 +125,8 @@
   }
 
   .btn_inscribirse,
-  .btn_registrar_pago {
+  .btn_registrar_pago,
+  .btn_descargar_pdf {
     width: 100%;
     padding: 0.7rem 0;
     font-size: 1rem;
@@ -160,7 +163,8 @@
   }
 
   .btn_inscribirse,
-  .btn_registrar_pago {
+  .btn_registrar_pago,
+  .btn_descargar_pdf {
     font-size: 0.95rem;
     padding: 0.6rem 0;
   }
