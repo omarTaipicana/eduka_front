@@ -78,7 +78,7 @@ const Giscopnsc = () => {
         </a>
         <a
           href="/files/giscopnsc_c.pdf"
-          download="Giscopnsc_Plan_Curso.pdf"
+          download="Brochure-Giscopnsc.pdf"
           className="btn_descargar_pdf"
         >
           Descargar PDF
