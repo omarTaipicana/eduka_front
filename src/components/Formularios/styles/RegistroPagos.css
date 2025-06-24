@@ -1,0 +1,121 @@
+@import "./RegistroAlumnos.css";
+
+/* ALTURA Y FONDO CON MEJOR CONTRASTE */
+.medio_alto {
+  height: 85vh;
+  max-height: 600px;
+  min-height: 480px;
+  overflow-y: auto;
+  padding: 1rem 0;
+}
+
+/* Caja del formulario con fondo translúcido */
+.registro_left {
+  background-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(6px);
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 1rem;
+  box-shadow: 0 0 10px rgba(0, 64, 128, 0.5);
+}
+
+/* Caja de felicitación con más luz */
+.felicitacion_mensaje {
+  background: rgba(255, 255, 255, 0.15);
+  color: #e0f2ff;
+  padding: 1.2rem;
+  border-left: 5px solid #00cfff;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.felicitacion_mensaje h2 {
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+.felicitacion_mensaje p {
+  font-size: 1rem;
+}
+
+/* FORMULARIO CON DOS COLUMNAS */
+.doble_columna {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Columna de datos del usuario */
+.datos_usuario {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 0 8px rgba(0, 96, 192, 0.4);
+}
+.datos_usuario h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+.datos_usuario p {
+  color: #c9ddeb;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* Columna de opciones de pago */
+.inputs_pago {
+  flex: 1;
+}
+.inputs_pago label {
+  display: block;
+  margin-bottom: 0.7rem;
+  color: #e3f5ff;
+  font-size: 0.9rem;
+}
+
+.inputs_pago input[type="file"],
+.inputs_pago input[type="number"] {
+  background-color: #eaf2fb;
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  width: 100%;
+  margin-top: 0.3rem;
+  margin-bottom: 1rem;
+  border: none;
+  color: #003366;
+  font-size: 0.9rem;
+}
+
+.inputs_pago p {
+  font-size: 1rem;
+  color: #ffffff;
+  margin-top: 1rem;
+}
+
+/* Checkbox inputs */
+.inputs_pago input[type="checkbox"] {
+  margin-left: 0.6rem;
+  transform: scale(1.2);
+  accent-color: #00cfff;
+}
+
+/* Botón */
+.form_button button {
+  width: 100%;
+  background: #00aaff;
+}
+.form_button button:hover {
+  background: #008fcc;
+}
+
+/* Ajuste para fondo derecho */
+.curso_fondo_pago {
+  position: relative;
+  height: 100%;
+  min-height: 500px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 140, 255, 0.4);
+}

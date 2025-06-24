@@ -17,12 +17,21 @@ import useCrud from "../hooks/useCrud";
 import IsLoading from "../components/shared/isLoading";
 import { useDispatch } from "react-redux";
 import { showAlert } from "../store/states/alert.slice";
+import useAuth from "../hooks/useAuth";
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const token = localStorage.getItem("token");
 
   const PATH_CONTACTANOS = "/contactanos";
+  const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
+
+  useEffect(() => {
+    if (token) {
+      loggedUser();
+    }
+  }, [token]);
 
   const [
     response,
@@ -101,7 +110,17 @@ const LandingPage = () => {
           <button onClick={() => scrollToSection(cursosRef)}>Cursos</button>
           <button onClick={() => scrollToSection(nosotrosRef)}>Nosotros</button>
           <button onClick={() => scrollToSection(contactoRef)}>Contacto</button>
-          <button onClick={handleRegisterClick}>Login</button>
+          {!token ? (
+            <button onClick={handleRegisterClick}>Login</button>
+          ) : (
+            <img
+              className="user__icon"
+              src="../../../user.png"
+              alt="User Icon"
+              onClick={handleRegisterClick}
+            />
+            
+          )}
         </div>
       </nav>
 
