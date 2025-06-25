@@ -221,6 +221,13 @@
   background-repeat: no-repeat; /* Evita que se repita */
 }
 
+.form_error {
+  color: red !important;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+
 /* ------------------- */
 /* RESPONSIVE */
 /* ------------------- */

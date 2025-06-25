@@ -22,7 +22,9 @@ export const RegistroPagos = () => {
   const [cursoActual, setCursoActual] = useState(null);
   const [inscrito, setInscrito] = useState();
   const [pagoExistente, setPagoExistente] = useState(null);
-  const [total, setTotal] = useState(26);
+  const [certificadoPagado, setCertificadoPagado] = useState(false);
+
+  const [total, setTotal] = useState(0);
 
   const [
     resUpload,
@@ -56,11 +58,18 @@ export const RegistroPagos = () => {
   }, [inscrito]);
 
   useEffect(() => {
-    let precio = 26;
-    if (watchExtras[0]) precio += 15;
-    if (watchExtras[1]) precio += 10;
-    setTotal(precio);
-  }, [watchExtras]);
+    if (certificadoPagado) {
+      let precio = 0;
+      if (watchExtras[0]) precio += 15;
+      if (watchExtras[1]) precio += 10;
+      setTotal(precio);
+    } else {
+      let precio = 26;
+      if (watchExtras[0]) precio += 15;
+      if (watchExtras[1]) precio += 10;
+      setTotal(precio);
+    }
+  }, [watchExtras, certificadoPagado]);
 
   // Buscar curso activo según code
   const cursoActivo = courses.find((c) => c.sigla === code);
@@ -96,9 +105,9 @@ export const RegistroPagos = () => {
 
     if (encontradoPago) {
       setPagoExistente(encontradoPago);
+      setTotal(0);
       return;
     }
-
     setUsuario(encontrado);
     const curso = courses?.find((c) => c.id === encontrado.courseId);
     setCursoActual(curso);
@@ -157,7 +166,8 @@ export const RegistroPagos = () => {
     setUsuario(inscrito); // permite continuar al formulario
     const curso = courses?.find((c) => c.id === pagoExistente.courseId);
     setCursoActual(curso);
-    setPagoExistente(null); // cierra el modal
+    setPagoExistente(null);
+    setCertificadoPagado(true);
   };
 
   return (
