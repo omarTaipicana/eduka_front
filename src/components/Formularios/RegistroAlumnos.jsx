@@ -162,7 +162,7 @@ const RegistroAlumnos = () => {
       className="registro_container"
       style={{ backgroundImage: `url(/images/fondo_${code}.jpg)` }}
     >
-      { isLoading2 && <IsLoading />}
+      {isLoading2 && <IsLoading />}
 
       <div className="registro_wrapper">
         <div className="registro_left animate_slide_left">
@@ -184,11 +184,19 @@ const RegistroAlumnos = () => {
 
               <label>
                 Nombres:
-                <input required {...register("nombres")} />
+                <input
+                  placeholder="Nombres completos (tildes y ñ si aplica)"
+                  required
+                  {...register("nombres")}
+                />
               </label>
               <label>
                 Apellidos:
-                <input required {...register("apellidos")} />
+                <input
+                  placeholder="Apellidos completos (tildes y ñ si aplica)"
+                  required
+                  {...register("apellidos")}
+                />
               </label>
 
               <label>
@@ -247,8 +255,8 @@ const RegistroAlumnos = () => {
                 )}
               </div>
 
-              <div className="form_button">
-                <button type="submit">🚀 Inscribirme</button>
+              <div className="form_button_inscripcion">
+                <button className="btn_inscripcion" type="submit">🚀 Inscribirme</button>
               </div>
             </div>
           </form>

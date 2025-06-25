@@ -6,6 +6,7 @@ const useCrud = () => {
   const BASEURL = import.meta.env.VITE_API_URL;
   const [response, setResponse] = useState([]);
   const [newReg, setNewReg] = useState();
+  const [newUpload, setNewUpload] = useState();
   const [deleteReg, setDeleteReg] = useState();
   const [updateReg, setUpdateReg] = useState();
   const [error, setError] = useState(false);
@@ -74,6 +75,36 @@ const useCrud = () => {
       });
   };
 
+  const uploadPdf = (path, data, file) => {
+    setIsLoading(true);
+
+    // Crear un objeto FormData y agregar el archivo
+    const formData = new FormData();
+    formData.append("imagePago", file);
+    for (const key in data) {
+      formData.append(key, data[key]);
+    }
+
+    const url = `${BASEURL}${path}`;
+
+    axios
+      .post(url, formData, {
+        headers: {
+          ...getConfigToken().headers,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((res) => {
+        setResponse([...response, res.data]);
+        setNewUpload(res.data);
+      })
+      .finally(() => setIsLoading(false))
+      .catch((err) => {
+        setError(err);
+        // console.log(err);
+      });
+  };
+
   return [
     response,
     getApi,
@@ -85,6 +116,8 @@ const useCrud = () => {
     newReg,
     deleteReg,
     updateReg,
+    uploadPdf,
+    newUpload,
   ];
 };
 

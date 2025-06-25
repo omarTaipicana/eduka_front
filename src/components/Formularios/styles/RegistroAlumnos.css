@@ -146,8 +146,6 @@ select {
   font-size: 0.7rem; /* Tamaño más pequeño para las opciones */
 }
 
-
-
 .form_check_container {
   margin-top: 1rem;
   background: #00050cc9;
@@ -167,7 +165,7 @@ select {
   display: block;
   transform: scale(1.2);
   accent-color: #0066cc;
-  outline: none; /* Eliminar el borde de enfoque */
+  outline: none;
 }
 
 .form_check_label input[type="checkbox"]:focus {
@@ -182,12 +180,12 @@ select {
   text-align: center;
 }
 
-.form_button {
+.form_button_inscripcion {
   display: flex;
   justify-content: center;
 }
 
-.form_button button {
+.btn_inscripcion {
   margin-top: 1rem;
   padding: 0.7rem 2rem;
   background: #00aaff;
@@ -200,7 +198,7 @@ select {
   font-size: 1rem;
 }
 
-.form_button button:hover {
+.btn_inscripcion:hover {
   background: #0077cc;
 }
 
@@ -314,6 +312,13 @@ select {
     width: 100%;
     padding: 1.5rem 1rem;
   }
+  .registro_left {
+    order: 2;
+  }
+  .registro_right {
+    order: 1;
+    padding: 0;
+  }
 
   .formulario_registro {
     flex-direction: column;
@@ -338,6 +343,12 @@ select {
 }
 
 @media screen and (max-width: 600px) {
+  .registro_left {
+    order: 2;
+  }
+  .registro_right {
+    order: 1;
+  }
   .registro_container {
     padding: 0 1rem;
   }
