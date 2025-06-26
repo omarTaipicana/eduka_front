@@ -1,10 +1,12 @@
 import React from "react";
 import "./styles/ModalPagoExistente.css";
 
-const ModalPagoExistente = ({ pagos, onClose, onRegistrarNuevo }) => {
+const ModalPagoExistente = ({ pagos, onClose, onRegistrarNuevo, inscrito }) => {
   const pagosOrdenados = [...(pagos || [])].sort(
     (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
+  ).filter((pago)=>pago.inscripcionId === inscrito.id);
+
+  console.log(pagos)
 
   return (
     <div className="modal_pago_overlay">

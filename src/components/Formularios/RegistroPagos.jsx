@@ -181,6 +181,7 @@ export const RegistroPagos = () => {
           pagos={resUpload}
           onRegistrarNuevo={onRegistrarNuevo}
           onClose={() => setPagoExistente(null)}
+          inscrito={inscrito}
         />
       )}
 
