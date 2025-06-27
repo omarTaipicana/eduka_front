@@ -12,11 +12,32 @@ const PrincipalHeader = () => {
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [valRole, setValRole] = useState(false);
 
   useEffect(() => {
-    if (token) {
-      loggedUser();
+    if (
+      user?.role === "Administrador" ||
+      user?.role === "Sub-Administrador" ||
+      user?.role === "Validador" ||
+      user?.cI === "0503627234"
+    ) {
+      setValRole(true);
     }
+  }, [user]);
+
+  useEffect(() => {
+    const checkToken = async () => {
+      if (!token) return;
+
+      const success = await loggedUser();
+
+      if (!success) {
+        console.log("❌ Token inválido, removido");
+        localStorage.removeItem("token");
+        setUserLogged(null);
+      }
+    };
+    checkToken();
   }, [token]);
 
   const handleLogout = () => {
@@ -71,11 +92,33 @@ const PrincipalHeader = () => {
           <span></span>
         </button>
 
-        {/* Menú de enlaces */}
         <nav className={`nav_links ${menuOpen ? "open" : ""}`}>
-          <Link to="/home" onClick={closeMenu}>Home</Link>
-          {!token && <Link to="/register" onClick={closeMenu}>Register</Link>}
-          {!token && <Link to="/login" onClick={closeMenu}>Login</Link>}
+          {token && valRole && (
+            <Link to="/dashboard" onClick={closeMenu}>
+              Dashboard
+            </Link>
+          )}
+
+          {token && valRole && (
+            <Link to="/validacion" onClick={closeMenu}>
+              Validacion
+            </Link>
+          )}
+          {token && (
+            <Link to="/home" onClick={closeMenu}>
+              Home
+            </Link>
+          )}
+          {!token && (
+            <Link to="/register" onClick={closeMenu}>
+              Register
+            </Link>
+          )}
+          {!token && (
+            <Link to="/login" onClick={closeMenu}>
+              Login
+            </Link>
+          )}
           {token && (
             <>
               <Link to="/login" onClick={closeMenu}>
@@ -85,7 +128,13 @@ const PrincipalHeader = () => {
                   alt="User Icon"
                 />
               </Link>
-              <button onClick={() => { handleLogout(); closeMenu(); }} className="logout__button">
+              <button
+                onClick={() => {
+                  handleLogout();
+                  closeMenu();
+                }}
+                className="logout__button"
+              >
                 Salir
               </button>
             </>

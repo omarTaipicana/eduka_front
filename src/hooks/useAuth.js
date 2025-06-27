@@ -60,18 +60,22 @@ const useAuth = () => {
       .finally(() => setIsLoading(false));
   };
 
-  const loggedUser = () => {
-    setIsLoading(true);
-    const url = `${urlBase}/users/me`;
-    axios
-      .get(url, getConfigToken())
-      .then((res) => {
-        setUserLogged(res.data);
-        // navigate("/login");
-      })
-      .catch((err) => setError(err))
-      .finally(() => setIsLoading(false));
-  };
+const loggedUser = async () => {
+  setIsLoading(true);
+  const url = `${urlBase}/users/me`;
+  try {
+    const res = await axios.get(url, getConfigToken());
+    setUserLogged(res.data);
+    return true;
+  } catch (error) {
+    setError(error);
+    return false;  // Indica fallo pero no lanza error
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
 
   const verifyUser = (code) => {
     setIsLoading(true);

@@ -41,16 +41,12 @@ const Register = () => {
     formState: { errors },
   } = useForm();
 
-
-
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    navigate("/login");
-  }
-}, [navigate]);
-
-
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     if (error) {
@@ -75,10 +71,30 @@ useEffect(() => {
     }
   }, [userRegister]);
 
-
-
   const submit = (data) => {
     const frontBaseUrl = `${location.protocol}//${location.host}/#/verify`;
+
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/;
+
+    if (!passwordRegex.test(data.password)) {
+      return dispatch(
+        showAlert({
+          message:
+            "⚠️ La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.",
+          alertType: 1,
+        })
+      );
+    }
+
+    if (data.password !== data.confirmPassword) {
+      return dispatch(
+        showAlert({
+          message: "⚠️ Las contraseñas no coinciden.",
+          alertType: 1,
+        })
+      );
+    }
 
     const body = {
       ...data,
@@ -86,23 +102,14 @@ useEffect(() => {
       dateBirth: null,
     };
 
-    if (data.password === data.confirmPassword) {
-      registerUser(body);
-      reset({
-        email: "",
-        firstName: "",
-        lastName: "",
-        password: "",
-        confirmPassword: "",
-      });
-    } else {
-      dispatch(
-        showAlert({
-          message: "   ⚠️Las contraseñas no coinciden",
-          alertType: 1,
-        })
-      );
-    }
+    registerUser(body);
+    reset({
+      email: "",
+      firstName: "",
+      lastName: "",
+      password: "",
+      confirmPassword: "",
+    });
   };
 
   return (
@@ -177,6 +184,7 @@ useEffect(() => {
               />
             </div>
           </label>
+
           <button className="btn__form__register">Registrarse</button>
         </form>
       </div>

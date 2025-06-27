@@ -15,6 +15,11 @@ import Giscopnsc from "./components/Cursos/Giscopnsc";
 import RegistroAlumnos from "./components/Formularios/RegistroAlumnos";
 import { RegistroPagos } from "./components/Formularios/RegistroPagos";
 import Accv from "./components/Cursos/Accv";
+import ProtectedRoutes from "./routes/ProtectedRoutes";
+import ValidadorProtectedRoute from "./routes/ValidadorProtectedRoute";
+import SubAdminProtectedRoutes from "./routes/SubAdminProtectedRoutes";
+import ValidacionPago from "./pages/ValidacionPago";
+import Dashboard from "./pages/Dashboard";
 
 const App = () => {
   const location = useLocation();
@@ -23,8 +28,6 @@ const App = () => {
     <div>
       {location.pathname !== "/" && <PrincipalHeader />}
       <Routes>
-        <Route path="/home" element={<Home />} />
-
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify/:code" element={<Verify />} />
@@ -34,9 +37,21 @@ const App = () => {
         <Route path="/register_discente/:code" element={<RegistroAlumnos />} />
         <Route path="/register_pago/:code" element={<RegistroPagos />} />
 
-        <Route path="/giscopnsc" element={<Giscopnsc />} />
+        <Route path="/giscopensc" element={<Giscopnsc />} />
         <Route path="/accv" element={<Accv />} />
         <Route path="/login" element={<Login />} />
+
+        <Route element={<ProtectedRoutes />}>
+          <Route path="/home" element={<Home />} />
+
+          <Route element={<ValidadorProtectedRoute />}>
+            <Route path="/validacion" element={<ValidacionPago />} />
+
+            <Route element={<SubAdminProtectedRoutes />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+            </Route>
+          </Route>
+        </Route>
       </Routes>
       <Footer />
       <Alert />

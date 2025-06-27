@@ -77,8 +77,8 @@ const Giscopnsc = () => {
           Registrar pago
         </a>
         <a
-          href="/files/giscopnsc_c.pdf"
-          download="Brochure-Giscopnsc.pdf"
+          href="/files/giscopensc_c.pdf"
+          download="Brochure-Giscopensc.pdf"
           className="btn_descargar_pdf"
         >
           Descargar PDF
@@ -101,7 +101,7 @@ const Giscopnsc = () => {
         <div className="pdf_container">
           {" "}
           <Document
-            file="/files/giscopnsc_c.pdf"
+            file="/files/giscopensc_c.pdf"
             onLoadSuccess={onDocumentLoadSuccess}
             loading="Cargando PDF..."
           >

@@ -57,9 +57,18 @@ const Login = () => {
   } = useForm();
 
   useEffect(() => {
-    if (token) {
-      loggedUser();
-    }
+    const checkToken = async () => {
+      if (!token) return;
+
+      const success = await loggedUser();
+
+      if (!success) {
+        console.log("❌ Token inválido, removido");
+        localStorage.removeItem("token");
+        setUserLogged(null);
+      }
+    };
+    checkToken();
   }, [token]);
 
   const senpladesVal = senplades ? senplades : [];
@@ -100,9 +109,10 @@ const Login = () => {
 
   useEffect(() => {
     if (error) {
+      const message = error.response?.data?.message ?? "Error inesperado";
       dispatch(
         showAlert({
-          message: `⚠️ ${error.response?.data?.message}` || "Error inesperado",
+          message: `⚠️ ${message}`,
           alertType: 1,
         })
       );

@@ -28,9 +28,18 @@ const LandingPage = () => {
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
 
   useEffect(() => {
-    if (token) {
-      loggedUser();
-    }
+    const checkToken = async () => {
+      if (!token) return;
+
+      const success = await loggedUser();
+
+      if (!success) {
+        console.log("❌ Token inválido, removido");
+        localStorage.removeItem("token");
+        setUserLogged(null);
+      }
+    };
+    checkToken();
   }, [token]);
 
   const [
@@ -119,7 +128,6 @@ const LandingPage = () => {
               alt="User Icon"
               onClick={handleRegisterClick}
             />
-            
           )}
         </div>
       </nav>
@@ -155,7 +163,7 @@ const LandingPage = () => {
       >
         <h2>Nuestros Cursos</h2>
         <div className="curso_lista">
-          <Link to="/giscopnsc">
+          <Link to="/giscopensc">
             <div className="curso_card giscopnsc">
               <div className="curso_card_overlay">
                 <h3 className="curso_title">

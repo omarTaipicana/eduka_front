@@ -78,9 +78,26 @@ const RegistroAlumnos = () => {
     return decenaSuperior - suma === digitoVerificador;
   };
 
+  const capitalizeWords = (str) => {
+    return str
+      .trim() // elimina espacios al inicio y fin
+      .split(/\s+/) // separa por uno o más espacios
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   const submit = (data) => {
+    // Ajustar nombres y apellidos
+    const nombreFormateado = capitalizeWords(data.nombres);
+    const apellidoFormateado = capitalizeWords(data.apellidos);
+
+    // Ajustar email a minúsculas y quitar espacios al inicio/final
+    const emailFormateado = data.email.trim().toLowerCase();
+    const confirmEmailFormateado = data.confirmEmail.trim().toLowerCase();
+
+    // Validaciones con datos formateados
     const isValidCedula = validarCedula(data.cedula);
-    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email);
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailFormateado);
     const isValidCellular = /^09\d{8}$/.test(data.celular);
 
     if (!isValidCedula)
@@ -94,7 +111,7 @@ const RegistroAlumnos = () => {
       return dispatch(
         showAlert({ message: "⚠️ El email es incorrecto.", alertType: 1 })
       );
-    if (data.email !== data.confirmEmail)
+    if (emailFormateado !== confirmEmailFormateado)
       return dispatch(
         showAlert({ message: "⚠️ Los correos no coinciden.", alertType: 1 })
       );
@@ -121,7 +138,7 @@ const RegistroAlumnos = () => {
     }
 
     const yaRegistradoPorEmail = response?.find(
-      (r) => r.email === data.email && r.courseId === idCourse
+      (r) => r.email === emailFormateado && r.courseId === idCourse
     );
     if (yaRegistradoPorEmail) {
       return dispatch(
@@ -133,7 +150,16 @@ const RegistroAlumnos = () => {
       );
     }
 
-    const body = { ...data, curso: code, courseId: idCourse };
+    const body = {
+      ...data,
+      nombres: nombreFormateado,
+      apellidos: apellidoFormateado,
+      email: emailFormateado,
+      confirmEmail: confirmEmailFormateado,
+      curso: code,
+      courseId: idCourse,
+    };
+
     postInscripcion(PATH_INSCRIPCIONES, body);
     reset();
   };
@@ -256,7 +282,9 @@ const RegistroAlumnos = () => {
               </div>
 
               <div className="form_button_inscripcion">
-                <button className="btn_inscripcion" type="submit">🚀 Inscribirme</button>
+                <button className="btn_inscripcion" type="submit">
+                  🚀 Inscribirme
+                </button>
               </div>
             </div>
           </form>

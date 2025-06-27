@@ -28,7 +28,6 @@
   font-size: 1.7em;
   font-weight: 600;
   text-align: center;
-  margin-top: 1em;
   animation: shake 0.3s ease-in-out 1;
 }
 
@@ -54,10 +53,10 @@
 
 .verify_false {
   margin-bottom: 2em;
-  width: 50%;
+  width: 30%;
 }
 
 .verify_true {
   margin-bottom: 2em;
-  width: 30%;
+  width: 27%;
 }
