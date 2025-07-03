@@ -17,7 +17,7 @@ export const RegistroPagos = () => {
   const { code } = useParams();
 
   const [response, getInscripcion, , , , , isLoading2] = useCrud();
-  const [courses, getCourse, , , , ,] = useCrud();
+  const [courses, getCourse, , , , , isLoading3, , , ,] = useCrud();
   const [usuario, setUsuario] = useState(null);
   const [cursoActual, setCursoActual] = useState(null);
   const [inscrito, setInscrito] = useState();
@@ -84,8 +84,11 @@ export const RegistroPagos = () => {
       );
       return;
     }
+
+    const cedulaLimpia = data.cedula.trim(); // Elimina espacios al inicio y final
+
     const encontrado = response?.find(
-      (r) => r.cedula === data.cedula && r.curso === code
+      (r) => r.cedula === cedulaLimpia && r.curso === code
     );
 
     setInscrito(encontrado);
@@ -99,6 +102,7 @@ export const RegistroPagos = () => {
       );
       return;
     }
+
     const encontradoPago = resUpload.find(
       (r) => r.inscripcionId === encontrado.id && r.curso === code
     );
@@ -108,6 +112,7 @@ export const RegistroPagos = () => {
       setTotal(0);
       return;
     }
+
     setUsuario(encontrado);
     const curso = courses?.find((c) => c.id === encontrado.courseId);
     setCursoActual(curso);
@@ -150,6 +155,8 @@ export const RegistroPagos = () => {
   if (!cursoActivo) {
     return (
       <div className="registro_container curso_no_encontrado">
+        {isLoading3 && <IsLoading />}
+
         <div className="mensaje_curso_caja">
           <h2>❌ Curso no disponible</h2>
           <p>
@@ -176,6 +183,8 @@ export const RegistroPagos = () => {
       style={{ backgroundImage: `url(/images/fondo_${code}.jpg)` }}
     >
       {isLoading && <IsLoading />}
+      {isLoading3 && <IsLoading />}
+
       {pagoExistente && (
         <ModalPagoExistente
           pagos={resUpload}

@@ -71,8 +71,19 @@ const Register = () => {
     }
   }, [userRegister]);
 
+  const capitalizeWords = (str) => {
+    return str
+      .trim() // elimina espacios al inicio y fin
+      .split(/\s+/) // separa por uno o más espacios
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   const submit = (data) => {
     const frontBaseUrl = `${location.protocol}//${location.host}/#/verify`;
+    const nombreFormateado = capitalizeWords(data.firstName);
+    const apellidoFormateado = capitalizeWords(data.lastName);
+    const emailFormateado = data.email.trim().toLowerCase();
 
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/;
@@ -98,6 +109,9 @@ const Register = () => {
 
     const body = {
       ...data,
+      email: emailFormateado,
+      firstName: nombreFormateado,
+      lastName: apellidoFormateado,
       frontBaseUrl,
       dateBirth: null,
     };

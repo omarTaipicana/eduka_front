@@ -190,7 +190,67 @@ const Login = () => {
     setIsNewLogin(true);
   };
 
+  const validarCedula = (cedula) => {
+    // Eliminar todos los caracteres que no sean dígitos
+    cedula = cedula.replace(/\D/g, ""); // \D = todo lo que NO sea dígito
+
+    // Verificar que tenga exactamente 10 dígitos
+    if (!/^\d{10}$/.test(cedula)) return false;
+
+    const digitos = cedula.split("").map(Number);
+    const digitoVerificador = digitos.pop();
+    let suma = 0;
+
+    for (let i = 0; i < digitos.length; i++) {
+      let valor = digitos[i];
+      if (i % 2 === 0) {
+        valor *= 2;
+        if (valor > 9) valor -= 9;
+      }
+      suma += valor;
+    }
+
+    const decenaSuperior = Math.ceil(suma / 10) * 10;
+    return decenaSuperior - suma === digitoVerificador;
+  };
+
+  const capitalizeWords = (str) => {
+    return str
+      .trim() // elimina espacios al inicio y fin
+      .split(/\s+/) // separa por uno o más espacios
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   const submitUpdate = (data) => {
+    const isValidCedula = validarCedula(data.cI);
+    const celularLimpio = data.cellular.replace(/\D/g, ""); // Elimina todo lo que no sea dígito
+    const isValidCellular = /^09\d{8}$/.test(celularLimpio);
+    const emailFormateado = data.email.trim().toLowerCase();
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailFormateado);
+
+    if (!isValidCedula)
+      return dispatch(
+        showAlert({
+          message: "⚠️ La cédula ingresada es incorrecta.",
+          alertType: 1,
+        })
+      );
+
+    if (!isValidEmail)
+      return dispatch(
+        showAlert({ message: "⚠️ El email es incorrecto.", alertType: 1 })
+      );
+
+    if (!isValidCellular)
+      return dispatch(
+        showAlert({
+          message:
+            "⚠️ Celular inválido. Debe empezar con 09 y tener 10 dígitos.",
+          alertType: 1,
+        })
+      );
+
     if (
       data?.dateBirth &&
       data?.cI &&
