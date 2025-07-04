@@ -85,11 +85,14 @@
 
 .chart-box {
   background: #ffffff;
-  padding: 1.5rem;
+  padding: 3.5rem;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 83, 160, 0.05);
   margin: 2rem 0;
+  overflow-x: auto; /* <-- Por si en móviles hay desbordes */
+  padding-right: 2.5rem; /* <-- Agrega este padding extra a la derecha */
 }
+
 
 .chart-box h4 {
   color: #1a1a1a;

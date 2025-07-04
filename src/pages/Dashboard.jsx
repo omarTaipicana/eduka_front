@@ -100,17 +100,21 @@ const Dashboard = () => {
     return conteo.map(({ label, cantidad }) => ({ label, value: cantidad }));
   };
 
-  const contarPorFecha = () => {
-    const conteo = {};
-    inscripciones?.forEach((i) => {
-      const fecha = new Date(i.createdAt).toLocaleDateString();
-      conteo[fecha] = (conteo[fecha] || 0) + 1;
-    });
-    return Object.entries(conteo).map(([fecha, cantidad]) => ({
-      fecha,
-      cantidad,
-    }));
-  };
+const contarPorFecha = () => {
+  const conteo = {};
+
+  inscripciones?.forEach((i) => {
+    const fecha = new Date(i.createdAt);
+    const fechaClave = fecha.toISOString().split("T")[0]; // YYYY-MM-DD (ISO 8601)
+    conteo[fechaClave] = (conteo[fechaClave] || 0) + 1;
+  });
+
+  return Object.entries(conteo)
+    .map(([fecha, cantidad]) => ({ fecha, cantidad }))
+    .sort((a, b) => new Date(a.fecha) - new Date(b.fecha)); // orden real por fecha
+};
+
+
 
   const renderContent = () => {
     switch (activeSection) {
@@ -201,23 +205,27 @@ const Dashboard = () => {
 
             <div className="chart-box">
               <h4>Evolutivo diario de inscripciones</h4>
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={contarPorFecha()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="fecha" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="cantidad"
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                    label={<CustomLabel />}
-                    dot={{ r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+<ResponsiveContainer width="100%" height={250}>
+  <LineChart
+    data={contarPorFecha()}
+    margin={{ top: 20, right: 30, left: 0, bottom: 5 }} // <-- aquí
+  >
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis dataKey="fecha" />
+    <YAxis />
+    <Tooltip />
+    <Legend />
+    <Line
+      type="monotone"
+      dataKey="cantidad"
+      stroke="#8884d8"
+      strokeWidth={2}
+      label={<CustomLabel />}
+      dot={{ r: 4 }}
+    />
+  </LineChart>
+</ResponsiveContainer>
+
             </div>
           </section>
         );
