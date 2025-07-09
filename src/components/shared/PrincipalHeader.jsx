@@ -9,6 +9,7 @@ const PrincipalHeader = () => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false);

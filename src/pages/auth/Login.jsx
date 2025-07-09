@@ -172,6 +172,8 @@ const Login = () => {
     if (formReady) {
       reset({
         email: userLogged.email,
+        firstName: userLogged.firstName,
+        lastName: userLogged.lastName,
         dateBirth: userLogged.dateBirth,
         cI: userLogged.cI,
         cellular: userLogged.cellular,
@@ -251,6 +253,13 @@ const Login = () => {
         })
       );
 
+    // Capitalizar nombres y apellidos
+    const formattedData = {
+      ...data,
+      firstName: capitalizeWords(data.firstName),
+      lastName: capitalizeWords(data.lastName),
+    };
+
     if (
       data?.dateBirth &&
       data?.cI &&
@@ -264,7 +273,8 @@ const Login = () => {
       setIsNewLogin(false);
       setIsInfoComplete(false);
     }
-    updateUser(data, userLogged.id);
+
+    updateUser(formattedData, userLogged.id);
     setUserEdit(false);
   };
 
@@ -301,6 +311,19 @@ const Login = () => {
             >
               <article className="form__user__seccion">
                 <label className="label__user__info">
+                  <span className="span__user__info">Nombres: </span>
+                  <input
+                    readOnly={!userEdit}
+                    style={{
+                      border: "none",
+                    }}
+                    required
+                    {...register("firstName")}
+                    className="input__form__info"
+                    type="text"
+                  />
+                </label>
+                <label className="label__user__info">
                   <span className="span__user__info">Email: </span>
                   <input
                     readOnly
@@ -313,6 +336,7 @@ const Login = () => {
                     type="text"
                   />
                 </label>
+
                 <label className="label__user__info">
                   <span className="span__user__info">
                     Fecha de Nacimiento:{" "}
@@ -359,6 +383,19 @@ const Login = () => {
               </article>
 
               <article className="form__user__seccion">
+                <label className="label__user__info">
+                  <span className="span__user__info">Apellidos: </span>
+                  <input
+                    readOnly={!userEdit}
+                    style={{
+                      border: "none",
+                    }}
+                    required
+                    {...register("lastName")}
+                    className="input__form__info"
+                    type="text"
+                  />
+                </label>
                 <label className="label__user__info">
                   <span className="span__user__info">Provincia:</span>
                   {!userEdit ? (

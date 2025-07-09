@@ -1,5 +1,6 @@
 .dashboard-container {
   display: flex;
+  flex-direction: row;
   height: 100vh;
   font-family: Arial, sans-serif;
   background: rgba(255, 255, 255, 0.9);
@@ -15,6 +16,7 @@
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease-in-out;
   z-index: 1000;
+  flex-shrink: 0;
 }
 
 .dashboard-menu h3 {
@@ -49,10 +51,23 @@
 
 .dashboard-content {
   flex-grow: 1;
-  padding: 2rem;
+  padding: 2rem 3rem;
   overflow-y: auto;
   width: 100%;
   color: #1a1a1a;
+  box-shadow: inset 0 0 15px rgb(0 0 0 / 0.05);
+  animation: fadeInContent 0.4s ease forwards;
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .resumen,
@@ -89,10 +104,9 @@
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 83, 160, 0.05);
   margin: 2rem 0;
-  overflow-x: auto; /* <-- Por si en móviles hay desbordes */
-  padding-right: 2.5rem; /* <-- Agrega este padding extra a la derecha */
+  overflow-x: auto;
+  padding-right: 2.5rem;
 }
-
 
 .chart-box h4 {
   color: #1a1a1a;
@@ -105,9 +119,8 @@
   color: #1a1a1a;
 }
 
-/* Botón hamburguesa específico para Dashboard */
 .dashboard-hamburger-btn {
-  position: absolute;
+  position: fixed;
   top: 1rem;
   left: 1rem;
   z-index: 1001;
@@ -115,10 +128,13 @@
   background: none;
   border: none;
   cursor: pointer;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0;
 }
 
 .dashboard-hamburger-line {
-  width: 25px;
+  width: 30px;
   height: 3px;
   background: #0053a0;
   margin: 5px 0;
@@ -126,9 +142,8 @@
   display: block;
 }
 
-/* Animación X */
 .dashboard-hamburger-line.open:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
+  transform: translateY(18px) rotate(45deg);
 }
 
 .dashboard-hamburger-line.open:nth-child(2) {
@@ -140,26 +155,56 @@
 }
 
 @media screen and (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
   .dashboard-hamburger-btn {
-    display: block;
+    display: flex;
   }
 
   .dashboard-menu {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100%;
+    height: 100vh;
+    width: 240px;
     transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
     z-index: 1000;
+    background: #fff;
+    padding-top: 4rem;
+    box-shadow: 2px 0 12px rgb(0 0 0 / 0.25);
+    flex-direction: column;
   }
 
   .dashboard-menu.open {
     transform: translateX(0);
   }
 
+  .menu-btn {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    border-left: none;
+    border-bottom: 1px solid #eee;
+  }
+
+  .menu-btn.active {
+    background-color: #0053a0;
+    color: #fff;
+    border-left: none;
+  }
+
   .dashboard-content {
-    padding: 1rem;
-    margin-left: 0;
+    padding: 4rem 1.5rem 2rem 1.5rem;
+    height: calc(100vh - 4rem);
+  }
+
+  .chart-box {
+    padding: 1.5rem;
+    padding-right: 1.5rem;
+    width: 100%;
+    min-width: 100%;
+    box-sizing: border-box;
   }
 }
