@@ -157,6 +157,10 @@ const ValidacionPago = () => {
           }
         }
       }
+      if (filtroFecha) {
+        const fechaPago = new Date(p.createdAt).toISOString().split("T")[0];
+        if (fechaPago !== filtroFecha) return false;
+      }
 
       if (filtroGrado) {
         const textoFiltro = filtroGrado.toLowerCase();
