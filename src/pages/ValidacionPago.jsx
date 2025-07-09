@@ -51,6 +51,31 @@ const ValidacionPago = () => {
     getInscripciones(PATH_INSCRIPCIONES);
   }, []);
 
+  const iniciarEdicion = (pago) => {
+  setEditPagoId(pago.id);
+  setEditValorDepositado(pago.valorDepositado || "");
+  setEditVerificado(pago.verificado || false);
+};
+
+const cancelarEdicion = () => {
+  setEditPagoId(null);
+  setEditValorDepositado("");
+  setEditVerificado(false);
+};
+
+const guardarEdicion = async (pagoId) => {
+  try {
+    await updatePago(PATH_PAGOS, pagoId, {
+      valorDepositado: parseFloat(editValorDepositado),
+      verificado: editVerificado,
+    });
+    await getPago(PATH_PAGOS);
+    cancelarEdicion();
+  } catch (error) {
+    alert("Error al guardar los cambios.");
+  }
+};
+
   const listaCursos = React.useMemo(() => {
     if (!pago) return [];
     const cursos = pago.map((p) => p.curso);
