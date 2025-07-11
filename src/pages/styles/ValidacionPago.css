@@ -71,6 +71,23 @@
   }
 }
 
+.dashboard-hamburger-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-hamburger-inner.open span:nth-child(1) {
+  transform: translateY(18px) rotate(45deg);
+}
+
+.dashboard-hamburger-inner.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.dashboard-hamburger-inner.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
 .vp-hamburger-btn {
   position: fixed;
   top: 1rem;
@@ -96,15 +113,14 @@
   display: block;
 }
 
-.vp-hamburger-line.open:nth-child(1) {
+/* Animación individual */
+.line1.open {
   transform: translateY(9px) rotate(45deg);
 }
-
-.vp-hamburger-line.open:nth-child(2) {
+.line2.open {
   opacity: 0;
 }
-
-.vp-hamburger-line.open:nth-child(3) {
+.line3.open {
   transform: translateY(-9px) rotate(-45deg);
 }
 
@@ -159,7 +175,6 @@
   cursor: pointer;
   font-family: inherit;
 }
-
 
 /* Tabla con fuente más pequeña y centrado */
 .vp-pagos-table {
@@ -317,7 +332,7 @@
     height: calc(100vh - 4rem);
   }
 
-  .vp-filtros {
+  .vp-filtro {
     flex-direction: column;
     gap: 0.75rem;
   }
@@ -326,18 +341,16 @@
     min-width: 100%;
   }
   /* Contenedor para la tabla con scroll horizontal */
-.vp-tabla-scroll {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
+  .vp-tabla-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 
-/* Tabla con ancho mínimo y fuente pequeña en móviles */
-.vp-pagos-table {
-  min-width: 800px; /* asegura que la tabla no colapse */
-  width: max-content; /* ajusta al contenido sin romper el diseño */
-  font-size: 0.6rem;
-}
-
-  
+  /* Tabla con ancho mínimo y fuente pequeña en móviles */
+  .vp-pagos-table {
+    min-width: 800px; /* asegura que la tabla no colapse */
+    width: max-content; /* ajusta al contenido sin romper el diseño */
+    font-size: 0.6rem;
+  }
 }

@@ -20,6 +20,8 @@ import ValidadorProtectedRoute from "./routes/ValidadorProtectedRoute";
 import SubAdminProtectedRoutes from "./routes/SubAdminProtectedRoutes";
 import ValidacionPago from "./pages/ValidacionPago";
 import Dashboard from "./pages/Dashboard";
+import Secretaria from "./pages/Secretaria";
+import SecretariaRoutes from "./routes/SecretariaRoutes";
 
 const App = () => {
   const location = useLocation();
@@ -40,6 +42,10 @@ const App = () => {
         <Route path="/giscopensc" element={<Giscopnsc />} />
         <Route path="/accv" element={<Accv />} />
         <Route path="/login" element={<Login />} />
+
+        <Route element={<SecretariaRoutes />}>
+          <Route path="/secre" element={<Secretaria />} />
+        </Route>
 
         <Route element={<ProtectedRoutes />}>
           <Route path="/home" element={<Home />} />

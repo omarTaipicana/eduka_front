@@ -9,21 +9,40 @@ const PrincipalHeader = () => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [valRole, setValRole] = useState(false);
+  const [grados, setGrados] = useState({
+    grado1: false,
+    grado2: false,
+    grado3: false,
+    grado4: false,
+    grado5: false,
+    grado6: false,
+  });
 
+  // Configurar grados según CI o rol
   useEffect(() => {
-    if (
-      user?.role === "Administrador" ||
-      user?.role === "Sub-Administrador" ||
-      user?.role === "Validador" ||
-      user?.cI === "0503627234"
-    ) {
-      setValRole(true);
-    }
+    if (!user?.role) return;
+
+    const ci = user?.cI;
+    const role = user?.role;
+
+    setGrados({
+      grado1: ci === "0503627234", // Superadmin (acceso total)
+      grado2: role === "Administrador",
+      grado3: role === "Sub-Administrador",
+      grado4: role === "Validador",
+      grado5: role === "Secretaria",
+      grado6: ![
+        "0503627234",
+        "Administrador",
+        "Sub-Administrador",
+        "Validador",
+        "Secretaria",
+      ].includes(role),
+    });
   }, [user]);
 
   useEffect(() => {
@@ -61,12 +80,10 @@ const PrincipalHeader = () => {
     navigate("/");
   };
 
-  // Toggle menú hamburguesa
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
 
-  // Cerrar menú al click en enlace
   const closeMenu = () => {
     setMenuOpen(false);
   };
@@ -94,32 +111,87 @@ const PrincipalHeader = () => {
         </button>
 
         <nav className={`nav_links ${menuOpen ? "open" : ""}`}>
-          {token && valRole && (
-            <Link to="/dashboard" onClick={closeMenu}>
-              Dashboard
-            </Link>
+          {token && (
+            <>
+              {grados.grado1 ? (
+                <>
+                  <Link to="/secre" onClick={closeMenu}>
+                    Secretaria
+                  </Link>
+                  <Link to="/dashboard" onClick={closeMenu}>
+                    Dashboard
+                  </Link>
+                  <Link to="/validacion" onClick={closeMenu}>
+                    Validacion
+                  </Link>
+                  <Link to="/home" onClick={closeMenu}>
+                    Home
+                  </Link>
+                </>
+              ) : grados.grado2 ? (
+                <>
+                  <Link to="/secre" onClick={closeMenu}>
+                    Secretaria
+                  </Link>
+                  <Link to="/dashboard" onClick={closeMenu}>
+                    Dashboard
+                  </Link>
+                  <Link to="/validacion" onClick={closeMenu}>
+                    Validacion
+                  </Link>
+                  <Link to="/home" onClick={closeMenu}>
+                    Home
+                  </Link>
+                </>
+              ) : grados.grado3 ? (
+                <>
+                  <Link to="/validacion" onClick={closeMenu}>
+                    Validacion
+                  </Link>
+                  <Link to="/secre" onClick={closeMenu}>
+                    Secretaria
+                  </Link>
+                  <Link to="/home" onClick={closeMenu}>
+                    Home
+                  </Link>
+                </>
+              ) : grados.grado4 ? (
+                <>
+                  <Link to="/validacion" onClick={closeMenu}>
+                    Validacion
+                  </Link>
+                  <Link to="/home" onClick={closeMenu}>
+                    Home
+                  </Link>
+                </>
+              ) : grados.grado5 ? (
+                <>
+                  <Link to="/secre" onClick={closeMenu}>
+                    Secretaria
+                  </Link>
+                  <Link to="/home" onClick={closeMenu}>
+                    Home
+                  </Link>
+                </>
+              ) : grados.grado6 ? (
+                <Link to="/home" onClick={closeMenu}>
+                  Home
+                </Link>
+              ) : null}
+            </>
           )}
 
-          {token && valRole && (
-            <Link to="/validacion" onClick={closeMenu}>
-              Validacion
-            </Link>
-          )}
-          {token && (
-            <Link to="/home" onClick={closeMenu}>
-              Home
-            </Link>
-          )}
           {!token && (
-            <Link to="/register" onClick={closeMenu}>
-              Register
-            </Link>
+            <>
+              <Link to="/register" onClick={closeMenu}>
+                Register
+              </Link>
+              <Link to="/login" onClick={closeMenu}>
+                Login
+              </Link>
+            </>
           )}
-          {!token && (
-            <Link to="/login" onClick={closeMenu}>
-              Login
-            </Link>
-          )}
+
           {token && (
             <>
               <Link to="/login" onClick={closeMenu}>

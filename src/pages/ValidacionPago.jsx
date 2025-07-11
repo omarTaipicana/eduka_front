@@ -32,6 +32,11 @@ const ValidacionPago = () => {
   const [editPagoId, setEditPagoId] = useState(null);
   const [editValorDepositado, setEditValorDepositado] = useState("");
   const [editVerificado, setEditVerificado] = useState(false);
+  const [editMoneda, setEditMoneda] = useState(false);
+  const [editDistintivo, setEditDistintivo] = useState(false);
+
+  const [editingEntregaId, setEditingEntregaId] = useState(null); // estado para saber qué pago estás editando
+  const [entregadoEdit, setEntregadoEdit] = useState(false);
 
   const [filtroCurso, setFiltroCurso] = useState("");
   const [filtroVerificado, setFiltroVerificado] = useState("todos");
@@ -51,30 +56,68 @@ const ValidacionPago = () => {
     getInscripciones(PATH_INSCRIPCIONES);
   }, []);
 
+  const resumenTotales = React.useMemo(() => {
+    if (!pago) return null;
+
+    const totalPagos = pago.length;
+
+    const totalValidados = pago.filter((p) => p.verificado).length;
+    const entregadosValidados = pago.filter(
+      (p) => p.verificado && p.entregado
+    ).length;
+
+    const totalMoneda = pago.filter((p) => p.moneda).length;
+    const entregadosMoneda = pago.filter((p) => p.moneda && p.entregado).length;
+
+    const totalDistintivo = pago.filter((p) => p.distintivo).length;
+    const entregadosDistintivo = pago.filter(
+      (p) => p.distintivo && p.entregado
+    ).length;
+
+    const entregadosTotales = pago.filter((p) => p.entregado).length;
+
+    return {
+      totalPagos,
+      entregadosTotales,
+      totalValidados,
+      entregadosValidados,
+      totalMoneda,
+      entregadosMoneda,
+      totalDistintivo,
+      entregadosDistintivo,
+    };
+  }, [pago]);
+
   const iniciarEdicion = (pago) => {
-  setEditPagoId(pago.id);
-  setEditValorDepositado(pago.valorDepositado || "");
-  setEditVerificado(pago.verificado || false);
-};
+    setEditPagoId(pago.id);
+    setEditValorDepositado(pago.valorDepositado || "");
+    setEditVerificado(pago.verificado || false);
+    setEditMoneda(pago.moneda || false);
+    setEditDistintivo(pago.distintivo || false);
+  };
 
-const cancelarEdicion = () => {
-  setEditPagoId(null);
-  setEditValorDepositado("");
-  setEditVerificado(false);
-};
+  const cancelarEdicion = () => {
+    setEditPagoId(null);
+    setEditValorDepositado("");
+    setEditVerificado(false);
+    setEditMoneda(false);
+    setEditDistintivo(false);
+  };
 
-const guardarEdicion = async (pagoId) => {
-  try {
-    await updatePago(PATH_PAGOS, pagoId, {
-      valorDepositado: parseFloat(editValorDepositado),
-      verificado: editVerificado,
-    });
-    await getPago(PATH_PAGOS);
-    cancelarEdicion();
-  } catch (error) {
-    alert("Error al guardar los cambios.");
-  }
-};
+  const guardarEdicion = async (pagoId) => {
+    try {
+      await updatePago(PATH_PAGOS, pagoId, {
+        valorDepositado: parseFloat(editValorDepositado),
+        verificado: editVerificado,
+        moneda: editMoneda,
+        distintivo: editDistintivo,
+      });
+      await getPago(PATH_PAGOS);
+      cancelarEdicion();
+    } catch (error) {
+      alert("Error al guardar los cambios.");
+    }
+  };
 
   const listaCursos = React.useMemo(() => {
     if (!pago) return [];
@@ -240,7 +283,53 @@ const guardarEdicion = async (pagoId) => {
   const renderContent = () => {
     switch (activeSection) {
       case "resumen":
-        return <p>📋 Pronto tendrás información del Resumen General.</p>;
+        if (!resumenTotales) return <p>Cargando resumen...</p>;
+        return (
+          <div className="vp-resumen-container">
+            <h2>📋 Resumen General</h2>
+
+            <div className="vp-resumen-item">
+              <div className="vp-resumen-label">
+                Total Pagos vs Total Validados
+              </div>
+              <div className="vp-resumen-values">
+                <span className="vp-total">{resumenTotales.totalPagos}</span>
+                <span className="vp-separator">/</span>
+                <span className="vp-validated">
+                  {resumenTotales.totalValidados}
+                </span>
+              </div>
+            </div>
+
+            <div className="vp-resumen-item">
+              <div className="vp-resumen-label">
+                Total Monedas vs Entregadas
+              </div>
+              <div className="vp-resumen-values">
+                <span className="vp-total">{resumenTotales.totalMoneda}</span>
+                <span className="vp-separator">/</span>
+                <span className="vp-validated">
+                  {resumenTotales.entregadosMoneda}
+                </span>
+              </div>
+            </div>
+
+            <div className="vp-resumen-item">
+              <div className="vp-resumen-label">
+                Total Distintivos vs Entregados
+              </div>
+              <div className="vp-resumen-values">
+                <span className="vp-total">
+                  {resumenTotales.totalDistintivo}
+                </span>
+                <span className="vp-separator">/</span>
+                <span className="vp-validated">
+                  {resumenTotales.entregadosDistintivo}
+                </span>
+              </div>
+            </div>
+          </div>
+        );
 
       case "validarPagos":
         return (
@@ -333,7 +422,19 @@ const guardarEdicion = async (pagoId) => {
                 fontWeight: 600,
               }}
             >
-              Mostrando {pagosFiltrados().length} resultados
+              <p
+                style={{
+                  marginBottom: "10px",
+                  color: "#0053a0",
+                  fontWeight: 600,
+                }}
+              >
+                Mostrando {pagosFiltrados().length} resultados /{" "}
+                <span style={{ color: "#198754", fontWeight: "bold" }}>
+                  {pagosFiltrados().filter((p) => p.verificado).length} pagos
+                  validados
+                </span>
+              </p>
             </div>
 
             {pago && pago.length > 0 ? (
@@ -381,11 +482,37 @@ const guardarEdicion = async (pagoId) => {
                           </td>
                           <td>{p.curso}</td>
                           <td style={{ textAlign: "center" }}>
-                            {p.distintivo ? "✅" : "❌"}
+                            {isEditing ? (
+                              <input
+                                type="checkbox"
+                                checked={editDistintivo}
+                                onChange={(e) =>
+                                  setEditDistintivo(e.target.checked)
+                                }
+                              />
+                            ) : p.distintivo ? (
+                              "✅"
+                            ) : (
+                              "❌"
+                            )}
                           </td>
+
                           <td style={{ textAlign: "center" }}>
-                            {p.moneda ? "✅" : "❌"}
+                            {isEditing ? (
+                              <input
+                                type="checkbox"
+                                checked={editMoneda}
+                                onChange={(e) =>
+                                  setEditMoneda(e.target.checked)
+                                }
+                              />
+                            ) : p.moneda ? (
+                              "✅"
+                            ) : (
+                              "❌"
+                            )}
                           </td>
+
                           <td>
                             {isEditing ? (
                               <input
@@ -606,28 +733,35 @@ const guardarEdicion = async (pagoId) => {
                     );
                     if (!inscrip) return null;
 
-                    const toggleEntrega = async () => {
+                    const startEditing = () => {
+                      setEditingEntregaId(p.id);
+                      setEntregadoEdit(p.entregado);
+                    };
+
+                    const guardarEntrega = async () => {
                       try {
-                        await updatePago(PATH_PAGOS, p.id, {
-                          entregado: !p.entregado,
+                        await updatePago(PATH_PAGOS, editingEntregaId, {
+                          entregado: entregadoEdit,
                         });
                         await getPago(PATH_PAGOS);
+                        setEditingEntregaId(null);
                       } catch (error) {
                         alert("Error al actualizar entrega.");
                       }
                     };
 
+                    const cancelarEdicion = () => {
+                      setEditingEntregaId(null);
+                    };
+
                     return (
                       <tr key={p.id}>
-                        <td>
-                          {`${inscrip.grado} - ${inscrip.nombres} ${inscrip.apellidos}`}
-                        </td>
+                        <td>{`${inscrip.grado} - ${inscrip.nombres} ${inscrip.apellidos}`}</td>
                         <td>
                           {p.createdAt
                             ? new Date(p.createdAt).toLocaleDateString()
                             : "-"}
                         </td>
-
                         <td>{p.curso}</td>
                         <td style={{ textAlign: "center" }}>
                           {p.moneda ? "✅" : "❌"}
@@ -653,17 +787,44 @@ const guardarEdicion = async (pagoId) => {
                           )}
                         </td>
                         <td style={{ textAlign: "center" }}>
-                          {p.entregado ? "✅" : "❌"}
+                          {editingEntregaId === p.id ? (
+                            <input
+                              type="checkbox"
+                              checked={entregadoEdit}
+                              onChange={(e) =>
+                                setEntregadoEdit(e.target.checked)
+                              }
+                            />
+                          ) : p.entregado ? (
+                            "✅"
+                          ) : (
+                            "❌"
+                          )}
                         </td>
                         <td>
-                          <button
-                            onClick={toggleEntrega}
-                            className="vp-btn-edit"
-                          >
-                            {p.entregado
-                              ? "Quitar Entrega"
-                              : "Registrar Entrega"}
-                          </button>
+                          {editingEntregaId === p.id ? (
+                            <>
+                              <button
+                                onClick={guardarEntrega}
+                                className="vp-btn-save"
+                              >
+                                Guardar
+                              </button>
+                              <button
+                                onClick={cancelarEdicion}
+                                className="vp-btn-cancel"
+                              >
+                                Cancelar
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={startEditing}
+                              className="vp-btn-edit"
+                            >
+                              Registrar Entrega
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );
@@ -819,13 +980,14 @@ const guardarEdicion = async (pagoId) => {
     <div className="vp-container">
       <button
         ref={hamburgerRef}
-        className="vp-hamburger-btn"
+        className="dashboard-hamburger-btn"
         onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Toggle menu"
       >
-        <span className={`vp-hamburger-line ${menuOpen ? "open" : ""}`} />
-        <span className={`vp-hamburger-line ${menuOpen ? "open" : ""}`} />
-        <span className={`vp-hamburger-line ${menuOpen ? "open" : ""}`} />
+        <div className={`dashboard-hamburger-inner ${menuOpen ? "open" : ""}`}>
+          <span className="dashboard-hamburger-line" />
+          <span className="dashboard-hamburger-line" />
+          <span className="dashboard-hamburger-line" />
+        </div>
       </button>
 
       <nav className={`vp-menu ${menuOpen ? "open" : ""}`} ref={menuRef}>
