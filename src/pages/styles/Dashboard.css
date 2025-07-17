@@ -1,3 +1,6 @@
+/* ===========================
+   Contenedor Principal
+   =========================== */
 .dashboard-container {
   display: flex;
   flex-direction: row;
@@ -8,6 +11,9 @@
   position: relative;
 }
 
+/* ===========================
+   Menú Lateral
+   =========================== */
 .dashboard-menu {
   width: 240px;
   background: #fff;
@@ -17,6 +23,11 @@
   transition: transform 0.3s ease-in-out;
   z-index: 1000;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
 
 .dashboard-menu h3 {
@@ -36,7 +47,7 @@
   border-left: 4px solid transparent;
   text-align: left;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.2s ease;
 }
 
 .menu-btn:hover {
@@ -49,6 +60,9 @@
   border-left: 4px solid #ffb703;
 }
 
+/* ===========================
+   Contenido Principal
+   =========================== */
 .dashboard-content {
   flex-grow: 1;
   padding: 2rem 3rem;
@@ -57,8 +71,12 @@
   color: #1a1a1a;
   box-shadow: inset 0 0 15px rgb(0 0 0 / 0.05);
   animation: fadeInContent 0.4s ease forwards;
+  min-width: 0; /* para evitar overflow en flex */
 }
 
+/* ===========================
+   Animación Fade In
+   =========================== */
 @keyframes fadeInContent {
   from {
     opacity: 0;
@@ -70,6 +88,9 @@
   }
 }
 
+/* ===========================
+   Secciones del dashboard
+   =========================== */
 .resumen,
 .inscripciones,
 .pagos,
@@ -78,6 +99,9 @@
   margin-bottom: 3rem;
 }
 
+/* ===========================
+   Tarjetas Resumen
+   =========================== */
 .summary-card {
   background: #ffffff;
   padding: 2rem;
@@ -86,10 +110,12 @@
   text-align: center;
   margin-top: 1rem;
 }
+
 .summary-card-2 {
   display: flex;
   justify-content: center;
   gap: 3em;
+  flex-wrap: wrap;
 }
 
 .summary-card h3 {
@@ -103,14 +129,16 @@
   margin-top: 0.5rem;
 }
 
+/* ===========================
+   Caja de gráficos
+   =========================== */
 .chart-box {
   background: #ffffff;
-  padding: 3.5rem;
+  padding: 3.5rem 3.5rem 3.5rem 3.5rem;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 83, 160, 0.05);
   margin: 2rem 0;
   overflow-x: auto;
-  padding-right: 2.5rem;
 }
 
 .chart-box h4 {
@@ -118,12 +146,18 @@
   margin-bottom: 1rem;
 }
 
+/* ===========================
+   Resumen específico
+   =========================== */
 .summary-inscritos {
   font-size: 1.2rem;
   margin-bottom: 1rem;
   color: #1a1a1a;
 }
 
+/* ===========================
+   Botón hamburguesa
+   =========================== */
 .dashboard-hamburger-btn {
   position: fixed;
   top: 1rem;
@@ -159,7 +193,9 @@
   transform: translateY(-8px) rotate(-45deg);
 }
 
-
+/* ===========================
+   Filtros en resumen
+   =========================== */
 .resumen > div[style] {
   display: flex;
   gap: 1rem;
@@ -199,6 +235,9 @@
   background-color: #e6f0ff;
 }
 
+/* ===========================
+   Contenedor y estilos filtros
+   =========================== */
 .filtro-container {
   display: flex;
   flex-wrap: wrap;
@@ -242,6 +281,9 @@
   background-color: #003f7a;
 }
 
+/* ===========================
+   Contenedor resumen VP
+   =========================== */
 .vp-resumen-container {
   background: linear-gradient(135deg, #007acc 0%, #00b4f1 100%);
   padding: 2rem;
@@ -307,15 +349,200 @@
 }
 
 
+
+
+
+/* ============================
+   CONTENEDOR GENERAL DASHBOARD
+   ============================ */
+.dashboard-container {
+  padding: 2rem;
+  background-color: #f9fbff;
+  color: #003366;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* ============================
+   FILTROS (SECCIÓN SUPERIOR)
+   ============================ */
+.dashboard-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  align-items: flex-end;
+  background-color: #f0f8ff;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1.5px solid #cce0f5;
+}
+
+.filtro-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.filtro-group label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #0053a0;
+  margin-bottom: 0.35rem;
+}
+
+.filtro-input,
+.filtro-select {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.95rem;
+  border: 1.5px solid #0053a0;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #003366;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.filtro-input:focus,
+.filtro-select:focus {
+  border-color: #003366;
+  box-shadow: 0 0 6px rgba(0, 83, 160, 0.3);
+  background-color: #e6f0ff;
+}
+
+.btn-limpiar-filtros {
+  padding: 0.55rem 1.2rem;
+  background-color: #0053a0;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  height: fit-content;
+  align-self: center;
+  margin-top: 0.2rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-limpiar-filtros:hover {
+  background-color: #003f7a;
+}
+
+/* ============================
+   CONTADOR DE RESULTADOS
+   ============================ */
+.result-count {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 0.8rem;
+  color: #004080;
+}
+
+/* ============================
+   TABLA DE INSCRIPCIONES
+   ============================ */
+.tabla-scrollable {
+  overflow-x: auto;
+  max-width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+.tabla-inscripciones {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 950px;
+  background-color: #ffffff;
+  color: #003366;
+}
+
+.tabla-inscripciones th,
+.tabla-inscripciones td {
+  border: 1px solid #ccc;
+  padding: 0.65rem 0.8rem;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.tabla-inscripciones th {
+  background-color: #e6f0ff;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tabla-inscripciones td {
+  background-color: #fdfdfd;
+  vertical-align: top;
+}
+
+.tabla-inscripciones a {
+  color: #0053a0;
+  text-decoration: underline;
+  font-weight: 500;
+  font-size: 0.92rem;
+}
+
+.tabla-inscripciones a:hover {
+  color: #003366;
+}
+
+/* Ancho fijo para columna curso */
+.tabla-inscripciones td.curso-col,
+.tabla-inscripciones th.curso-col {
+  max-width: 180px;
+  width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.curso-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.curso-item {
+  margin-bottom: 0.6rem;
+  font-size: 1rem;
+  color: #444;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.curso-icon {
+  margin-right: 0.5rem;
+  color: #007bff;
+}
+
+
+
+/* ===========================
+   Responsive
+   =========================== */
+@media screen and (max-width: 1024px) {
+  .dashboard-content {
+    padding: 1.5rem 2rem;
+  }
+
+  .summary-card-2 {
+    gap: 2rem;
+  }
+}
+
 @media screen and (max-width: 768px) {
+  /* Layout en columna para móviles */
   .dashboard-container {
     flex-direction: column;
   }
 
+  /* Mostrar botón hamburguesa */
   .dashboard-hamburger-btn {
     display: flex;
   }
 
+  /* Menú lateral modo drawer */
   .dashboard-menu {
     position: fixed;
     top: 0;
@@ -328,7 +555,6 @@
     background: #fff;
     padding-top: 4rem;
     box-shadow: 2px 0 12px rgb(0 0 0 / 0.25);
-    flex-direction: column;
   }
 
   .dashboard-menu.open {
@@ -348,20 +574,24 @@
     border-left: none;
   }
 
+  /* Ajustes padding contenido */
   .dashboard-content {
     padding: 4rem 1.5rem 2rem 1.5rem;
     height: calc(100vh - 4rem);
   }
 
+  /* Ajuste para la caja de gráficos */
   .chart-box {
-    padding: 1.5rem;
-    padding-right: 1.5rem;
+    padding: 1.5rem 1.5rem;
     width: 100%;
     min-width: 100%;
     box-sizing: border-box;
   }
-    .resumen > div[style] {
+
+  /* Ajuste para filtros */
+  .resumen > div[style] {
     flex-direction: column;
+    gap: 1rem;
   }
 
   .resumen > div[style] > div {
@@ -370,5 +600,10 @@
 
   .resumen > div[style] input[type="date"] {
     width: 100%;
+  }
+
+  /* Ajuste para tarjetas resumen flex-wrap */
+  .summary-card-2 {
+    flex-direction: column;
   }
 }

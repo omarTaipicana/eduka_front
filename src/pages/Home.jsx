@@ -9,11 +9,13 @@ const Home = () => {
   const PATH_INSCRIPCIONES = "/inscripcion";
   const PATH_COURSES = "/courses";
   const PATH_PAGOS = "/pagos";
+  const PATH_CERTIFICADOS = "/certificados";
 
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
   const [course, getCourse] = useCrud();
   const [inscripciones, getInscripcion] = useCrud();
   const [pago, getPago] = useCrud();
+  const [certificados, getCertificados] = useCrud();
 
   const [activeSection, setActiveSection] = useState("datos-personales");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -24,6 +26,7 @@ const Home = () => {
     getInscripcion(PATH_INSCRIPCIONES);
     getCourse(PATH_COURSES);
     getPago(PATH_PAGOS);
+    getCertificados(PATH_CERTIFICADOS);
   }, []);
 
   useEffect(() => {
@@ -133,7 +136,7 @@ const Home = () => {
           className={`menu-btn ${activeSection === "cursos" ? "active" : ""}`}
           onClick={() => handleSelect("cursos")}
         >
-          📚 Cursos Inscritos
+          📚 Cursos Inscritos y Certificados
         </button>
         <button
           className={`menu-btn ${
@@ -244,26 +247,57 @@ const Home = () => {
 
         {activeSection === "cursos" && (
           <section className="section cursos">
-            <h2>📚 Cursos inscritos</h2>
+            <h2>📚 Cursos inscritos y Certificados</h2>
             {cursosInscritos?.length > 0 ? (
               <ul className="curso-list">
-                {cursosInscritos.map((curso) => (
-                  <li key={curso.id} className="curso-item">
-                    <span className="curso-icon">🔹</span>{" "}
-                    <a
-                      href={`https://acadexeduc.com/course/view.php?name=${curso.sigla}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        textDecoration: "none",
-                        color: "#007bff",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {curso.nombre}
-                    </a>
-                  </li>
-                ))}
+                {cursosInscritos.map((curso) => {
+                  const certificado = certificados?.find(
+                    (c) =>
+                      c.cedula === user?.cI &&
+                      c.curso === curso.sigla &&
+                      inscripciones?.some(
+                        (i) =>
+                          i.courseId === curso.id && i.email === user?.email
+                      )
+                  );
+
+                  return (
+                    <li key={curso.id} className="curso-item">
+                      <span className="curso-icon">🔹</span>{" "}
+                      <a
+                        href={`https://acadexeduc.com/course/view.php?name=${curso.sigla}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          textDecoration: "none",
+                          color: "#007bff",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {curso.nombre}
+                      </a>
+                      {certificado?.url && (
+                        <>
+                          {" "}
+                          —{" "}
+                          <a
+                            href={certificado.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color: "green",
+                              textDecoration: "underline",
+                              fontWeight: "500",
+                              marginLeft: "0.3rem",
+                            }}
+                          >
+                            Ver certificado
+                          </a>
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p>No hay cursos inscritos.</p>
