@@ -226,6 +226,12 @@
   display: block;
 }
 
+
+.vp-pagos-table input[type="text"] {
+  width: 100%;
+  margin: 0 auto;
+  display: block;
+}
 /* Botones con un tamaño menor y padding ajustado */
 .vp-btn-edit,
 .vp-btn-save,

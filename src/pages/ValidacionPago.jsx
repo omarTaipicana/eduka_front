@@ -3,6 +3,7 @@ import "./styles/ValidacionPago.css";
 import useCrud from "../hooks/useCrud";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import useAuth from "../hooks/useAuth";
 
 const PATH_PAGOS = "/pagos";
 const PATH_INSCRIPCIONES = "/inscripcion";
@@ -13,6 +14,7 @@ const ValidacionPago = () => {
   const menuRef = useRef();
   const hamburgerRef = useRef();
 
+  const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
   const [inscripciones, getInscripciones] = useCrud();
   const [
     pago,
@@ -31,6 +33,7 @@ const ValidacionPago = () => {
 
   const [editPagoId, setEditPagoId] = useState(null);
   const [editValorDepositado, setEditValorDepositado] = useState("");
+  const [observacion, setObservacion] = useState("");
   const [editVerificado, setEditVerificado] = useState(false);
   const [editMoneda, setEditMoneda] = useState(false);
   const [editDistintivo, setEditDistintivo] = useState(false);
@@ -54,6 +57,7 @@ const ValidacionPago = () => {
   useEffect(() => {
     getPago(PATH_PAGOS);
     getInscripciones(PATH_INSCRIPCIONES);
+    loggedUser();
   }, []);
 
   const resumenTotales = React.useMemo(() => {
@@ -91,6 +95,7 @@ const ValidacionPago = () => {
   const iniciarEdicion = (pago) => {
     setEditPagoId(pago.id);
     setEditValorDepositado(pago.valorDepositado || "");
+    setObservacion(pago.observacion || "");
     setEditVerificado(pago.verificado || false);
     setEditMoneda(pago.moneda || false);
     setEditDistintivo(pago.distintivo || false);
@@ -99,6 +104,7 @@ const ValidacionPago = () => {
   const cancelarEdicion = () => {
     setEditPagoId(null);
     setEditValorDepositado("");
+    setObservacion("");
     setEditVerificado(false);
     setEditMoneda(false);
     setEditDistintivo(false);
@@ -111,6 +117,8 @@ const ValidacionPago = () => {
         verificado: editVerificado,
         moneda: editMoneda,
         distintivo: editDistintivo,
+        observacion: observacion,
+        usuarioEdicion: user.cI,
       });
       await getPago(PATH_PAGOS);
       cancelarEdicion();
@@ -459,6 +467,7 @@ const ValidacionPago = () => {
                       <th>Valor Depositado</th>
                       <th>Pago (comprobante)</th>
                       <th>Verificado</th>
+                      <th>Observacion</th>
                       <th>Acción</th>
                     </tr>
                   </thead>
@@ -553,6 +562,20 @@ const ValidacionPago = () => {
                               "✅"
                             ) : (
                               "❌"
+                            )}
+                          </td>
+                          <td>
+                            {" "}
+                            {isEditing ? (
+                              <input
+                                value={observacion}
+                                type="text"
+                                onChange={(e) => setObservacion(e.target.value)}
+                              />
+                            ) : p.observacion ? (
+                              p.observacion
+                            ) : (
+                              "👍"
                             )}
                           </td>
                           <td>
