@@ -321,7 +321,7 @@ export const RegistroPagos = () => {
           <div>
             <img
               className="curso_fondo_pago"
-              src="/images/pago_accv_n.jpg"
+              src="/images/pago_accv_n.png"
               alt=""
             />
           </div>
