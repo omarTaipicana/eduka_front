@@ -914,7 +914,7 @@ const Secretaria = () => {
                                 onClick={() => iniciarEdicion(i)}
                                 className="vp-btn-edit"
                               >
-                                Registrar Validación
+                                Reg. Observación
                               </button>
                             )}
                           </td>
