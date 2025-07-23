@@ -118,7 +118,7 @@ const ValidacionPago = () => {
         moneda: editMoneda,
         distintivo: editDistintivo,
         observacion: observacion,
-        usuarioEdicion: user.cI,
+        usuarioEdicion: user.email,
       });
       await getPago(PATH_PAGOS);
       cancelarEdicion();

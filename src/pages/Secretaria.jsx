@@ -1,6 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import "./styles/Secretaria.css";
 import useCrud from "../hooks/useCrud";
+import IsLoading from "../components/shared/isLoading";
+import useAuth from "../hooks/useAuth";
 
 const Secretaria = () => {
   const [activeSection, setActiveSection] = useState("inscripciones");
@@ -10,7 +12,18 @@ const Secretaria = () => {
   const [busqueda, setBusqueda] = useState("");
   const [filtroPago, setFiltroPago] = useState("");
   const [filtroCertificado, setFiltroCertificado] = useState("");
+  const [filtroDetalle, setFiltroDetalle] = useState("");
+  const [filtroUltimoAcceso, setFiltroUltimoAcceso] = useState("");
   const [cedulaPagoBuscada, setCedulaPagoBuscada] = useState("");
+  const [inputCedula, setInputCedula] = useState("");
+  const [inputNombre, setInputNombre] = useState("");
+  const [busquedaTemporal, setBusquedaTemporal] = useState("");
+  const [cedulaTemporal, setCedulaTemporal] = useState("");
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [editInscripcionId, setEditInscripcionId] = useState();
+  const [observacion, setObservacion] = useState("");
+
+  const registrosPorPagina = 10;
 
   const [sugerencias, setSugerencias] = useState([]);
   const menuRef = useRef();
@@ -20,17 +33,31 @@ const Secretaria = () => {
   const PATH_COURSES = "/courses";
   const PATH_PAGOS = "/pagos";
   const PATH_CERTIFICADOS = "/certificados";
+  const PATH_MOODLE = "/usuarios_m";
 
   const [courses, getCourses] = useCrud();
-  const [inscripciones, getInscripciones] = useCrud();
+  const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
+
+  const [
+    inscripciones,
+    getInscripciones,
+    ,
+    ,
+    updateInscripciones,
+    ,
+    isLoadingI,
+  ] = useCrud();
   const [pagos, getPagos] = useCrud();
   const [certificados, getCertificados] = useCrud();
+  const [moodle, getMoodle, , , , , isLoadingM] = useCrud();
 
   useEffect(() => {
     getInscripciones(PATH_INSCRIPCIONES);
     getCourses(PATH_COURSES);
     getPagos(PATH_PAGOS);
     getCertificados(PATH_CERTIFICADOS);
+    getMoodle(PATH_MOODLE);
+    loggedUser();
   }, []);
 
   const handleSelect = (section) => {
@@ -64,6 +91,8 @@ const Secretaria = () => {
   const limpiarFiltros = () => {
     setCedulaBuscada("");
     setNombreBuscado("");
+    setInputCedula("");
+    setInputNombre("");
     setSugerencias([]);
   };
 
@@ -152,352 +181,618 @@ const Secretaria = () => {
     .slice()
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+  const handleBuscar = () => {
+    setCedulaBuscada(inputCedula);
+    setNombreBuscado(inputNombre);
+    setSugerencias([]); // opcionalmente vacía sugerencias
+  };
+
+  const datosFiltrados = useMemo(() => {
+    const filtrados = inscripcionesParaPagos.filter((i) => {
+      const pagosRelacionados = pagos.filter((p) => p.inscripcionId === i.id);
+      const certificado = certificados.find((c) => c.cedula === i.cedula);
+      const curso = courses.find((c) => c.id === i.courseId);
+      const usuarioMoodle = moodle.find((u) => u.email === i.email);
+
+      const nombreCompleto = `${i.nombres} ${i.apellidos}`.toLowerCase();
+      const cumpleBusqueda = nombreCompleto.includes(busqueda.toLowerCase());
+
+      const cumpleFiltroPago =
+        filtroPago === ""
+          ? true
+          : filtroPago === "con_pago"
+          ? pagosRelacionados.length > 0
+          : pagosRelacionados.length === 0;
+
+      const cumpleFiltroCertificado =
+        filtroCertificado === ""
+          ? true
+          : filtroCertificado === "con_certificado"
+          ? !!certificado
+          : !certificado;
+
+      const cumpleFiltroCedula =
+        cedulaPagoBuscada.trim() === ""
+          ? true
+          : i.cedula.includes(cedulaPagoBuscada.trim());
+
+      // Detalle (nota final)
+      let detalleEstado = "";
+      if (!usuarioMoodle) {
+        detalleEstado = "sin_usuario_moodle";
+      } else {
+        const cursoMoodle = usuarioMoodle.courses?.find(
+          (mc) => mc.fullname === curso?.sigla
+        );
+        if (!cursoMoodle) {
+          detalleEstado = "no_matriculado";
+        } else {
+          const nota = cursoMoodle.grades?.["Nota Final"];
+          if (nota == null) {
+            detalleEstado = "sin_calificacion";
+          } else if (Number(nota) >= 7) {
+            detalleEstado = "aprobado";
+          } else {
+            detalleEstado = "no_aprobado";
+          }
+        }
+      }
+
+      const cumpleFiltroDetalle =
+        filtroDetalle === "" ? true : filtroDetalle === detalleEstado;
+
+      // Último acceso
+      let ultimoAccesoEstado = "";
+      if (!usuarioMoodle) {
+        ultimoAccesoEstado = "sin_usuario";
+      } else if (
+        usuarioMoodle.lastaccess === "0" ||
+        usuarioMoodle.lastaccess === 0
+      ) {
+        ultimoAccesoEstado = "no_ingresa";
+      } else {
+        ultimoAccesoEstado = "registra_ingreso";
+      }
+
+      const cumpleFiltroUltimoAcceso =
+        filtroUltimoAcceso === ""
+          ? true
+          : filtroUltimoAcceso === ultimoAccesoEstado;
+
+      return (
+        cumpleBusqueda &&
+        cumpleFiltroPago &&
+        cumpleFiltroCertificado &&
+        cumpleFiltroCedula &&
+        cumpleFiltroDetalle &&
+        cumpleFiltroUltimoAcceso
+      );
+    });
+
+    // Ordena por fecha descendente (más reciente primero)
+    return filtrados.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+  }, [
+    inscripcionesParaPagos,
+    pagos,
+    certificados,
+    courses,
+    moodle,
+    busqueda,
+    cedulaPagoBuscada,
+    filtroPago,
+    filtroCertificado,
+    filtroDetalle,
+    filtroUltimoAcceso,
+  ]);
+
+  const datosPaginados = useMemo(() => {
+    const inicio = (paginaActual - 1) * registrosPorPagina;
+    const fin = inicio + registrosPorPagina;
+    return datosFiltrados.slice(inicio, fin);
+  }, [datosFiltrados, paginaActual]);
+
+  const totalPaginas = Math.ceil(datosFiltrados.length / registrosPorPagina);
+
+  const iniciarEdicion = (inscripcion) => {
+    setObservacion(inscripcion.observacion || "");
+    setEditInscripcionId(inscripcion.id);
+  };
+
+  const cancelarEdicion = () => {
+    setObservacion("");
+    setEditInscripcionId();
+  };
+
+  const guardarEdicion = async (inscripcionId) => {
+    try {
+      await updateInscripciones(PATH_INSCRIPCIONES, inscripcionId, {
+        observacion: observacion,
+        usuarioEdicion: user.email,
+      });
+      await getInscripciones(PATH_INSCRIPCIONES);
+      cancelarEdicion();
+    } catch (error) {
+      alert("Error al guardar los cambios.");
+    }
+  };
+
   return (
-    <div className="secretaria_container">
-      <button
-        ref={hamburgerRef}
-        className="secretaria_hamburger"
-        onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Toggle menu"
-        aria-expanded={menuOpen}
-      >
-        <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-        <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-        <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-      </button>
+    <div>
+      {isLoadingM && <IsLoading />}
 
-      <nav
-        className={`secretaria_menu ${menuOpen ? "open" : ""}`}
-        ref={menuRef}
-      >
+      <div className="secretaria_container">
         <button
-          className={`menu-btn ${
-            activeSection === "inscripciones" ? "active" : ""
-          }`}
-          onClick={() => handleSelect("inscripciones")}
+          ref={hamburgerRef}
+          className="secretaria_hamburger"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+          aria-expanded={menuOpen}
         >
-          🔎 Buscador
+          <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
+          <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
+          <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
         </button>
-        <button
-          className={`menu-btn ${activeSection === "pagos" ? "active" : ""}`}
-          onClick={() => handleSelect("pagos")}
+
+        <nav
+          className={`secretaria_menu ${menuOpen ? "open" : ""}`}
+          ref={menuRef}
         >
-          📄 listado
-        </button>
-        <button
-          className={`menu-btn ${
-            activeSection === "certificados" ? "active" : ""
-          }`}
-          onClick={() => handleSelect("certificados")}
-        >
-          🎓 Certificados
-        </button>
-      </nav>
+          <button
+            className={`menu-btn ${
+              activeSection === "inscripciones" ? "active" : ""
+            }`}
+            onClick={() => handleSelect("inscripciones")}
+          >
+            🔎 Buscador
+          </button>
+          <button
+            className={`menu-btn ${activeSection === "pagos" ? "active" : ""}`}
+            onClick={() => handleSelect("pagos")}
+          >
+            📄 listado
+          </button>
+          <button
+            className={`menu-btn ${
+              activeSection === "certificados" ? "active" : ""
+            }`}
+            onClick={() => handleSelect("certificados")}
+          >
+            🎓 Certificados
+          </button>
+        </nav>
 
-      <main className="secretaria_content">
-        {["inscripciones"].includes(activeSection) && (
-          <>
-            <div className="inputs_busqueda">
-              <div className="input_group">
-                <input
-                  type="text"
-                  className="buscador_input"
-                  placeholder="🔍 Buscar por cédula"
-                  value={cedulaBuscada}
-                  onChange={(e) => {
-                    setCedulaBuscada(e.target.value);
-                    setNombreBuscado("");
-                    setSugerencias([]);
-                  }}
-                />
-              </div>
-
-              <div className="input_group">
-                <input
-                  type="text"
-                  className="buscador_input"
-                  placeholder="🔍 Buscar por nombres y apellidos"
-                  value={nombreBuscado}
-                  onChange={handleBuscarPorNombre}
-                  autoComplete="off"
-                />
-                {sugerencias.length > 0 && (
-                  <ul className="sugerencias_lista" role="listbox">
-                    {sugerencias.map((sug) => (
-                      <li
-                        key={sug.id}
-                        onClick={() => seleccionarSugerencia(sug)}
-                        className="sugerencia_item"
-                        role="option"
-                      >
-                        {sug.nombres} {sug.apellidos} — {sug.cedula}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {/* Botón para limpiar filtros */}
-              <button className="btn_limpiar_filtros" onClick={limpiarFiltros}>
-                ❌ Borrar filtros
-              </button>
-            </div>
-          </>
-        )}
-
-        {activeSection === "inscripciones" &&
-          inscripcionesAMostrar.length > 0 &&
-          inscripcionesAMostrar.map((i) => {
-            const curso = courses.find((c) => c.id === i.courseId);
-            const pagosRelacionados = pagos.filter(
-              (p) => p.inscripcionId === i.id
-            );
-
-            return (
-              <div key={i.id} className="grid_dos_columnas">
-                <div className="card_inscripcion">
-                  <h3>
-                    {i.nombres} {i.apellidos}
-                  </h3>
-                  <p>
-                    <strong>Cédula:</strong> {i.cedula}
-                  </p>
-                  <p>
-                    <strong>Celular:</strong> {i.celular}
-                  </p>
-                  <p>
-                    <strong>Subsistema:</strong> {i.subsistema}
-                  </p>
-                  <p>
-                    <strong>Grado:</strong> {i.grado}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {i.email}
-                  </p>
-                  <p>
-                    <strong>Curso:</strong> {curso?.nombre || "No encontrado"}
-                  </p>
-
-                  {(() => {
-                    const certificado = certificados.find(
-                      (c) => c.cedula === i.cedula && c.curso === i.curso
-                    );
-
-                    if (certificado?.url) {
-                      return (
-                        <a
-                          className="btn_certificado"
-                          href={certificado.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          🎓 Certificado emitido
-                        </a>
-                      );
-                    } else {
-                      return (
-                        <p className="pendiente_certificado">
-                          📌 Por certificar
-                        </p>
-                      );
-                    }
-                  })()}
+        <main className="secretaria_content">
+          {["inscripciones"].includes(activeSection) && (
+            <>
+              <div className="inputs_busqueda">
+                <div className="input_group">
+                  <input
+                    type="text"
+                    className="buscador_input"
+                    placeholder="🔍 Buscar por cédula"
+                    value={inputCedula}
+                    onChange={(e) => setInputCedula(e.target.value)}
+                  />
                 </div>
 
-                <div className="card_pagos_inscripcion">
-                  <h4>💳 Pagos relacionados</h4>
-                  {pagosRelacionados.length === 0 ? (
-                    <p>Sin pagos registrados.</p>
-                  ) : (
-                    pagosRelacionados.map((pago, idx) => (
-                      <div key={pago.id} className="pago_detalle">
-                        <p>
-                          <strong>Pago #{idx + 1}</strong>
-                        </p>
-                        <p>Monto: ${pago.valorDepositado}</p>
-                        {pago.moneda && <p>💰 Incluye moneda</p>}
-                        {pago.distintivo && <p>🎖️ Incluye distintivo</p>}
-                        <p>
-                          Estado:{" "}
-                          {pago.verificado
-                            ? "✅ Verificado"
-                            : "⏳ Por verificar"}
-                        </p>
-                        <a
-                          className="btn_ver_comprobante"
-                          href={pago.pagoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                <div className="input_group">
+                  <input
+                    type="text"
+                    className="buscador_input"
+                    placeholder="🔍 Buscar por nombres y apellidos"
+                    value={inputNombre}
+                    onChange={(e) => {
+                      const valor = e.target.value;
+                      setInputNombre(valor);
+
+                      const sugerenciasFiltradas = inscripciones.filter((i) =>
+                        `${i.nombres} ${i.apellidos}`
+                          .toLowerCase()
+                          .includes(valor.toLowerCase())
+                      );
+
+                      setSugerencias(sugerenciasFiltradas);
+                    }}
+                    autoComplete="off"
+                  />
+
+                  {/* si quieres que siga funcionando el autocompletado cuando escribes */}
+                  {sugerencias.length > 0 && (
+                    <ul className="sugerencias_lista" role="listbox">
+                      {sugerencias.map((sug) => (
+                        <li
+                          key={sug.id}
+                          onClick={() => seleccionarSugerencia(sug)}
+                          className="sugerencia_item"
+                          role="option"
                         >
-                          Ver comprobante
-                        </a>
-                        <hr />
-                      </div>
-                    ))
+                          {sug.nombres} {sug.apellidos} — {sug.cedula}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
-              </div>
-            );
-          })}
 
-        {activeSection === "pagos" && (
-          <div>
-            {/* Filtros */}
-            <div className="inputs_busqueda">
-              <div className="input_group">
-                <input
-                  type="text"
-                  placeholder="Buscar por cédula..."
-                  value={cedulaPagoBuscada}
-                  onChange={(e) => setCedulaPagoBuscada(e.target.value)}
-                  className="buscador_input"
-                />
-              </div>
-              <div className="input_group">
-                <input
-                  type="text"
-                  placeholder="Buscar por nombre..."
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  className="buscador_input"
-                />
-              </div>
-              <div className="input_group">
-                <select
-                  value={filtroPago}
-                  onChange={(e) => setFiltroPago(e.target.value)}
-                  className="buscador_input"
+                <button className="btn_buscar" onClick={handleBuscar}>
+                  🔍 Buscar
+                </button>
+
+                <button
+                  className="btn_limpiar_filtros"
+                  onClick={limpiarFiltros}
                 >
-                  <option value="">Todos</option>
-                  <option value="con_pago">Con pago</option>
-                  <option value="sin_pago">Sin pago</option>
-                </select>
+                  ❌ Borrar filtros
+                </button>
               </div>
-              <div className="input_group">
-                <select
-                  value={filtroCertificado}
-                  onChange={(e) => setFiltroCertificado(e.target.value)}
-                  className="buscador_input"
-                >
-                  <option value="">Todos</option>
-                  <option value="con_certificado">Con certificado</option>
-                  <option value="sin_certificado">Sin certificado</option>
-                </select>
-              </div>
+            </>
+          )}
 
-              <button
-                className="btn_limpiar_filtros"
-                onClick={() => {
-                  setCedulaPagoBuscada("");
-                  setBusqueda("");
-                  setFiltroPago("");
-                  setFiltroCertificado("");
-                }}
-              >
-                ❌ Limpiar filtros
-              </button>
-            </div>
+          {/* Inscripcion------------------------------------------------------------------------- */}
 
-            {/* Tabla */}
-            <div
-              className="numero-registros"
-              style={{ marginBottom: "10px", fontWeight: "bold" }}
-            >
-              Número de registros:{" "}
-              {
-                inscripcionesParaPagos.filter((i) => {
-                  const pagosRelacionados = pagos.filter(
-                    (p) => p.inscripcionId === i.id
-                  );
-                  const certificado = certificados.find(
-                    (c) => c.cedula === i.cedula
-                  );
+          {activeSection === "inscripciones" &&
+            inscripcionesAMostrar.length > 0 &&
+            inscripcionesAMostrar.map((i) => {
+              const curso = courses.find((c) => c.id === i.courseId);
+              const pagosRelacionados = pagos.filter(
+                (p) => p.inscripcionId === i.id
+              );
 
-                  const nombreCompleto =
-                    `${i.nombres} ${i.apellidos}`.toLowerCase();
-                  const cumpleBusqueda = nombreCompleto.includes(
-                    busqueda.toLowerCase()
-                  );
+              return (
+                <div key={i.id} className="grid_dos_columnas">
+                  <div className="card_inscripcion">
+                    <h3>
+                      {i.nombres} {i.apellidos}
+                    </h3>
+                    <p>
+                      <strong>Cédula:</strong> {i.cedula}
+                    </p>
+                    <p>
+                      <strong>Celular:</strong> {i.celular}
+                    </p>
+                    <p>
+                      <strong>Subsistema:</strong> {i.subsistema}
+                    </p>
+                    <p>
+                      <strong>Grado:</strong> {i.grado}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {i.email}
+                    </p>
+                    <p>
+                      <strong>Inscripción:</strong>{" "}
+                      {curso?.nombre || "No encontrado"}
+                    </p>
+                    <p>
+                      <strong>Fecha de inscripción:</strong>{" "}
+                      {i?.createdAt
+                        ? new Date(i.createdAt)
+                            .toLocaleString("es-EC", {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                              hour12: false,
+                              timeZone: "America/Guayaquil",
+                            })
+                            .replace(",", "")
+                        : "No encontrado"}
+                    </p>
 
-                  const cumpleFiltroPago =
-                    filtroPago === ""
-                      ? true
-                      : filtroPago === "con_pago"
-                      ? pagosRelacionados.length > 0
-                      : pagosRelacionados.length === 0;
-
-                  const cumpleFiltroCertificado =
-                    filtroCertificado === ""
-                      ? true
-                      : filtroCertificado === "con_certificado"
-                      ? !!certificado
-                      : !certificado;
-
-                  return (
-                    cumpleBusqueda &&
-                    cumpleFiltroPago &&
-                    cumpleFiltroCertificado
-                  );
-                }).length
-              }
-            </div>
-            <div className="contenedor-tabla-pagos">
-              <table className="tabla-pagos">
-                <thead>
-                  <tr>
-                    <th>Cédula</th>
-                    <th>Grado</th>
-                    <th className="col-curso">Nombre</th>
-                    <th className="col-curso">Email</th>
-                    <th>Celular</th>
-                    <th className="col-curso">Curso</th>
-                    <th>Pagos</th>
-                    <th>Certificado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {inscripcionesParaPagos
-                    .filter((i) => {
-                      const pagosRelacionados = pagos.filter(
-                        (p) => p.inscripcionId === i.id
-                      );
+                    {(() => {
                       const certificado = certificados.find(
-                        (c) => c.cedula === i.cedula
+                        (c) => c.cedula === i.cedula && c.curso === i.curso
                       );
 
-                      const nombreCompleto =
-                        `${i.nombres} ${i.apellidos}`.toLowerCase();
-                      const cumpleBusqueda = nombreCompleto.includes(
-                        busqueda.toLowerCase()
+                      if (certificado?.url) {
+                        return (
+                          <a
+                            className="btn_certificado"
+                            href={certificado.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            🎓 Certificado emitido
+                          </a>
+                        );
+                      } else {
+                        return (
+                          <p className="pendiente_certificado">
+                            📌 Por certificar
+                          </p>
+                        );
+                      }
+                    })()}
+
+                    {(() => {
+                      const usuarioMoodle = moodle.find(
+                        (u) => u.email.toLowerCase() === i.email.toLowerCase()
                       );
 
-                      const cumpleFiltroPago =
-                        filtroPago === ""
-                          ? true
-                          : filtroPago === "con_pago"
-                          ? pagosRelacionados.length > 0
-                          : pagosRelacionados.length === 0;
+                      if (!usuarioMoodle) {
+                        return (
+                          <p className="pendiente_certificado">
+                            ⛔ Sin usuario en Moodle
+                          </p>
+                        );
+                      }
 
-                      const cumpleFiltroCertificado =
-                        filtroCertificado === ""
-                          ? true
-                          : filtroCertificado === "con_certificado"
-                          ? !!certificado
-                          : !certificado;
+                      const cursoMoodle = usuarioMoodle.courses.find(
+                        (c) =>
+                          c.fullname.toLowerCase() ===
+                          curso?.sigla?.toLowerCase()
+                      );
 
-                      const cumpleFiltroCedula =
-                        cedulaPagoBuscada.trim() === ""
-                          ? true
-                          : i.cedula.includes(cedulaPagoBuscada.trim());
+                      if (!cursoMoodle) {
+                        return (
+                          <p className="pendiente_certificado">
+                            📌 No esta matriculad@ en este curso
+                          </p>
+                        );
+                      }
+
+                      const notaFinal = cursoMoodle.grades?.["Nota Final"];
+
+                      if (!notaFinal) {
+                        return (
+                          <p className="pendiente_certificado">
+                            📌 Calificación no registrada
+                          </p>
+                        );
+                      }
 
                       return (
-                        cumpleBusqueda &&
-                        cumpleFiltroPago &&
-                        cumpleFiltroCertificado &&
-                        cumpleFiltroCedula
+                        <div>
+                          <p className="nota_curso">
+                            ✅ <strong>Nota Final:</strong> {notaFinal}
+                          </p>
+                          <p>
+                            <strong>Último acceso:</strong>{" "}
+                            {usuarioMoodle?.lastaccess
+                              ? new Date(
+                                  parseInt(usuarioMoodle.lastaccess) * 1000
+                                ).toLocaleString("es-EC", {
+                                  year: "numeric",
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  second: "2-digit",
+                                  hour12: false,
+                                  timeZone: "America/Guayaquil",
+                                })
+                              : "Sin registro"}
+                          </p>
+                        </div>
                       );
-                    })
-                    .map((i) => {
+                    })()}
+                  </div>
+
+                  <div className="card_pagos_inscripcion">
+                    <h4>💳 Pagos relacionados</h4>
+                    {pagosRelacionados.length === 0 ? (
+                      <p>Sin pagos registrados.</p>
+                    ) : (
+                      pagosRelacionados.map((pago, idx) => (
+                        <div key={pago.id} className="pago_detalle">
+                          <p>
+                            <strong>Pago #{idx + 1}</strong>
+                          </p>
+                          <p>Monto: ${pago.valorDepositado}</p>
+                          {pago.moneda && <p>💰 Incluye moneda</p>}
+                          {pago.distintivo && <p>🎖️ Incluye distintivo</p>}
+                          <p>
+                            Estado:{" "}
+                            {pago.verificado
+                              ? "✅ Verificado"
+                              : "⏳ Por verificar"}
+                          </p>
+                          <a
+                            className="btn_ver_comprobante"
+                            href={pago.pagoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Ver comprobante
+                          </a>
+                          <hr />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+          {/* Pagos------------------------------------------------------------------------- */}
+
+          {activeSection === "pagos" && (
+            <div>
+              {/* Filtros */}
+              <div className="inputs_busqueda">
+                <div className="input_group">
+                  <input
+                    type="text"
+                    placeholder="Buscar por cédula..."
+                    value={cedulaTemporal}
+                    onChange={(e) => setCedulaTemporal(e.target.value)}
+                    className="buscador_input"
+                  />
+                </div>
+                <div className="input_group">
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre..."
+                    value={busquedaTemporal}
+                    onChange={(e) => setBusquedaTemporal(e.target.value)}
+                    className="buscador_input"
+                  />
+                </div>
+
+                <div className="input_group">
+                  <select
+                    value={filtroDetalle}
+                    onChange={(e) => setFiltroDetalle(e.target.value)}
+                    className="buscador_input"
+                  >
+                    <option value="">Detalle</option>
+                    <option value="aprobado">Aprobado</option>
+                    <option value="no_aprobado">No aprobado</option>
+                    <option value="sin_calificacion">Sin calificación</option>
+                    <option value="sin_usuario_moodle">
+                      Sin usuario Moodle
+                    </option>
+                    <option value="no_matriculado">No está matriculado</option>
+                  </select>
+                </div>
+
+                <div className="input_group">
+                  <select
+                    value={filtroUltimoAcceso}
+                    onChange={(e) => setFiltroUltimoAcceso(e.target.value)}
+                    className="buscador_input"
+                  >
+                    <option value="">Ultimo Acceso</option>
+                    <option value="sin_usuario">Sin usuario</option>
+                    <option value="no_ingresa">No ingresa</option>
+                    <option value="registra_ingreso">Registra ingreso</option>
+                  </select>
+                </div>
+
+                <div className="input_group">
+                  <select
+                    value={filtroPago}
+                    onChange={(e) => setFiltroPago(e.target.value)}
+                    className="buscador_input"
+                  >
+                    <option value="">Pagos</option>
+                    <option value="con_pago">Con pago</option>
+                    <option value="sin_pago">Sin pago</option>
+                  </select>
+                </div>
+                <div className="input_group">
+                  <select
+                    value={filtroCertificado}
+                    onChange={(e) => setFiltroCertificado(e.target.value)}
+                    className="buscador_input"
+                  >
+                    <option value="">Certificados</option>
+                    <option value="con_certificado">Con certificado</option>
+                    <option value="sin_certificado">Sin certificado</option>
+                  </select>
+                </div>
+
+                <div className="input_group">
+                  <button
+                    className="btn_buscar"
+                    onClick={() => {
+                      setBusqueda(busquedaTemporal);
+                      setCedulaPagoBuscada(cedulaTemporal);
+                    }}
+                  >
+                    🔍 Buscar
+                  </button>
+                </div>
+
+                <div className="input_group">
+                  <button
+                    className="btn_limpiar_filtros"
+                    onClick={() => {
+                      setBusquedaTemporal("");
+                      setCedulaTemporal("");
+                      setBusqueda("");
+                      setCedulaPagoBuscada("");
+                      setFiltroPago("");
+                      setFiltroCertificado("");
+                      setFiltroDetalle("");
+                      setFiltroUltimoAcceso("");
+                    }}
+                  >
+                    ❌ Limpiar filtros
+                  </button>
+                </div>
+              </div>
+
+              <div className="paginacion">
+                <button
+                  onClick={() => setPaginaActual(1)}
+                  disabled={paginaActual === 1}
+                >
+                  «
+                </button>
+                <button
+                  onClick={() => setPaginaActual((p) => Math.max(p - 1, 1))}
+                  disabled={paginaActual === 1}
+                >
+                  ‹
+                </button>
+
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+                  .filter(
+                    (n) =>
+                      n === 1 ||
+                      n === totalPaginas ||
+                      (n >= paginaActual - 2 && n <= paginaActual + 2)
+                  )
+                  .map((n, idx, arr) => (
+                    <React.Fragment key={n}>
+                      {idx > 0 && n - arr[idx - 1] > 1 && (
+                        <span className="puntos">...</span>
+                      )}
+                      <button
+                        onClick={() => setPaginaActual(n)}
+                        className={paginaActual === n ? "pagina-actual" : ""}
+                      >
+                        {n}
+                      </button>
+                    </React.Fragment>
+                  ))}
+
+                <button
+                  onClick={() =>
+                    setPaginaActual((p) => Math.min(p + 1, totalPaginas))
+                  }
+                  disabled={paginaActual === totalPaginas}
+                >
+                  ›
+                </button>
+                <button
+                  onClick={() => setPaginaActual(totalPaginas)}
+                  disabled={paginaActual === totalPaginas}
+                >
+                  »
+                </button>
+              </div>
+
+              {/* Tabla */}
+              <div className="numero-registros">
+                Número de registros: {datosFiltrados.length} / Página{" "}
+                {paginaActual} de {totalPaginas}
+              </div>
+              <div className="contenedor-tabla-pagos">
+                <table className="tabla-pagos">
+                  <thead>
+                    <tr>
+                      <th>Cédula</th>
+                      <th>Grado</th>
+                      <th className="col-curso">Nombre</th>
+                      <th className="col-curso">Detalle</th>
+                      <th className="col-curso">Ultimo Acceso</th>
+
+                      <th>Celular</th>
+                      <th className="col-curso">Curso</th>
+                      <th>Pagos</th>
+                      <th>Certificado</th>
+                      <th>Observacion</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {datosPaginados.map((i) => {
+                      const isEditing = editInscripcionId === i.id;
                       const pagosRelacionados = pagos.filter(
                         (p) => p.inscripcionId === i.id
                       );
@@ -505,6 +800,41 @@ const Secretaria = () => {
                         (c) => c.cedula === i.cedula
                       );
                       const curso = courses.find((c) => c.id === i.courseId);
+                      const usuarioMoodle = moodle.find(
+                        (u) => u.email === i.email
+                      );
+
+                      const notaFinal = (() => {
+                        if (!usuarioMoodle) return "Sin usuario Moodle";
+                        const cursoMoodle = usuarioMoodle.courses?.find(
+                          (mc) => mc.fullname === curso?.sigla
+                        );
+                        if (!cursoMoodle) return "No está matriculado";
+                        const nota = cursoMoodle.grades?.["Nota Final"];
+                        return nota != null ? nota : "Sin calificación";
+                      })();
+
+                      const ultimoAcceso = (() => {
+                        if (!usuarioMoodle) return "Sin usuario";
+                        if (
+                          usuarioMoodle.lastaccess === "0" ||
+                          usuarioMoodle.lastaccess === 0
+                        ) {
+                          return "No ingresa";
+                        }
+                        return new Date(
+                          parseInt(usuarioMoodle.lastaccess) * 1000
+                        ).toLocaleString("es-EC", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: false,
+                          timeZone: "America/Guayaquil",
+                        });
+                      })();
 
                       return (
                         <tr key={i.id}>
@@ -513,7 +843,8 @@ const Secretaria = () => {
                           <td className="col-curso">
                             {i.nombres} {i.apellidos}
                           </td>
-                          <td className="col-curso">{i.email}</td>
+                          <td className="col-curso">{notaFinal}</td>
+                          <td className="col-curso">{ultimoAcceso}</td>
                           <td>{i.celular}</td>
                           <td className="col-curso">
                             {curso?.nombre || "No encontrado"}
@@ -546,22 +877,64 @@ const Secretaria = () => {
                               "-----"
                             )}
                           </td>
+
+                          <td>
+                            {" "}
+                            {isEditing ? (
+                              <input
+                                value={observacion}
+                                type="text"
+                                onChange={(e) => setObservacion(e.target.value)}
+                              />
+                            ) : i.observacion ? (
+                              i.observacion
+                            ) : (
+                              "👍"
+                            )}
+                          </td>
+
+                          <td>
+                            {isEditing ? (
+                              <>
+                                <button
+                                  onClick={() => guardarEdicion(i.id)}
+                                  className="vp-btn-save"
+                                >
+                                  Guardar
+                                </button>
+                                <button
+                                  onClick={cancelarEdicion}
+                                  className="vp-btn-cancel"
+                                >
+                                  Cancelar
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => iniciarEdicion(i)}
+                                className="vp-btn-edit"
+                              >
+                                Registrar Validación
+                              </button>
+                            )}
+                          </td>
                         </tr>
                       );
                     })}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {activeSection === "certificados" && (
-          <section className="secretaria_section">
-            <h2>🎓 Certificados</h2>
-            <p>📌 Pronto verás información sobre certificados.</p>
-          </section>
-        )}
-      </main>
+          {activeSection === "certificados" && (
+            <section className="secretaria_section">
+              <h2>🎓 Certificados</h2>
+              <p>📌 Pronto verás información sobre certificados.</p>
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
 };
