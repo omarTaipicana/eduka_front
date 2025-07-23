@@ -21,7 +21,8 @@ const Secretaria = () => {
   const [cedulaTemporal, setCedulaTemporal] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
   const [editInscripcionId, setEditInscripcionId] = useState();
-  const [observacion, setObservacion] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const observacionRef = useRef(null);
 
   const registrosPorPagina = 10;
 
@@ -296,31 +297,35 @@ const Secretaria = () => {
   const totalPaginas = Math.ceil(datosFiltrados.length / registrosPorPagina);
 
   const iniciarEdicion = (inscripcion) => {
-    setObservacion(inscripcion.observacion || "");
     setEditInscripcionId(inscripcion.id);
   };
 
   const cancelarEdicion = () => {
-    setObservacion("");
     setEditInscripcionId();
   };
 
   const guardarEdicion = async (inscripcionId) => {
+    const nuevaObservacion = observacionRef.current?.value.trim() || "";
+    setIsSaving(true); // ← inicia carga
+
     try {
       await updateInscripciones(PATH_INSCRIPCIONES, inscripcionId, {
-        observacion: observacion,
+        observacion: nuevaObservacion,
         usuarioEdicion: user.email,
       });
       await getInscripciones(PATH_INSCRIPCIONES);
       cancelarEdicion();
     } catch (error) {
       alert("Error al guardar los cambios.");
+    } finally {
+      setIsSaving(false); // ← finaliza carga
     }
   };
 
   return (
     <div>
       {isLoadingM && <IsLoading />}
+      {isLoadingI && <IsLoading />}
 
       <div className="secretaria_container">
         <button
@@ -878,13 +883,14 @@ const Secretaria = () => {
                             )}
                           </td>
 
-                          <td>
+                          <td className="celda-observacion">
                             {" "}
                             {isEditing ? (
                               <input
-                                value={observacion}
                                 type="text"
-                                onChange={(e) => setObservacion(e.target.value)}
+                                defaultValue={i.observacion || ""}
+                                ref={observacionRef}
+                                className="vp-input"
                               />
                             ) : i.observacion ? (
                               i.observacion
