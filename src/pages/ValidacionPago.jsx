@@ -4,6 +4,7 @@ import useCrud from "../hooks/useCrud";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import useAuth from "../hooks/useAuth";
+import IsLoading from "../components/shared/isLoading";
 
 const PATH_PAGOS = "/pagos";
 const PATH_INSCRIPCIONES = "/inscripcion";
@@ -16,11 +17,15 @@ const ValidacionPago = () => {
 
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
   const [inscripciones, getInscripciones] = useCrud();
+  const [showDelete, setShowDelete] = useState(false);
+  const [isLoading2, setIsLoading2] = useState(false);
+  const [pagoIdDelete, setPagoIdDelete] = useState(null);
+
   const [
     pago,
     getPago,
     postPago,
-    deletePago,
+    deletePagPro,
     updatePago,
     error,
     isLoading,
@@ -111,6 +116,8 @@ const ValidacionPago = () => {
   };
 
   const guardarEdicion = async (pagoId) => {
+    setIsLoading2(true); // ⏳ Inicia loading
+
     try {
       await updatePago(PATH_PAGOS, pagoId, {
         valorDepositado: parseFloat(editValorDepositado),
@@ -124,6 +131,25 @@ const ValidacionPago = () => {
       cancelarEdicion();
     } catch (error) {
       alert("Error al guardar los cambios.");
+    } finally {
+      setIsLoading2(false); // ✅ Termina loading
+    }
+  };
+
+  const deletePagoPr = async (pagoIdDelete) => {
+    setIsLoading2(true); // ⏳ Mostrar loading al iniciar
+
+    try {
+      await updatePago(PATH_PAGOS, pagoIdDelete, {
+        confirmacion: false,
+      });
+      await getPago(PATH_PAGOS);
+      cancelarEdicion();
+      setShowDelete(false);
+    } catch (error) {
+      alert("Error al guardar los cambios.");
+    } finally {
+      setIsLoading2(false); // ✅ Ocultar loading siempre, incluso si hay error
     }
   };
 
@@ -208,6 +234,8 @@ const ValidacionPago = () => {
     if (!pago || !inscripciones) return [];
 
     const filtrados = pago.filter((p) => {
+      if (p.confirmacion === false) return false;
+
       const inscrip = inscripciones.find((i) => i.id === p.inscripcionId);
       if (!inscrip) return false;
 
@@ -468,7 +496,7 @@ const ValidacionPago = () => {
                       <th>Pago (comprobante)</th>
                       <th>Verificado</th>
                       <th>Observacion</th>
-                      <th>Acción</th>
+                      <th colSpan={2}>Acción</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -602,6 +630,18 @@ const ValidacionPago = () => {
                                 Registrar Validación
                               </button>
                             )}
+                          </td>
+
+                          <td>
+                            <img
+                              className="user_icon_btn"
+                              src="../../../delete_3.png"
+                              alt="Eliminar"
+                              onClick={() => {
+                                setShowDelete(true);
+                                setPagoIdDelete(p.id);
+                              }}
+                            />
                           </td>
                         </tr>
                       );
@@ -1000,64 +1040,94 @@ const ValidacionPago = () => {
   };
 
   return (
-    <div className="vp-container">
-      <button
-        ref={hamburgerRef}
-        className="dashboard-hamburger-btn"
-        onClick={() => setMenuOpen(!menuOpen)}
-      >
-        <div className={`dashboard-hamburger-inner ${menuOpen ? "open" : ""}`}>
-          <span className="dashboard-hamburger-line" />
-          <span className="dashboard-hamburger-line" />
-          <span className="dashboard-hamburger-line" />
-        </div>
-      </button>
+    <div>
+      {isLoading && <IsLoading />}
 
-      <nav className={`vp-menu ${menuOpen ? "open" : ""}`} ref={menuRef}>
-        <h3>📊 Menú Principal</h3>
+      <div className="vp-container">
         <button
-          className={`vp-menu-btn ${
-            activeSection === "resumen" ? "active" : ""
-          }`}
-          onClick={() => setActiveSection("resumen")}
+          ref={hamburgerRef}
+          className="dashboard-hamburger-btn"
+          onClick={() => setMenuOpen(!menuOpen)}
         >
-          📋 Resumen General
+          <div
+            className={`dashboard-hamburger-inner ${menuOpen ? "open" : ""}`}
+          >
+            <span className="dashboard-hamburger-line" />
+            <span className="dashboard-hamburger-line" />
+            <span className="dashboard-hamburger-line" />
+          </div>
         </button>
-        <button
-          className={`vp-menu-btn ${
-            activeSection === "validarPagos" ? "active" : ""
-          }`}
-          onClick={() => setActiveSection("validarPagos")}
-        >
-          ✅ Validar Pagos
-        </button>
-        <button
-          className={`vp-menu-btn ${
-            activeSection === "registrarEntregas" ? "active" : ""
-          }`}
-          onClick={() => setActiveSection("registrarEntregas")}
-        >
-          🎁 Registrar Entregas de Distintivos
-        </button>
-        <button
-          className={`vp-menu-btn ${
-            activeSection === "listaPagos" ? "active" : ""
-          }`}
-          onClick={() => setActiveSection("listaPagos")}
-        >
-          💳 Lista de Pagos
-        </button>
-        <button
-          className={`vp-menu-btn ${
-            activeSection === "listaInscritos" ? "active" : ""
-          }`}
-          onClick={() => setActiveSection("listaInscritos")}
-        >
-          📋 Lista de Inscritos
-        </button>
-      </nav>
 
-      <main className="vp-content">{renderContent()}</main>
+        <nav className={`vp-menu ${menuOpen ? "open" : ""}`} ref={menuRef}>
+          <h3>📊 Menú Principal</h3>
+          <button
+            className={`vp-menu-btn ${
+              activeSection === "resumen" ? "active" : ""
+            }`}
+            onClick={() => setActiveSection("resumen")}
+          >
+            📋 Resumen General
+          </button>
+          <button
+            className={`vp-menu-btn ${
+              activeSection === "validarPagos" ? "active" : ""
+            }`}
+            onClick={() => setActiveSection("validarPagos")}
+          >
+            ✅ Validar Pagos
+          </button>
+          <button
+            className={`vp-menu-btn ${
+              activeSection === "registrarEntregas" ? "active" : ""
+            }`}
+            onClick={() => setActiveSection("registrarEntregas")}
+          >
+            🎁 Registrar Entregas de Distintivos
+          </button>
+          <button
+            className={`vp-menu-btn ${
+              activeSection === "listaPagos" ? "active" : ""
+            }`}
+            onClick={() => setActiveSection("listaPagos")}
+          >
+            💳 Lista de Pagos
+          </button>
+          <button
+            className={`vp-menu-btn ${
+              activeSection === "listaInscritos" ? "active" : ""
+            }`}
+            onClick={() => setActiveSection("listaInscritos")}
+          >
+            📋 Lista de Inscritos
+          </button>
+        </nav>
+
+        <main className="vp-content">{renderContent()}</main>
+        {showDelete && (
+          <div className="modal_overlay">
+            <article className="user_delete_content">
+              <span>¿Deseas eliminar el registro?</span>
+              <section className="btn_content">
+                <button
+                  className="btn yes"
+                  onClick={() => deletePagoPr(pagoIdDelete)}
+                >
+                  Sí
+                </button>
+                <button
+                  className="btn no"
+                  onClick={() => {
+                    setShowDelete(false);
+                    setPagoIdDelete();
+                  }}
+                >
+                  No
+                </button>
+              </section>
+            </article>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
