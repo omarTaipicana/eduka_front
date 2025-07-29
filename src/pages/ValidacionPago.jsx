@@ -17,9 +17,14 @@ const ValidacionPago = () => {
 
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
   const [inscripciones, getInscripciones] = useCrud();
-  const [showDelete, setShowDelete] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
   const [pagoIdDelete, setPagoIdDelete] = useState(null);
+
+  const [showRestaurar, setShowRestaurar] = useState(false);
+  const [pagoIdRestaurar, setPagoIdRestaurar] = useState(null);
+
+  const [papelera, setPapelera] = useState(false);
 
   const [
     pago,
@@ -153,6 +158,23 @@ const ValidacionPago = () => {
     }
   };
 
+  const restaurarPagoPr = async (pagoIdRestaurar) => {
+    setIsLoading2(true); // ⏳ Mostrar loading al iniciar
+
+    try {
+      await updatePago(PATH_PAGOS, pagoIdRestaurar, {
+        confirmacion: true,
+      });
+      await getPago(PATH_PAGOS);
+      cancelarEdicion();
+      setShowRestaurar(false);
+    } catch (error) {
+      alert("Error al guardar los cambios.");
+    } finally {
+      setIsLoading2(false); // ✅ Ocultar loading siempre, incluso si hay error
+    }
+  };
+
   const listaCursos = React.useMemo(() => {
     if (!pago) return [];
     const cursos = pago.map((p) => p.curso);
@@ -195,7 +217,7 @@ const ValidacionPago = () => {
     if (!pago || !inscripciones) return [];
 
     const filtrados = pago
-      .filter((p) => p.moneda || p.distintivo)
+      .filter((p) => (p.moneda || p.distintivo) && p.confirmacion === true)
       .filter((p) => {
         const inscrip = inscripciones.find((i) => i.id === p.inscripcionId);
         if (!inscrip) return false;
@@ -235,6 +257,60 @@ const ValidacionPago = () => {
 
     const filtrados = pago.filter((p) => {
       if (p.confirmacion === false) return false;
+
+      const inscrip = inscripciones.find((i) => i.id === p.inscripcionId);
+      if (!inscrip) return false;
+
+      if (filtroCurso && p.curso !== filtroCurso) return false;
+      if (filtroVerificado === "verificados" && !p.verificado) return false;
+      if (filtroVerificado === "no" && p.verificado) return false;
+      if (filtroMoneda === "si" && !p.moneda) return false;
+      if (filtroMoneda === "no" && p.moneda) return false;
+      if (filtroDistintivo === "si" && !p.distintivo) return false;
+      if (filtroDistintivo === "no" && p.distintivo) return false;
+
+      if (filtroFechaDesde || filtroFechaHasta) {
+        const pagoFecha = p.createdAt ? new Date(p.createdAt) : null;
+        if (pagoFecha) {
+          if (filtroFechaDesde) {
+            const desde = new Date(filtroFechaDesde);
+            if (pagoFecha < desde) return false;
+          }
+          if (filtroFechaHasta) {
+            const hasta = new Date(filtroFechaHasta);
+            hasta.setHours(23, 59, 59, 999);
+            if (pagoFecha > hasta) return false;
+          }
+        }
+      }
+      if (filtroFecha) {
+        const fechaPago = new Date(p.createdAt).toISOString().split("T")[0];
+        if (fechaPago !== filtroFecha) return false;
+      }
+
+      if (filtroGrado) {
+        const textoFiltro = filtroGrado.toLowerCase();
+        const matchesGrado = inscrip.grado?.toLowerCase().includes(textoFiltro);
+        const matchesNombres = inscrip.nombres
+          ?.toLowerCase()
+          .includes(textoFiltro);
+        const matchesApellidos = inscrip.apellidos
+          ?.toLowerCase()
+          .includes(textoFiltro);
+        if (!matchesGrado && !matchesNombres && !matchesApellidos) return false;
+      }
+
+      return true;
+    });
+
+    return ordenarPorFecha(filtrados);
+  };
+
+  const pagosFiltradosDelete = () => {
+    if (!pago || !inscripciones) return [];
+
+    const filtrados = pago.filter((p) => {
+      if (p.confirmacion === true) return false;
 
       const inscrip = inscripciones.find((i) => i.id === p.inscripcionId);
       if (!inscrip) return false;
@@ -449,29 +525,57 @@ const ValidacionPago = () => {
                   placeholder="Ej: 2025-07-09"
                 />
               </div>
+              <img
+                className="papelera_btn"
+                src={`../../../${papelera ? "atras" : "papelera"}.png`}
+                alt="Eliminar"
+                onClick={() => {
+                  setPapelera(!papelera);
+                }}
+              />
             </div>
 
-            <div
-              style={{
-                marginBottom: "10px",
-                color: "#0053a0",
-                fontWeight: 600,
-              }}
-            >
-              <p
+            {papelera ? (
+              <div
                 style={{
                   marginBottom: "10px",
                   color: "#0053a0",
                   fontWeight: 600,
                 }}
               >
-                Mostrando {pagosFiltrados().length} resultados /{" "}
-                <span style={{ color: "#198754", fontWeight: "bold" }}>
-                  {pagosFiltrados().filter((p) => p.verificado).length} pagos
-                  validados
-                </span>
-              </p>
-            </div>
+                <p
+                  style={{
+                    marginBottom: "10px",
+                    color: "#f91118ff",
+                    fontWeight: 600,
+                  }}
+                >
+                  Mostrando {pagosFiltradosDelete().length} registros eliminados
+                </p>
+              </div>
+            ) : (
+              <div
+                style={{
+                  marginBottom: "10px",
+                  color: "#0053a0",
+                  fontWeight: 600,
+                }}
+              >
+                <p
+                  style={{
+                    marginBottom: "10px",
+                    color: "#0053a0",
+                    fontWeight: 600,
+                  }}
+                >
+                  Mostrando {pagosFiltrados().length} resultados /{" "}
+                  <span style={{ color: "#198754", fontWeight: "bold" }}>
+                    {pagosFiltrados().filter((p) => p.verificado).length} pagos
+                    validados
+                  </span>
+                </p>
+              </div>
+            )}
 
             {pago && pago.length > 0 ? (
               <div className="vp-tabla-scroll">
@@ -496,157 +600,289 @@ const ValidacionPago = () => {
                       <th>Pago (comprobante)</th>
                       <th>Verificado</th>
                       <th>Observacion</th>
-                      <th colSpan={2}>Acción</th>
+                      <th colSpan={papelera ? 1 : 2}>
+                        {papelera ? "Restaurar" : "Acción"}
+                      </th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {pagosFiltrados().map((p) => {
-                      const inscrip = inscripciones.find(
-                        (i) => i.id === p.inscripcionId
-                      );
-                      const isEditing = editPagoId === p.id;
-                      return (
-                        <tr key={p.id}>
-                          <td>
-                            {inscrip
-                              ? `${inscrip.grado} - ${inscrip.nombres} ${inscrip.apellidos}`
-                              : "Sin inscripción"}
-                          </td>
-                          <td>
-                            {p.createdAt
-                              ? new Date(p.createdAt).toLocaleDateString()
-                              : "-"}
-                          </td>
-                          <td>{p.curso}</td>
-                          <td style={{ textAlign: "center" }}>
-                            {isEditing ? (
-                              <input
-                                type="checkbox"
-                                checked={editDistintivo}
-                                onChange={(e) =>
-                                  setEditDistintivo(e.target.checked)
-                                }
-                              />
-                            ) : p.distintivo ? (
-                              "✅"
-                            ) : (
-                              "❌"
-                            )}
-                          </td>
+                  {papelera ? (
+                    <tbody>
+                      {pagosFiltradosDelete().map((p) => {
+                        const inscrip = inscripciones.find(
+                          (i) => i.id === p.inscripcionId
+                        );
+                        const isEditing = editPagoId === p.id;
+                        return (
+                          <tr key={p.id}>
+                            <td>
+                              {inscrip
+                                ? `${inscrip.grado} - ${inscrip.nombres} ${inscrip.apellidos}`
+                                : "Sin inscripción"}
+                            </td>
+                            <td>
+                              {p.createdAt
+                                ? new Date(p.createdAt).toLocaleDateString()
+                                : "-"}
+                            </td>
+                            <td>{p.curso}</td>
+                            <td style={{ textAlign: "center" }}>
+                              {isEditing ? (
+                                <input
+                                  type="checkbox"
+                                  checked={editDistintivo}
+                                  onChange={(e) =>
+                                    setEditDistintivo(e.target.checked)
+                                  }
+                                />
+                              ) : p.distintivo ? (
+                                "✅"
+                              ) : (
+                                "❌"
+                              )}
+                            </td>
 
-                          <td style={{ textAlign: "center" }}>
-                            {isEditing ? (
-                              <input
-                                type="checkbox"
-                                checked={editMoneda}
-                                onChange={(e) =>
-                                  setEditMoneda(e.target.checked)
-                                }
-                              />
-                            ) : p.moneda ? (
-                              "✅"
-                            ) : (
-                              "❌"
-                            )}
-                          </td>
+                            <td style={{ textAlign: "center" }}>
+                              {isEditing ? (
+                                <input
+                                  type="checkbox"
+                                  checked={editMoneda}
+                                  onChange={(e) =>
+                                    setEditMoneda(e.target.checked)
+                                  }
+                                />
+                              ) : p.moneda ? (
+                                "✅"
+                              ) : (
+                                "❌"
+                              )}
+                            </td>
 
-                          <td>
-                            {isEditing ? (
-                              <input
-                                type="number"
-                                step="0.01"
-                                value={editValorDepositado}
-                                onChange={(e) =>
-                                  setEditValorDepositado(e.target.value)
-                                }
-                              />
-                            ) : (
-                              `$${p.valorDepositado?.toFixed(2) || "0.00"}`
-                            )}
-                          </td>
-                          <td>
-                            {p.pagoUrl ? (
-                              <a
-                                href={p.pagoUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                Ver Comprobante
-                              </a>
-                            ) : (
-                              "No disponible"
-                            )}
-                          </td>
-                          <td style={{ textAlign: "center" }}>
-                            {isEditing ? (
-                              <input
-                                type="checkbox"
-                                checked={editVerificado}
-                                onChange={(e) =>
-                                  setEditVerificado(e.target.checked)
-                                }
-                              />
-                            ) : p.verificado ? (
-                              "✅"
-                            ) : (
-                              "❌"
-                            )}
-                          </td>
-                          <td>
-                            {" "}
-                            {isEditing ? (
-                              <input
-                                value={observacion}
-                                type="text"
-                                onChange={(e) => setObservacion(e.target.value)}
-                              />
-                            ) : p.observacion ? (
-                              p.observacion
-                            ) : (
-                              "👍"
-                            )}
-                          </td>
-                          <td>
-                            {isEditing ? (
-                              <>
-                                <button
-                                  onClick={() => guardarEdicion(p.id)}
-                                  className="vp-btn-save"
+                            <td>
+                              {isEditing ? (
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={editValorDepositado}
+                                  onChange={(e) =>
+                                    setEditValorDepositado(e.target.value)
+                                  }
+                                />
+                              ) : (
+                                `$${p.valorDepositado?.toFixed(2) || "0.00"}`
+                              )}
+                            </td>
+                            <td>
+                              {p.pagoUrl ? (
+                                <a
+                                  href={p.pagoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
                                 >
-                                  Guardar
-                                </button>
-                                <button
-                                  onClick={cancelarEdicion}
-                                  className="vp-btn-cancel"
-                                >
-                                  Cancelar
-                                </button>
-                              </>
-                            ) : (
-                              <button
-                                onClick={() => iniciarEdicion(p)}
-                                className="vp-btn-edit"
-                              >
-                                Registrar Validación
-                              </button>
-                            )}
-                          </td>
+                                  Ver Comprobante
+                                </a>
+                              ) : (
+                                "No disponible"
+                              )}
+                            </td>
+                            <td style={{ textAlign: "center" }}>
+                              {isEditing ? (
+                                <input
+                                  type="checkbox"
+                                  checked={editVerificado}
+                                  onChange={(e) =>
+                                    setEditVerificado(e.target.checked)
+                                  }
+                                />
+                              ) : p.verificado ? (
+                                "✅"
+                              ) : (
+                                "❌"
+                              )}
+                            </td>
+                            <td>
+                              {" "}
+                              {isEditing ? (
+                                <input
+                                  value={observacion}
+                                  type="text"
+                                  onChange={(e) =>
+                                    setObservacion(e.target.value)
+                                  }
+                                />
+                              ) : p.observacion ? (
+                                p.observacion
+                              ) : (
+                                "👍"
+                              )}
+                            </td>
 
-                          <td>
-                            <img
-                              className="user_icon_btn"
-                              src="../../../delete_3.png"
-                              alt="Eliminar"
-                              onClick={() => {
-                                setShowDelete(true);
-                                setPagoIdDelete(p.id);
-                              }}
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
+                            <td>
+                              <img
+                                className="restaurar_btn"
+                                src="../../../restaurar.png"
+                                alt="Eliminar"
+                                onClick={() => {
+                                  setShowRestaurar(true);
+                                  setPagoIdRestaurar(p.id);
+                                }}
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  ) : (
+                    <tbody>
+                      {pagosFiltrados().map((p) => {
+                        const inscrip = inscripciones.find(
+                          (i) => i.id === p.inscripcionId
+                        );
+                        const isEditing = editPagoId === p.id;
+                        return (
+                          <tr key={p.id}>
+                            <td>
+                              {inscrip
+                                ? `${inscrip.grado} - ${inscrip.nombres} ${inscrip.apellidos}`
+                                : "Sin inscripción"}
+                            </td>
+                            <td>
+                              {p.createdAt
+                                ? new Date(p.createdAt).toLocaleDateString()
+                                : "-"}
+                            </td>
+                            <td>{p.curso}</td>
+                            <td style={{ textAlign: "center" }}>
+                              {isEditing ? (
+                                <input
+                                  type="checkbox"
+                                  checked={editDistintivo}
+                                  onChange={(e) =>
+                                    setEditDistintivo(e.target.checked)
+                                  }
+                                />
+                              ) : p.distintivo ? (
+                                "✅"
+                              ) : (
+                                "❌"
+                              )}
+                            </td>
+
+                            <td style={{ textAlign: "center" }}>
+                              {isEditing ? (
+                                <input
+                                  type="checkbox"
+                                  checked={editMoneda}
+                                  onChange={(e) =>
+                                    setEditMoneda(e.target.checked)
+                                  }
+                                />
+                              ) : p.moneda ? (
+                                "✅"
+                              ) : (
+                                "❌"
+                              )}
+                            </td>
+
+                            <td>
+                              {isEditing ? (
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={editValorDepositado}
+                                  onChange={(e) =>
+                                    setEditValorDepositado(e.target.value)
+                                  }
+                                />
+                              ) : (
+                                `$${p.valorDepositado?.toFixed(2) || "0.00"}`
+                              )}
+                            </td>
+                            <td>
+                              {p.pagoUrl ? (
+                                <a
+                                  href={p.pagoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  Ver Comprobante
+                                </a>
+                              ) : (
+                                "No disponible"
+                              )}
+                            </td>
+                            <td style={{ textAlign: "center" }}>
+                              {isEditing ? (
+                                <input
+                                  type="checkbox"
+                                  checked={editVerificado}
+                                  onChange={(e) =>
+                                    setEditVerificado(e.target.checked)
+                                  }
+                                />
+                              ) : p.verificado ? (
+                                "✅"
+                              ) : (
+                                "❌"
+                              )}
+                            </td>
+                            <td>
+                              {" "}
+                              {isEditing ? (
+                                <input
+                                  value={observacion}
+                                  type="text"
+                                  onChange={(e) =>
+                                    setObservacion(e.target.value)
+                                  }
+                                />
+                              ) : p.observacion ? (
+                                p.observacion
+                              ) : (
+                                "👍"
+                              )}
+                            </td>
+                            <td>
+                              {isEditing ? (
+                                <>
+                                  <button
+                                    onClick={() => guardarEdicion(p.id)}
+                                    className="vp-btn-save"
+                                  >
+                                    Guardar
+                                  </button>
+                                  <button
+                                    onClick={cancelarEdicion}
+                                    className="vp-btn-cancel"
+                                  >
+                                    Cancelar
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  onClick={() => iniciarEdicion(p)}
+                                  className="vp-btn-edit"
+                                >
+                                  Registrar Validación
+                                </button>
+                              )}
+                            </td>
+
+                            <td>
+                              <img
+                                className="user_icon_btn"
+                                src="../../../delete_3.png"
+                                alt="Eliminar"
+                                onClick={() => {
+                                  setShowDelete(true);
+                                  setPagoIdDelete(p.id);
+                                }}
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  )}
                 </table>
               </div>
             ) : (
@@ -1119,6 +1355,31 @@ const ValidacionPago = () => {
                   onClick={() => {
                     setShowDelete(false);
                     setPagoIdDelete();
+                  }}
+                >
+                  No
+                </button>
+              </section>
+            </article>
+          </div>
+        )}
+
+        {showRestaurar && (
+          <div className="modal_overlay">
+            <article className="user_delete_content">
+              <span>¿Deseas restaurar registro?</span>
+              <section className="btn_content">
+                <button
+                  className="btn yes"
+                  onClick={() => restaurarPagoPr(pagoIdRestaurar)}
+                >
+                  Sí
+                </button>
+                <button
+                  className="btn no"
+                  onClick={() => {
+                    setShowRestaurar(false);
+                    setPagoIdRestaurar();
                   }}
                 >
                   No

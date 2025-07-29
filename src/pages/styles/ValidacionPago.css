@@ -226,7 +226,6 @@
   display: block;
 }
 
-
 .vp-pagos-table input[type="text"] {
   width: 100%;
   margin: 0 auto;
@@ -291,11 +290,6 @@
   background-color: #555;
 }
 
-
-
-
-
-
 /* Delete Modal */
 /* Fondo oscuro detrás del modal */
 .modal_overlay {
@@ -355,32 +349,13 @@
   transform: scale(1.05);
 }
 
+.papelera_btn {
+  width: 3em;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+.restaurar_btn{
+  width: 1.5em;
+}
 
 /* En móviles, filtros en columna */
 @media screen and (max-width: 768px) {
