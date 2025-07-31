@@ -15,7 +15,33 @@ const Home = () => {
   const [course, getCourse] = useCrud();
   const [inscripciones, getInscripcion] = useCrud();
   const [pago, getPago] = useCrud();
+  const [open, setOpen] = useState(false);
+
   const [certificados, getCertificados] = useCrud();
+  const PATH_MOODLE = `/usuarios_m/${user?.email}`;
+
+  const [
+    moodle,
+    getMoodle,
+    postApi,
+    deleteApi,
+    updateApi,
+    error,
+    isLoading,
+    newReg,
+    deleteReg,
+    updateReg,
+    uploadPdf,
+    newUpload,
+    getMoodleById,
+  ] = useCrud();
+
+  useEffect(() => {
+    if (user) {
+      getMoodleById(PATH_MOODLE);
+    }
+  }, [user]);
+
 
   const [activeSection, setActiveSection] = useState("datos-personales");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -308,9 +334,57 @@ const Home = () => {
         {activeSection === "calificaciones" && (
           <section className="section calificaciones">
             <h2>📝 Calificaciones</h2>
-            <p>Próximamente podrás consultar tus calificaciones.</p>
+            {moodle?.courses?.length > 0 ? (
+              <ul className="curso-list">
+                {moodle.courses.map((curso, index) => {
+                  const calificaciones = curso.grades || {};
+
+                  return (
+                    <li key={index} className="curso-item">
+                      <button
+                        onClick={() => setOpen(!open)}
+                        className="curso-toggle"
+                        style={{
+                          background: "none",
+                          border: "none",
+                          fontSize: "1rem",
+                          fontWeight: "bold",
+                          color: "#0053a0",
+                          cursor: "pointer",
+                          marginBottom: "0.5rem",
+                        }}
+                      >
+                        {open ? "▼" : "▶"} {curso.fullname}
+                      </button>
+
+                      {open && Object.keys(calificaciones).length > 0 ? (
+                        <ul
+                          className="nota-list"
+                          style={{ marginLeft: "1rem" }}
+                        >
+                          {Object.entries(calificaciones).map(
+                            ([actividad, nota]) => (
+                              <li key={actividad}>
+                                <strong>{actividad}:</strong> {nota}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      ) : open ? (
+                        <p style={{ marginLeft: "1rem", color: "gray" }}>
+                          No hay calificaciones registradas.
+                        </p>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p>No hay cursos registrados.</p>
+            )}
           </section>
         )}
+
         {activeSection === "pagos" && (
           <section className="section pagos">
             <h2>💳 Pagos</h2>

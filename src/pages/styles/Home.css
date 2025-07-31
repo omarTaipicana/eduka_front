@@ -2,7 +2,7 @@
 
 .home-container {
   display: flex;
-  height: 100vh;
+  height: 82vh;
   width: 100vw;
   background: rgba(255 255 255 / 0.8);
   backdrop-filter: blur(8px);
@@ -22,7 +22,7 @@
   border-right: 1px solid #ccc;
   position: sticky;
   top: 0;
-  height: 100vh;
+  height: 82vh;
   z-index: 10;
   transition: transform 0.3s ease;
 }

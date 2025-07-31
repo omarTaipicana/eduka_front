@@ -22,7 +22,8 @@ const Dashboard = () => {
   const [inscripciones, getInscripciones] = useCrud();
   const PATH = "/inscripcion";
   const PATH_PAGOS = "/pagos";
-  const [pago, getPago] = useCrud();
+  const [pagos, getPago] = useCrud();
+  const pago = pagos.filter((p) => p.confirmacion === true);
 
   const [activeSection, setActiveSection] = useState("resumen");
   const [menuOpen, setMenuOpen] = useState(false);

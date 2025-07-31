@@ -49,6 +49,7 @@ const Secretaria = () => {
     isLoadingI,
   ] = useCrud();
   const [pagos, getPagos] = useCrud();
+  const pago = pagos.filter((p) => p.confirmacion === true);
   const [certificados, getCertificados] = useCrud();
   const [moodle, getMoodle, , , , , isLoadingM] = useCrud();
 

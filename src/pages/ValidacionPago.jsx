@@ -69,26 +69,31 @@ const ValidacionPago = () => {
     getInscripciones(PATH_INSCRIPCIONES);
     loggedUser();
   }, []);
-
   const resumenTotales = React.useMemo(() => {
     if (!pago) return null;
 
-    const totalPagos = pago.length;
+    const pagosConfirmados = pago.filter((p) => p.confirmacion);
 
-    const totalValidados = pago.filter((p) => p.verificado).length;
-    const entregadosValidados = pago.filter(
+    const totalPagos = pagosConfirmados.length;
+
+    const totalValidados = pagosConfirmados.filter((p) => p.verificado).length;
+    const entregadosValidados = pagosConfirmados.filter(
       (p) => p.verificado && p.entregado
     ).length;
 
-    const totalMoneda = pago.filter((p) => p.moneda).length;
-    const entregadosMoneda = pago.filter((p) => p.moneda && p.entregado).length;
+    const totalMoneda = pagosConfirmados.filter((p) => p.moneda).length;
+    const entregadosMoneda = pagosConfirmados.filter(
+      (p) => p.moneda && p.entregado
+    ).length;
 
-    const totalDistintivo = pago.filter((p) => p.distintivo).length;
-    const entregadosDistintivo = pago.filter(
+    const totalDistintivo = pagosConfirmados.filter((p) => p.distintivo).length;
+    const entregadosDistintivo = pagosConfirmados.filter(
       (p) => p.distintivo && p.entregado
     ).length;
 
-    const entregadosTotales = pago.filter((p) => p.entregado).length;
+    const entregadosTotales = pagosConfirmados.filter(
+      (p) => p.entregado
+    ).length;
 
     return {
       totalPagos,
