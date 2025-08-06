@@ -27,7 +27,7 @@ export const RegistroPagos = () => {
   const [total, setTotal] = useState(0);
 
   const [
-    resUpload,
+    resUploads,
     getUpload,
     postUpload,
     deleteUpload,
@@ -40,6 +40,8 @@ export const RegistroPagos = () => {
     uploadPdf,
     newUpload,
   ] = useCrud();
+
+  const resUpload = resUploads.filter((p) => p.confirmacion === true);
 
   const {
     register,

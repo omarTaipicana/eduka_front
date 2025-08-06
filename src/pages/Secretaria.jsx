@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo, useDeferredValue } from "react";
 import "./styles/Secretaria.css";
 import useCrud from "../hooks/useCrud";
 import IsLoading from "../components/shared/isLoading";
 import useAuth from "../hooks/useAuth";
+
 
 const Secretaria = () => {
   const [activeSection, setActiveSection] = useState("inscripciones");
@@ -22,7 +23,15 @@ const Secretaria = () => {
   const [paginaActual, setPaginaActual] = useState(1);
   const [editInscripcionId, setEditInscripcionId] = useState();
   const [isSaving, setIsSaving] = useState(false);
+  const inputNombreDiferido = useDeferredValue(inputNombre);
+
+  const debounceTimeout = useRef(null);
+  const debounceRef = useRef(null);
+
   const observacionRef = useRef(null);
+  const cedulaRef = useRef();
+  const nombreRef = useRef();
+
 
   const registrosPorPagina = 10;
 
@@ -36,8 +45,10 @@ const Secretaria = () => {
   const PATH_CERTIFICADOS = "/certificados";
   const PATH_MOODLE = "/usuarios_m";
 
+
   const [courses, getCourses] = useCrud();
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
+  const PATH_MOODLE_U = `/usuarios_m/${user?.email}`;
 
   const [
     inscripciones,
@@ -48,10 +59,24 @@ const Secretaria = () => {
     ,
     isLoadingI,
   ] = useCrud();
-  const [pagos, getPagos] = useCrud();
-  const pago = pagos.filter((p) => p.confirmacion === true);
+  const [pago, getPagos] = useCrud();
+  const pagos = pago.filter((p) => p.confirmacion === true);
   const [certificados, getCertificados] = useCrud();
-  const [moodle, getMoodle, , , , , isLoadingM] = useCrud();
+  const [
+    moodle,
+    getMoodle,
+    postApi,
+    deleteApi,
+    updateApi,
+    error,
+    isLoadingM,
+    newReg,
+    deleteReg,
+    updateReg,
+    uploadPdf,
+    newUpload,
+    getMoodleById,
+  ] = useCrud();
 
   useEffect(() => {
     getInscripciones(PATH_INSCRIPCIONES);
@@ -61,6 +86,27 @@ const Secretaria = () => {
     getMoodle(PATH_MOODLE);
     loggedUser();
   }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (inputNombreDiferido.trim().length < 3) {
+      setSugerencias([]);
+      return;
+    }
+
+    debounceRef.current = setTimeout(() => {
+      const texto = inputNombreDiferido.trim().toLowerCase();
+
+      const filtradas = inscripciones.filter((i) =>
+        `${i.nombres} ${i.apellidos}`.toLowerCase().includes(texto)
+      );
+
+      setSugerencias(filtradas.slice(0, 10));
+    }, 300); // o el tiempo que prefieras
+  }, [inputNombreDiferido, inscripciones]);
+
+
 
   const handleSelect = (section) => {
     setActiveSection(section);
@@ -91,6 +137,8 @@ const Secretaria = () => {
   }, [menuOpen]);
 
   const limpiarFiltros = () => {
+    cedulaRef.current.value = "";
+
     setCedulaBuscada("");
     setNombreBuscado("");
     setInputCedula("");
@@ -169,11 +217,11 @@ const Secretaria = () => {
     inscripcionesAMostrar =
       activeSection === "pagos"
         ? (filtrarInscripcionesPorNombreEnPagos || [])
-            .slice()
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice()
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         : (filtrarInscripcionesPorNombre || [])
-            .slice()
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          .slice()
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   } else {
     // Aquí no asignar nada para inscripciones, para que no muestre nada sin filtro
     inscripcionesAMostrar = [];
@@ -184,17 +232,56 @@ const Secretaria = () => {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const handleBuscar = () => {
-    setCedulaBuscada(inputCedula);
+    const cedulaValor = cedulaRef.current?.value || "";
+
+    setCedulaBuscada(cedulaValor);
     setNombreBuscado(inputNombre);
     setSugerencias([]); // opcionalmente vacía sugerencias
   };
 
+
+
+  const certificadosPorCedula = useMemo(() => {
+    const map = {};
+    certificados.forEach((c) => {
+      map[c.cedula] = c;
+    });
+    return map;
+  }, [certificados]);
+
+  const cursosPorId = useMemo(() => {
+    const map = {};
+    courses.forEach((c) => {
+      map[c.id] = c;
+    });
+    return map;
+  }, [courses]);
+
+  const moodlePorEmail = useMemo(() => {
+    const map = {};
+    moodle.forEach((u) => {
+      map[u.email.toLowerCase()] = u;
+    });
+    return map;
+  }, [moodle]);
+
+  const pagosPorInscripcionId = useMemo(() => {
+    const map = {};
+    pagos.forEach((p) => {
+      if (!map[p.inscripcionId]) map[p.inscripcionId] = [];
+      map[p.inscripcionId].push(p);
+    });
+    return map;
+  }, [pagos]);
+
+
+
   const datosFiltrados = useMemo(() => {
     const filtrados = inscripcionesParaPagos.filter((i) => {
-      const pagosRelacionados = pagos.filter((p) => p.inscripcionId === i.id);
-      const certificado = certificados.find((c) => c.cedula === i.cedula);
-      const curso = courses.find((c) => c.id === i.courseId);
-      const usuarioMoodle = moodle.find((u) => u.email === i.email);
+      const pagosRelacionados = pagosPorInscripcionId[i.id] || [];
+      const certificado = certificadosPorCedula[i.cedula];
+      const curso = cursosPorId[i.courseId];
+      const usuarioMoodle = moodlePorEmail[i.email.toLowerCase()];
 
       const nombreCompleto = `${i.nombres} ${i.apellidos}`.toLowerCase();
       const cumpleBusqueda = nombreCompleto.includes(busqueda.toLowerCase());
@@ -203,15 +290,15 @@ const Secretaria = () => {
         filtroPago === ""
           ? true
           : filtroPago === "con_pago"
-          ? pagosRelacionados.length > 0
-          : pagosRelacionados.length === 0;
+            ? pagosRelacionados.length > 0
+            : pagosRelacionados.length === 0;
 
       const cumpleFiltroCertificado =
         filtroCertificado === ""
           ? true
           : filtroCertificado === "con_certificado"
-          ? !!certificado
-          : !certificado;
+            ? !!certificado
+            : !certificado;
 
       const cumpleFiltroCedula =
         cedulaPagoBuscada.trim() === ""
@@ -224,7 +311,7 @@ const Secretaria = () => {
         detalleEstado = "sin_usuario_moodle";
       } else {
         const cursoMoodle = usuarioMoodle.courses?.find(
-          (mc) => mc.fullname === curso?.sigla
+          (mc) => mc.fullname?.toLowerCase() === curso?.sigla?.toLowerCase()
         );
         if (!cursoMoodle) {
           detalleEstado = "no_matriculado";
@@ -271,16 +358,15 @@ const Secretaria = () => {
       );
     });
 
-    // Ordena por fecha descendente (más reciente primero)
     return filtrados.sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
   }, [
     inscripcionesParaPagos,
-    pagos,
-    certificados,
-    courses,
-    moodle,
+    pagosPorInscripcionId,
+    certificadosPorCedula,
+    cursosPorId,
+    moodlePorEmail,
     busqueda,
     cedulaPagoBuscada,
     filtroPago,
@@ -288,6 +374,7 @@ const Secretaria = () => {
     filtroDetalle,
     filtroUltimoAcceso,
   ]);
+
 
   const datosPaginados = useMemo(() => {
     const inicio = (paginaActual - 1) * registrosPorPagina;
@@ -346,9 +433,8 @@ const Secretaria = () => {
           ref={menuRef}
         >
           <button
-            className={`menu-btn ${
-              activeSection === "inscripciones" ? "active" : ""
-            }`}
+            className={`menu-btn ${activeSection === "inscripciones" ? "active" : ""
+              }`}
             onClick={() => handleSelect("inscripciones")}
           >
             🔎 Buscador
@@ -360,9 +446,8 @@ const Secretaria = () => {
             📄 listado
           </button>
           <button
-            className={`menu-btn ${
-              activeSection === "certificados" ? "active" : ""
-            }`}
+            className={`menu-btn ${activeSection === "certificados" ? "active" : ""
+              }`}
             onClick={() => handleSelect("certificados")}
           >
             🎓 Certificados
@@ -370,16 +455,20 @@ const Secretaria = () => {
         </nav>
 
         <main className="secretaria_content">
-          {["inscripciones"].includes(activeSection) && (
+
+          {/* Inscripciones ------------------------------------------------------------------------- */}
+
+          {activeSection === "inscripciones" && (
             <>
+              {/* Buscadores */}
               <div className="inputs_busqueda">
                 <div className="input_group">
                   <input
                     type="text"
                     className="buscador_input"
                     placeholder="🔍 Buscar por cédula"
-                    value={inputCedula}
-                    onChange={(e) => setInputCedula(e.target.value)}
+                    ref={cedulaRef}
+
                   />
                 </div>
 
@@ -389,22 +478,10 @@ const Secretaria = () => {
                     className="buscador_input"
                     placeholder="🔍 Buscar por nombres y apellidos"
                     value={inputNombre}
-                    onChange={(e) => {
-                      const valor = e.target.value;
-                      setInputNombre(valor);
-
-                      const sugerenciasFiltradas = inscripciones.filter((i) =>
-                        `${i.nombres} ${i.apellidos}`
-                          .toLowerCase()
-                          .includes(valor.toLowerCase())
-                      );
-
-                      setSugerencias(sugerenciasFiltradas);
-                    }}
+                    onChange={(e) => setInputNombre(e.target.value)}
                     autoComplete="off"
                   />
 
-                  {/* si quieres que siga funcionando el autocompletado cuando escribes */}
                   {sugerencias.length > 0 && (
                     <ul className="sugerencias_lista" role="listbox">
                       {sugerencias.map((sug) => (
@@ -421,197 +498,204 @@ const Secretaria = () => {
                   )}
                 </div>
 
+
                 <button className="btn_buscar" onClick={handleBuscar}>
                   🔍 Buscar
                 </button>
 
-                <button
-                  className="btn_limpiar_filtros"
-                  onClick={limpiarFiltros}
-                >
+                <button className="btn_limpiar_filtros" onClick={limpiarFiltros}>
                   ❌ Borrar filtros
                 </button>
               </div>
+
+              {/* Resultados */}
+              {inscripcionesAMostrar.length === 0 ? (
+                inputNombre.trim() === "" && cedulaPagoBuscada.trim() === "" ? (
+                  <p className="mensaje_sin_resultados">
+                    ✍️ Por favor, ingrese un criterio de búsqueda para comenzar.
+                  </p>
+                ) : (
+                  <p className="mensaje_sin_resultados">
+                    🔍 No se encontraron resultados para esta búsqueda.
+                  </p>
+                )
+              ) : (
+
+
+                inscripcionesAMostrar.map((i) => {
+                  const curso = courses.find((c) => c.id === i.courseId);
+                  const pagosRelacionados = pagos.filter(
+                    (p) => p.inscripcionId === i.id
+                  );
+
+                  return (
+                    <div key={i.id} className="grid_dos_columnas">
+                      <div className="card_inscripcion">
+                        <h3>
+                          {i.nombres} {i.apellidos}
+                        </h3>
+                        <p>
+                          <strong>Cédula:</strong> {i.cedula}
+                        </p>
+                        <p>
+                          <strong>Celular:</strong> {i.celular}
+                        </p>
+                        <p>
+                          <strong>Subsistema:</strong> {i.subsistema}
+                        </p>
+                        <p>
+                          <strong>Grado:</strong> {i.grado}
+                        </p>
+                        <p>
+                          <strong>Email:</strong> {i.email}
+                        </p>
+                        <p>
+                          <strong>Inscripción:</strong>{" "}
+                          {curso?.nombre || "No encontrado"}
+                        </p>
+                        <p>
+                          <strong>Fecha de inscripción:</strong>{" "}
+                          {i?.createdAt
+                            ? new Date(i.createdAt)
+                              .toLocaleString("es-EC", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: false,
+                                timeZone: "America/Guayaquil",
+                              })
+                              .replace(",", "")
+                            : "No encontrado"}
+                        </p>
+
+                        {(() => {
+                          const certificado = certificados.find(
+                            (c) => c.cedula === i.cedula && c.curso === i.curso
+                          );
+
+                          if (certificado?.url) {
+                            return (
+                              <a
+                                className="btn_certificado"
+                                href={certificado.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                🎓 Certificado emitido
+                              </a>
+                            );
+                          } else {
+                            return (
+                              <p className="pendiente_certificado">📌 Por certificar</p>
+                            );
+                          }
+                        })()}
+
+                        {(() => {
+                          const usuarioMoodle = moodle.find(
+                            (u) => u.email.toLowerCase() === i.email.toLowerCase()
+                          );
+
+                          if (!usuarioMoodle) {
+                            return (
+                              <p className="pendiente_certificado">
+                                ⛔ Sin usuario en Moodle
+                              </p>
+                            );
+                          }
+
+                          const cursoMoodle = usuarioMoodle.courses.find(
+                            (c) =>
+                              c.fullname.toLowerCase() === curso?.sigla?.toLowerCase()
+                          );
+
+                          if (!cursoMoodle) {
+                            return (
+                              <p className="pendiente_certificado">
+                                📌 No esta matriculad@ en este curso
+                              </p>
+                            );
+                          }
+
+                          const notaFinal = cursoMoodle.grades?.["Nota Final"];
+
+                          if (!notaFinal) {
+                            return (
+                              <p className="pendiente_certificado">
+                                📌 Calificación no registrada
+                              </p>
+                            );
+                          }
+
+                          return (
+                            <div>
+                              <p className="nota_curso">
+                                ✅ <strong>Nota Final:</strong> {notaFinal}
+                              </p>
+                              <p>
+                                <strong>Último acceso:</strong>{" "}
+                                {usuarioMoodle?.lastaccess
+                                  ? new Date(
+                                    parseInt(usuarioMoodle.lastaccess) * 1000
+                                  ).toLocaleString("es-EC", {
+                                    year: "numeric",
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit",
+                                    hour12: false,
+                                    timeZone: "America/Guayaquil",
+                                  })
+                                  : "Sin registro"}
+                              </p>
+                            </div>
+                          );
+                        })()}
+                      </div>
+
+                      <div className="card_pagos_inscripcion">
+                        <h4>💳 Pagos relacionados</h4>
+                        {pagosRelacionados.length === 0 ? (
+                          <p>Sin pagos registrados.</p>
+                        ) : (
+                          pagosRelacionados.map((pago, idx) => (
+                            <div key={pago.id} className="pago_detalle">
+                              <p>
+                                <strong>Pago #{idx + 1}</strong>
+                              </p>
+                              <p>Monto: ${pago.valorDepositado}</p>
+                              {pago.moneda && <p>💰 Incluye moneda</p>}
+                              {pago.distintivo && <p>🎖️ Incluye distintivo</p>}
+                              <p>
+                                Estado:{" "}
+                                {pago.verificado
+                                  ? "✅ Verificado"
+                                  : "⏳ Por verificar"}
+                              </p>
+                              <a
+                                className="btn_ver_comprobante"
+                                href={pago.pagoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Ver comprobante
+                              </a>
+                              <hr />
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </>
           )}
 
-          {/* Inscripcion------------------------------------------------------------------------- */}
-
-          {activeSection === "inscripciones" &&
-            inscripcionesAMostrar.length > 0 &&
-            inscripcionesAMostrar.map((i) => {
-              const curso = courses.find((c) => c.id === i.courseId);
-              const pagosRelacionados = pagos.filter(
-                (p) => p.inscripcionId === i.id
-              );
-
-              return (
-                <div key={i.id} className="grid_dos_columnas">
-                  <div className="card_inscripcion">
-                    <h3>
-                      {i.nombres} {i.apellidos}
-                    </h3>
-                    <p>
-                      <strong>Cédula:</strong> {i.cedula}
-                    </p>
-                    <p>
-                      <strong>Celular:</strong> {i.celular}
-                    </p>
-                    <p>
-                      <strong>Subsistema:</strong> {i.subsistema}
-                    </p>
-                    <p>
-                      <strong>Grado:</strong> {i.grado}
-                    </p>
-                    <p>
-                      <strong>Email:</strong> {i.email}
-                    </p>
-                    <p>
-                      <strong>Inscripción:</strong>{" "}
-                      {curso?.nombre || "No encontrado"}
-                    </p>
-                    <p>
-                      <strong>Fecha de inscripción:</strong>{" "}
-                      {i?.createdAt
-                        ? new Date(i.createdAt)
-                            .toLocaleString("es-EC", {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              second: "2-digit",
-                              hour12: false,
-                              timeZone: "America/Guayaquil",
-                            })
-                            .replace(",", "")
-                        : "No encontrado"}
-                    </p>
-
-                    {(() => {
-                      const certificado = certificados.find(
-                        (c) => c.cedula === i.cedula && c.curso === i.curso
-                      );
-
-                      if (certificado?.url) {
-                        return (
-                          <a
-                            className="btn_certificado"
-                            href={certificado.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            🎓 Certificado emitido
-                          </a>
-                        );
-                      } else {
-                        return (
-                          <p className="pendiente_certificado">
-                            📌 Por certificar
-                          </p>
-                        );
-                      }
-                    })()}
-
-                    {(() => {
-                      const usuarioMoodle = moodle.find(
-                        (u) => u.email.toLowerCase() === i.email.toLowerCase()
-                      );
-
-                      if (!usuarioMoodle) {
-                        return (
-                          <p className="pendiente_certificado">
-                            ⛔ Sin usuario en Moodle
-                          </p>
-                        );
-                      }
-
-                      const cursoMoodle = usuarioMoodle.courses.find(
-                        (c) =>
-                          c.fullname.toLowerCase() ===
-                          curso?.sigla?.toLowerCase()
-                      );
-
-                      if (!cursoMoodle) {
-                        return (
-                          <p className="pendiente_certificado">
-                            📌 No esta matriculad@ en este curso
-                          </p>
-                        );
-                      }
-
-                      const notaFinal = cursoMoodle.grades?.["Nota Final"];
-
-                      if (!notaFinal) {
-                        return (
-                          <p className="pendiente_certificado">
-                            📌 Calificación no registrada
-                          </p>
-                        );
-                      }
-
-                      return (
-                        <div>
-                          <p className="nota_curso">
-                            ✅ <strong>Nota Final:</strong> {notaFinal}
-                          </p>
-                          <p>
-                            <strong>Último acceso:</strong>{" "}
-                            {usuarioMoodle?.lastaccess
-                              ? new Date(
-                                  parseInt(usuarioMoodle.lastaccess) * 1000
-                                ).toLocaleString("es-EC", {
-                                  year: "numeric",
-                                  month: "2-digit",
-                                  day: "2-digit",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  second: "2-digit",
-                                  hour12: false,
-                                  timeZone: "America/Guayaquil",
-                                })
-                              : "Sin registro"}
-                          </p>
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  <div className="card_pagos_inscripcion">
-                    <h4>💳 Pagos relacionados</h4>
-                    {pagosRelacionados.length === 0 ? (
-                      <p>Sin pagos registrados.</p>
-                    ) : (
-                      pagosRelacionados.map((pago, idx) => (
-                        <div key={pago.id} className="pago_detalle">
-                          <p>
-                            <strong>Pago #{idx + 1}</strong>
-                          </p>
-                          <p>Monto: ${pago.valorDepositado}</p>
-                          {pago.moneda && <p>💰 Incluye moneda</p>}
-                          {pago.distintivo && <p>🎖️ Incluye distintivo</p>}
-                          <p>
-                            Estado:{" "}
-                            {pago.verificado
-                              ? "✅ Verificado"
-                              : "⏳ Por verificar"}
-                          </p>
-                          <a
-                            className="btn_ver_comprobante"
-                            href={pago.pagoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Ver comprobante
-                          </a>
-                          <hr />
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              );
-            })}
 
           {/* Pagos------------------------------------------------------------------------- */}
 
@@ -858,16 +942,16 @@ const Secretaria = () => {
                           <td>
                             {pagosRelacionados.length > 0
                               ? pagosRelacionados.map((p, idx) => (
-                                  <div key={p.id}>
-                                    <a
-                                      href={p.pagoUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      Pago {idx + 1}
-                                    </a>
-                                  </div>
-                                ))
+                                <div key={p.id}>
+                                  <a
+                                    href={p.pagoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    Pago {idx + 1}
+                                  </a>
+                                </div>
+                              ))
                               : "----"}
                           </td>
                           <td>
