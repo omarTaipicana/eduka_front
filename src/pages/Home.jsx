@@ -16,6 +16,8 @@ const Home = () => {
   const [inscripciones, getInscripcion] = useCrud();
   const [pago, getPago] = useCrud();
   const [open, setOpen] = useState(false);
+  const [cursoAbiertoIndex, setCursoAbiertoIndex] = useState(null);
+
 
   const [certificados, getCertificados] = useCrud();
   const PATH_MOODLE = `/usuarios_m/${user?.email}`;
@@ -54,6 +56,7 @@ const Home = () => {
     getPago(PATH_PAGOS);
     getCertificados(PATH_CERTIFICADOS);
   }, []);
+
 
   useEffect(() => {
     const checkToken = async () => {
@@ -151,9 +154,8 @@ const Home = () => {
         aria-hidden={!menuOpen && window.innerWidth <= 768}
       >
         <button
-          className={`menu-btn ${
-            activeSection === "datos-personales" ? "active" : ""
-          }`}
+          className={`menu-btn ${activeSection === "datos-personales" ? "active" : ""
+            }`}
           onClick={() => handleSelect("datos-personales")}
         >
           📄 Datos Personales
@@ -165,9 +167,8 @@ const Home = () => {
           📚 Cursos Inscritos y Certificados
         </button>
         <button
-          className={`menu-btn ${
-            activeSection === "calificaciones" ? "active" : ""
-          }`}
+          className={`menu-btn ${activeSection === "calificaciones" ? "active" : ""
+            }`}
           onClick={() => handleSelect("calificaciones")}
         >
           📝 Calificaciones
@@ -179,9 +180,8 @@ const Home = () => {
           💳 Pagos
         </button>
         <button
-          className={`menu-btn ${
-            activeSection === "advertencia" ? "active" : ""
-          }`}
+          className={`menu-btn ${activeSection === "advertencia" ? "active" : ""
+            }`}
           onClick={() => handleSelect("advertencia")}
         >
           ⚠️ Importante
@@ -333,16 +333,20 @@ const Home = () => {
 
         {activeSection === "calificaciones" && (
           <section className="section calificaciones">
+
             <h2>📝 Calificaciones</h2>
             {moodle?.courses?.length > 0 ? (
               <ul className="curso-list">
                 {moodle.courses.map((curso, index) => {
                   const calificaciones = curso.grades || {};
+                  const estaAbierto = cursoAbiertoIndex === index;
 
                   return (
                     <li key={index} className="curso-item">
                       <button
-                        onClick={() => setOpen(!open)}
+                        onClick={() =>
+                          setCursoAbiertoIndex(estaAbierto ? null : index)
+                        }
                         className="curso-toggle"
                         style={{
                           background: "none",
@@ -354,23 +358,19 @@ const Home = () => {
                           marginBottom: "0.5rem",
                         }}
                       >
-                        {open ? "▼" : "▶"} {curso.fullname}
+                        {estaAbierto ? "▼" : "▶"}{" "}
+                        {course.find(c => c.sigla === curso.fullname)?.nombre || curso.fullname}
                       </button>
 
-                      {open && Object.keys(calificaciones).length > 0 ? (
-                        <ul
-                          className="nota-list"
-                          style={{ marginLeft: "1rem" }}
-                        >
-                          {Object.entries(calificaciones).map(
-                            ([actividad, nota]) => (
-                              <li key={actividad}>
-                                <strong>{actividad}:</strong> {nota}
-                              </li>
-                            )
-                          )}
+                      {estaAbierto && Object.keys(calificaciones).length > 0 ? (
+                        <ul className="nota-list" style={{ marginLeft: "1rem" }}>
+                          {Object.entries(calificaciones).map(([actividad, nota]) => (
+                            <li key={actividad}>
+                              <strong>{actividad}:</strong> {nota}
+                            </li>
+                          ))}
                         </ul>
-                      ) : open ? (
+                      ) : estaAbierto ? (
                         <p style={{ marginLeft: "1rem", color: "gray" }}>
                           No hay calificaciones registradas.
                         </p>
@@ -378,6 +378,7 @@ const Home = () => {
                     </li>
                   );
                 })}
+
               </ul>
             ) : (
               <p>No hay cursos registrados.</p>
@@ -416,14 +417,13 @@ const Home = () => {
                         <p>
                           <strong>Pago #{i + 1}</strong>{" "}
                           {i === 0
-                            ? `por el certificado${
-                                extras.length > 0
-                                  ? ", incluyendo " + extras.join(" y ")
-                                  : ""
-                              }`
+                            ? `por el certificado${extras.length > 0
+                              ? ", incluyendo " + extras.join(" y ")
+                              : ""
+                            }`
                             : extras.length > 0
-                            ? `por ${extras.join(" y ")}`
-                            : ""}
+                              ? `por ${extras.join(" y ")}`
+                              : ""}
                           .
                         </p>
                         <p>

@@ -510,7 +510,7 @@ const Secretaria = () => {
 
               {/* Resultados */}
               {inscripcionesAMostrar.length === 0 ? (
-                inputNombre.trim() === "" && cedulaPagoBuscada.trim() === "" ? (
+                inputNombre.trim() === "" && cedulaBuscada.trim() === "" ? (
                   <p className="mensaje_sin_resultados">
                     ✍️ Por favor, ingrese un criterio de búsqueda para comenzar.
                   </p>

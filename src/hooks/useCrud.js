@@ -110,7 +110,6 @@ const useCrud = () => {
   const getApiById = (path) => {
     setIsLoading(true);
     const url = `${BASEURL}${path}`;
-    console.log(url)
     axios
       .get(url, getConfigToken())
       .then((res) => setResponse(res.data))
