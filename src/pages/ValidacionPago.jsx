@@ -8,6 +8,8 @@ import IsLoading from "../components/shared/isLoading";
 
 const PATH_PAGOS = "/pagos";
 const PATH_INSCRIPCIONES = "/inscripcion";
+const PATH_CERTIFICADOS = "/certificados";
+
 
 const ValidacionPago = () => {
   const [activeSection, setActiveSection] = useState("resumen");
@@ -40,6 +42,8 @@ const ValidacionPago = () => {
     PagoPdf,
     newPago,
   ] = useCrud();
+  const [certificados, getCertificados] = useCrud();
+
 
   const [editPagoId, setEditPagoId] = useState(null);
   const [editValorDepositado, setEditValorDepositado] = useState("");
@@ -61,12 +65,16 @@ const ValidacionPago = () => {
   const [filtroFecha, setFiltroFecha] = useState("");
   const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
   const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
+  const [filtroCertificado, setFiltroCertificado] = useState("todos");
+
 
   const [ordenFechaDesc, setOrdenFechaDesc] = useState(true);
 
   useEffect(() => {
     getPago(PATH_PAGOS);
     getInscripciones(PATH_INSCRIPCIONES);
+    getCertificados(PATH_CERTIFICADOS);
+
     loggedUser();
   }, []);
   const resumenTotales = React.useMemo(() => {
@@ -266,6 +274,11 @@ const ValidacionPago = () => {
       const inscrip = inscripciones.find((i) => i.id === p.inscripcionId);
       if (!inscrip) return false;
 
+      // ⬇️ NUEVO: buscar certificado asociado a la inscripción
+      const certificado = certificados.find(c => c.cedula === inscrip.cedula);
+      if (filtroCertificado === "con" && !certificado?.url) return false;
+      if (filtroCertificado === "sin" && certificado?.url) return false;
+
       if (filtroCurso && p.curso !== filtroCurso) return false;
       if (filtroVerificado === "verificados" && !p.verificado) return false;
       if (filtroVerificado === "no" && p.verificado) return false;
@@ -288,6 +301,7 @@ const ValidacionPago = () => {
           }
         }
       }
+
       if (filtroFecha) {
         const fechaPago = new Date(p.createdAt).toISOString().split("T")[0];
         if (fechaPago !== filtroFecha) return false;
@@ -296,12 +310,8 @@ const ValidacionPago = () => {
       if (filtroGrado) {
         const textoFiltro = filtroGrado.toLowerCase();
         const matchesGrado = inscrip.grado?.toLowerCase().includes(textoFiltro);
-        const matchesNombres = inscrip.nombres
-          ?.toLowerCase()
-          .includes(textoFiltro);
-        const matchesApellidos = inscrip.apellidos
-          ?.toLowerCase()
-          .includes(textoFiltro);
+        const matchesNombres = inscrip.nombres?.toLowerCase().includes(textoFiltro);
+        const matchesApellidos = inscrip.apellidos?.toLowerCase().includes(textoFiltro);
         if (!matchesGrado && !matchesNombres && !matchesApellidos) return false;
       }
 
@@ -310,6 +320,7 @@ const ValidacionPago = () => {
 
     return ordenarPorFecha(filtrados);
   };
+
 
   const pagosFiltradosDelete = () => {
     if (!pago || !inscripciones) return [];
@@ -396,6 +407,7 @@ const ValidacionPago = () => {
     // Descargar archivo con nombre
     saveAs(blob, "pagos_filtrados.xlsx");
   };
+
 
   const renderContent = () => {
     switch (activeSection) {
@@ -605,6 +617,8 @@ const ValidacionPago = () => {
                       <th>Pago (comprobante)</th>
                       <th>Verificado</th>
                       <th>Observacion</th>
+                      <th>Editor</th>
+
                       <th colSpan={papelera ? 1 : 2}>
                         {papelera ? "Restaurar" : "Acción"}
                       </th>
@@ -720,7 +734,7 @@ const ValidacionPago = () => {
                                 "👍"
                               )}
                             </td>
-
+                            <td>{p.usuarioEdicion ? p.usuarioEdicion : "Sin editar"}</td>
                             <td>
                               <img
                                 className="restaurar_btn"
@@ -846,6 +860,8 @@ const ValidacionPago = () => {
                                 "👍"
                               )}
                             </td>
+                            <td>{p.usuarioEdicion ? p.usuarioEdicion : "Sin editar"}</td>
+
                             <td>
                               {isEditing ? (
                                 <>
@@ -1164,6 +1180,19 @@ const ValidacionPago = () => {
               </div>
 
               <div className="vp-filtro" style={{ flex: "1 1 150px" }}>
+                <label>Certificado:</label>
+                <select
+                  value={filtroCertificado}
+                  onChange={(e) => setFiltroCertificado(e.target.value)}
+                >
+                  <option value="todos">Todos</option>
+                  <option value="con">Con Certificado</option>
+                  <option value="sin">Sin Certificado</option>
+                </select>
+              </div>
+
+
+              <div className="vp-filtro" style={{ flex: "1 1 150px" }}>
                 <label>Fecha Desde:</label>
                 <input
                   type="date"
@@ -1184,6 +1213,7 @@ const ValidacionPago = () => {
               <button
                 onClick={() => {
                   setFiltroVerificado("todos");
+                  setFiltroCertificado("todos")
                   setFiltroFechaDesde("");
                   setFiltroFechaHasta("");
                 }}
@@ -1223,8 +1253,8 @@ const ValidacionPago = () => {
                     </th>
                     <th>Curso</th>
                     <th>Valor Depositado</th>
-
                     <th>Comprobante</th>
+                    <th>Certificado</th>
                     <th>Verificado</th>
                   </tr>
                 </thead>
@@ -1233,6 +1263,8 @@ const ValidacionPago = () => {
                     const inscrip = inscripciones.find(
                       (i) => i.id === p.inscripcionId
                     );
+                    const certificado = certificados.find(c => c.cedula === inscrip?.cedula);
+
                     return (
                       <tr key={p.id}>
                         <td>{inscrip?.grado || "-"}</td>
@@ -1243,7 +1275,7 @@ const ValidacionPago = () => {
                           {p.createdAt
                             ? new Date(p.createdAt).toLocaleDateString()
                             : "-"}
-                        </td>{" "}
+                        </td>
                         {/* Fecha */}
                         <td>{p.curso}</td>
                         <td>${p.valorDepositado?.toFixed(2) || "0.00"}</td>
@@ -1255,6 +1287,19 @@ const ValidacionPago = () => {
                               rel="noopener noreferrer"
                             >
                               Ver Comprobante
+                            </a>
+                          ) : (
+                            "No disponible"
+                          )}
+                        </td>
+                        <td>
+                          {certificado?.url ? (
+                            <a
+                              href={certificado.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Ver Certificado
                             </a>
                           ) : (
                             "No disponible"
@@ -1302,41 +1347,36 @@ const ValidacionPago = () => {
         <nav className={`vp-menu ${menuOpen ? "open" : ""}`} ref={menuRef}>
           <h3>📊 Menú Principal</h3>
           <button
-            className={`vp-menu-btn ${
-              activeSection === "resumen" ? "active" : ""
-            }`}
+            className={`vp-menu-btn ${activeSection === "resumen" ? "active" : ""
+              }`}
             onClick={() => setActiveSection("resumen")}
           >
             📋 Resumen General
           </button>
           <button
-            className={`vp-menu-btn ${
-              activeSection === "validarPagos" ? "active" : ""
-            }`}
+            className={`vp-menu-btn ${activeSection === "validarPagos" ? "active" : ""
+              }`}
             onClick={() => setActiveSection("validarPagos")}
           >
             ✅ Validar Pagos
           </button>
           <button
-            className={`vp-menu-btn ${
-              activeSection === "registrarEntregas" ? "active" : ""
-            }`}
+            className={`vp-menu-btn ${activeSection === "registrarEntregas" ? "active" : ""
+              }`}
             onClick={() => setActiveSection("registrarEntregas")}
           >
             🎁 Registrar Entregas de Distintivos
           </button>
           <button
-            className={`vp-menu-btn ${
-              activeSection === "listaPagos" ? "active" : ""
-            }`}
+            className={`vp-menu-btn ${activeSection === "listaPagos" ? "active" : ""
+              }`}
             onClick={() => setActiveSection("listaPagos")}
           >
             💳 Lista de Pagos
           </button>
           <button
-            className={`vp-menu-btn ${
-              activeSection === "listaInscritos" ? "active" : ""
-            }`}
+            className={`vp-menu-btn ${activeSection === "listaInscritos" ? "active" : ""
+              }`}
             onClick={() => setActiveSection("listaInscritos")}
           >
             📋 Lista de Inscritos
