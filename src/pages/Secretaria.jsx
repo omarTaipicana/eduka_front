@@ -25,6 +25,11 @@ const Secretaria = () => {
   const [isSaving, setIsSaving] = useState(false);
   const inputNombreDiferido = useDeferredValue(inputNombre);
 
+  const [cedulaCertificado, setCedulaCertificado] = useState("");
+  const [nombreCertificado, setNombreCertificado] = useState("");
+  const [sugerenciasCertificados, setSugerenciasCertificados] = useState([]);
+  const [certificadosFiltrados, setCertificadosFiltrados] = useState([]);
+
   const debounceTimeout = useRef(null);
   const debounceRef = useRef(null);
 
@@ -409,6 +414,61 @@ const Secretaria = () => {
       setIsSaving(false); // ← finaliza carga
     }
   };
+
+
+
+
+
+  const handleBuscarCertificados = () => {
+    const resultados = certificados.filter((c) => {
+      const matchCedula =
+        cedulaCertificado.trim() !== "" &&
+        c.cedula.includes(cedulaCertificado.trim());
+      const matchNombre =
+        nombreCertificado.trim() !== "" &&
+        `${c.nombres} ${c.apellidos}`
+          .toLowerCase()
+          .includes(nombreCertificado.toLowerCase());
+      return matchCedula || matchNombre;
+    });
+
+    setCertificadosFiltrados(resultados);
+  };
+
+  // Limpiar filtros
+  const limpiarFiltrosCertificados = () => {
+    setCedulaCertificado("");
+    setNombreCertificado("");
+    setCertificadosFiltrados([]);
+    setSugerenciasCertificados([]);
+  };
+
+  // Autocompletar nombres
+  useEffect(() => {
+    if (nombreCertificado.trim() === "") {
+      setSugerenciasCertificados([]);
+      return;
+    }
+    const sugerencias = certificados.filter((c) =>
+      `${c.nombres} ${c.apellidos}`
+        .toLowerCase()
+        .includes(nombreCertificado.toLowerCase())
+    );
+    setSugerenciasCertificados(sugerencias.slice(0, 5)); // máx 5 sugerencias
+  }, [nombreCertificado, certificados]);
+
+  // Seleccionar sugerencia
+  const seleccionarSugerenciaCertificado = (sug) => {
+    setNombreCertificado(`${sug.nombres} ${sug.apellidos}`);
+    setCedulaCertificado(sug.cedula);
+    setSugerenciasCertificados([]);
+    setCertificadosFiltrados([sug]);
+  };
+
+
+
+
+
 
   return (
     <div>
@@ -1021,9 +1081,126 @@ const Secretaria = () => {
           {activeSection === "certificados" && (
             <section className="secretaria_section">
               <h2>🎓 Certificados</h2>
-              <p>📌 Pronto verás información sobre certificados.</p>
+
+              {/* Buscadores */}
+              <div className="inputs_busqueda">
+                <div className="input_group">
+                  <input
+                    type="text"
+                    className="buscador_input"
+                    placeholder="🔍 Buscar por cédula"
+                    value={cedulaCertificado}
+                    onChange={(e) => setCedulaCertificado(e.target.value)}
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div className="input_group">
+                  <input
+                    type="text"
+                    className="buscador_input"
+                    placeholder="🔍 Buscar por nombres y apellidos"
+                    value={nombreCertificado}
+                    onChange={(e) => setNombreCertificado(e.target.value)}
+                    autoComplete="off"
+                  />
+
+                  {sugerenciasCertificados.length > 0 && (
+                    <ul className="sugerencias_lista" role="listbox">
+                      {sugerenciasCertificados.map((sug) => (
+                        <li
+                          key={sug.id}
+                          onClick={() => seleccionarSugerenciaCertificado(sug)}
+                          className="sugerencia_item"
+                          role="option"
+                        >
+                          {sug.nombres} {sug.apellidos} — {sug.cedula}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <button className="btn_buscar" onClick={handleBuscarCertificados}>
+                  🔍 Buscar
+                </button>
+
+                <button className="btn_limpiar_filtros" onClick={limpiarFiltrosCertificados}>
+                  ❌ Borrar filtros
+                </button>
+              </div>
+
+              {/* Resultados */}
+              {certificadosFiltrados.length === 0 ? (
+                nombreCertificado.trim() === "" && cedulaCertificado.trim() === "" ? (
+                  <p className="mensaje_sin_resultados">
+                    ✍️ Por favor, ingrese un criterio de búsqueda para comenzar.
+                  </p>
+                ) : (
+                  <p className="mensaje_sin_resultados">
+                    🔍 No se encontraron certificados para esta búsqueda.
+                  </p>
+                )
+              ) : (
+                certificadosFiltrados.map((c) => (
+                  <div key={c.id} className="card_inscripcion">
+                    <h3>
+                      {c.nombres} {c.apellidos}
+                    </h3>
+                    <p>
+                      <strong>Cédula:</strong> {c.cedula}
+                    </p>
+                    <p>
+                      <strong>Grado:</strong> {c.grado}
+                    </p>
+                    <p>
+                      <strong>Curso:</strong>{" "}
+                      {(() => {
+                        const cursoEncontrado = courses.find(
+                          (course) => course.sigla.toLowerCase() === c.curso.toLowerCase()
+                        );
+                        return cursoEncontrado ? cursoEncontrado.nombre : c.curso;
+                      })()}
+                    </p>
+
+                    <p>
+                      <strong>Depósito:</strong> ${c.deposito}
+                    </p>
+                    <p>
+                      <strong>Fecha:</strong> {c.fecha}
+                    </p>
+                    {c.urlDeposito === "EXTERNO" ? (
+                      <p className="pendiente_certificado">🌐 Comprobante externo</p>
+                    ) : (
+                      <a
+                        className="btn_ver_comprobante"
+                        href={c.urlDeposito}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        📄 Ver comprobante
+                      </a>
+                    )}
+
+                    <br />
+                    {c.url ? (
+                      <a
+                        className="btn_certificado"
+                        href={c.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        🎓 Ver certificado
+                      </a>
+                    ) : (
+                      <p className="pendiente_certificado">📌 Por certificar</p>
+                    )}
+                  </div>
+                ))
+              )}
             </section>
           )}
+
         </main>
       </div>
     </div>
