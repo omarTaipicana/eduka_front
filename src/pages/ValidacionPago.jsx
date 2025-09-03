@@ -275,7 +275,7 @@ const ValidacionPago = () => {
       if (!inscrip) return false;
 
       // ⬇️ NUEVO: buscar certificado asociado a la inscripción
-      const certificado = certificados.find(c => c.cedula === inscrip.cedula);
+      const certificado = certificados.find(c => c.cedula === inscrip.cedula && c.curso === inscrip.curso);
       if (filtroCertificado === "con" && !certificado?.url) return false;
       if (filtroCertificado === "sin" && certificado?.url) return false;
 
@@ -1263,7 +1263,7 @@ const ValidacionPago = () => {
                     const inscrip = inscripciones.find(
                       (i) => i.id === p.inscripcionId
                     );
-                    const certificado = certificados.find(c => c.cedula === inscrip?.cedula);
+                    const certificado = certificados.find(c => c.cedula === inscrip?.cedula && c.curso === inscrip.curso);
 
                     return (
                       <tr key={p.id}>
