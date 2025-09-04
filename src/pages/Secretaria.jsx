@@ -15,6 +15,7 @@ const Secretaria = () => {
   const [filtroCertificado, setFiltroCertificado] = useState("");
   const [filtroDetalle, setFiltroDetalle] = useState("");
   const [filtroUltimoAcceso, setFiltroUltimoAcceso] = useState("");
+  const [filtroCurso, setFiltroCurso] = useState("");
   const [cedulaPagoBuscada, setCedulaPagoBuscada] = useState("");
   const [inputCedula, setInputCedula] = useState("");
   const [inputNombre, setInputNombre] = useState("");
@@ -284,12 +285,16 @@ const Secretaria = () => {
   const datosFiltrados = useMemo(() => {
     const filtrados = inscripcionesParaPagos.filter((i) => {
       const pagosRelacionados = pagosPorInscripcionId[i.id] || [];
-      const certificado = certificadosPorCedula[i.cedula];
+      const certificado = certificados.find(
+        (c) => c.cedula === i.cedula && c.curso === cursosPorId[i.courseId]?.sigla
+      );
       const curso = cursosPorId[i.courseId];
       const usuarioMoodle = moodlePorEmail[i.email.toLowerCase()];
-
       const nombreCompleto = `${i.nombres} ${i.apellidos}`.toLowerCase();
       const cumpleBusqueda = nombreCompleto.includes(busqueda.toLowerCase());
+      const cumpleFiltroCurso =
+        filtroCurso === "" ? true : curso?.sigla === filtroCurso;
+
 
       const cumpleFiltroPago =
         filtroPago === ""
@@ -359,8 +364,10 @@ const Secretaria = () => {
         cumpleFiltroCertificado &&
         cumpleFiltroCedula &&
         cumpleFiltroDetalle &&
-        cumpleFiltroUltimoAcceso
+        cumpleFiltroUltimoAcceso &&
+        cumpleFiltroCurso
       );
+
     });
 
     return filtrados.sort(
@@ -378,7 +385,9 @@ const Secretaria = () => {
     filtroCertificado,
     filtroDetalle,
     filtroUltimoAcceso,
+    filtroCurso, // 👈 nuevo
   ]);
+
 
 
   const datosPaginados = useMemo(() => {
@@ -418,27 +427,37 @@ const Secretaria = () => {
 
 
 
-
   const handleBuscarCertificados = () => {
     const resultados = certificados.filter((c) => {
+
       const matchCedula =
         cedulaCertificado.trim() !== "" &&
         c.cedula.includes(cedulaCertificado.trim());
+
       const matchNombre =
         nombreCertificado.trim() !== "" &&
         `${c.nombres} ${c.apellidos}`
           .toLowerCase()
           .includes(nombreCertificado.toLowerCase());
+
       return matchCedula || matchNombre;
     });
 
     setCertificadosFiltrados(resultados);
   };
 
+
+
+
+
+
+
+
   // Limpiar filtros
   const limpiarFiltrosCertificados = () => {
     setCedulaCertificado("");
     setNombreCertificado("");
+    setFiltroCurso("");
     setCertificadosFiltrados([]);
     setSugerenciasCertificados([]);
   };
@@ -836,6 +855,22 @@ const Secretaria = () => {
                 </div>
 
                 <div className="input_group">
+                  <select
+                    value={filtroCurso}
+                    onChange={(e) => setFiltroCurso(e.target.value)}
+                    className="buscador_input"
+                  >
+                    <option value="">Todos los cursos</option>
+                    {Object.values(cursosPorId).map((c) => (
+                      <option key={c.id} value={c.sigla}>
+                        {c.sigla}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+
+                <div className="input_group">
                   <button
                     className="btn_buscar"
                     onClick={() => {
@@ -857,6 +892,7 @@ const Secretaria = () => {
                       setCedulaPagoBuscada("");
                       setFiltroPago("");
                       setFiltroCertificado("");
+                      setFiltroCurso("");
                       setFiltroDetalle("");
                       setFiltroUltimoAcceso("");
                     }}
@@ -947,7 +983,7 @@ const Secretaria = () => {
                         (p) => p.inscripcionId === i.id
                       );
                       const certificado = certificados.find(
-                        (c) => c.cedula === i.cedula
+                        (c) => c.cedula === i.cedula && c.curso === i.curso
                       );
                       const curso = courses.find((c) => c.id === i.courseId);
                       const usuarioMoodle = moodle.find(
