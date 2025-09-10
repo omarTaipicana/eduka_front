@@ -1205,6 +1205,9 @@ const Secretaria = () => {
                     <p>
                       <strong>Fecha:</strong> {c.fecha}
                     </p>
+                    <p>
+                      <strong>Grupo:</strong> {c.verificado}
+                    </p>
                     {c.urlDeposito === "EXTERNO" ? (
                       <p className="pendiente_certificado">🌐 Comprobante externo</p>
                     ) : (
