@@ -162,6 +162,7 @@ const RegistroAlumnos = () => {
 
     const body = {
       ...data,
+      cedula: cedulaLimpia,
       nombres: nombreFormateado,
       apellidos: apellidoFormateado,
       email: emailFormateado,
