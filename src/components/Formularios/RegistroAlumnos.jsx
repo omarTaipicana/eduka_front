@@ -103,7 +103,9 @@ const RegistroAlumnos = () => {
     const confirmEmailFormateado = data.confirmEmail.trim().toLowerCase();
 
     // Validaciones con datos formateados
-    const isValidCedula = validarCedula(data.cedula);
+    
+    const cedulaLimpia = data.cedula.trim().replace(/\D/g, ""); 
+    const isValidCedula = validarCedula(cedulaLimpia);
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailFormateado);
     const celularLimpio = data.celular.replace(/\D/g, ""); // Elimina todo lo que no sea dígito
     const isValidCellular = /^09\d{8}$/.test(celularLimpio);
