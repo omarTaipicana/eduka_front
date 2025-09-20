@@ -1,69 +1,23 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./styles/Home.css";
 import useAuth from "../hooks/useAuth";
-import useCrud from "../hooks/useCrud";
 import IsLoading from "../components/shared/isLoading";
 
 const Home = () => {
   const token = localStorage.getItem("token");
-  const PATH_INSCRIPCIONES = "/inscripcion";
-  const PATH_COURSES = "/courses";
-  const PATH_PAGOS = "/pagos";
-  const PATH_CERTIFICADOS = "/certificados";
-
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
-  const [course, getCourse] = useCrud();
-  const [inscripciones, getInscripcion] = useCrud();
-  const [pago, getPago] = useCrud();
-  const [open, setOpen] = useState(false);
-  const [cursoAbiertoIndex, setCursoAbiertoIndex] = useState(null);
-
-
-  const [certificados, getCertificados] = useCrud();
-  const PATH_MOODLE = `/usuarios_m/${user?.email}`;
-
-  const [
-    moodle,
-    getMoodle,
-    postApi,
-    deleteApi,
-    updateApi,
-    error,
-    isLoading,
-    newReg,
-    deleteReg,
-    updateReg,
-    uploadPdf,
-    newUpload,
-    getMoodleById,
-  ] = useCrud();
-
-  useEffect(() => {
-    if (user) {
-      getMoodleById(PATH_MOODLE);
-    }
-  }, [user]);
-
 
   const [activeSection, setActiveSection] = useState("datos-personales");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cursoAbiertoIndex, setCursoAbiertoIndex] = useState(null);
   const menuRef = useRef();
   const hamburgerRef = useRef();
-
-  useEffect(() => {
-    getInscripcion(PATH_INSCRIPCIONES);
-    getCourse(PATH_COURSES);
-    getPago(PATH_PAGOS);
-    getCertificados(PATH_CERTIFICADOS);
-  }, []);
 
 
   useEffect(() => {
     const checkToken = async () => {
       if (!token) return;
-
       const success = await loggedUser();
-
       if (!success) {
         console.log("❌ Token inválido, removido");
         localStorage.removeItem("token");
@@ -86,22 +40,9 @@ const Home = () => {
         setMenuOpen(false);
       }
     };
-
-    if (menuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
-
-  const inscritos = inscripciones?.filter((i) => i.email === user?.email);
-  const cursosInscritos = course?.filter((c) =>
-    inscritos?.some((i) => i.courseId === c.id)
-  );
 
   const handleSelect = (section) => {
     setActiveSection(section);
@@ -110,7 +51,6 @@ const Home = () => {
 
   const calcularEdad = (fechaNacimiento) => {
     if (!fechaNacimiento) return "";
-
     const nacimiento = new Date(fechaNacimiento);
     const hoy = new Date();
 
@@ -147,15 +87,14 @@ const Home = () => {
         <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
       </button>
 
-      {/* Menú lateral o desplegable */}
+      {/* Menú lateral */}
       <nav
         className={`home-menu ${menuOpen ? "open" : ""}`}
         ref={menuRef}
         aria-hidden={!menuOpen && window.innerWidth <= 768}
       >
         <button
-          className={`menu-btn ${activeSection === "datos-personales" ? "active" : ""
-            }`}
+          className={`menu-btn ${activeSection === "datos-personales" ? "active" : ""}`}
           onClick={() => handleSelect("datos-personales")}
         >
           📄 Datos Personales
@@ -164,11 +103,10 @@ const Home = () => {
           className={`menu-btn ${activeSection === "cursos" ? "active" : ""}`}
           onClick={() => handleSelect("cursos")}
         >
-          📚 Cursos Inscritos y Certificados
+          📚 Cursos y Certificados
         </button>
         <button
-          className={`menu-btn ${activeSection === "calificaciones" ? "active" : ""
-            }`}
+          className={`menu-btn ${activeSection === "calificaciones" ? "active" : ""}`}
           onClick={() => handleSelect("calificaciones")}
         >
           📝 Calificaciones
@@ -180,8 +118,7 @@ const Home = () => {
           💳 Pagos
         </button>
         <button
-          className={`menu-btn ${activeSection === "advertencia" ? "active" : ""
-            }`}
+          className={`menu-btn ${activeSection === "advertencia" ? "active" : ""}`}
           onClick={() => handleSelect("advertencia")}
         >
           ⚠️ Importante
@@ -194,273 +131,138 @@ const Home = () => {
             <h2>📄 Datos personales</h2>
             {user ? (
               <ul className="data-list">
-                <li>
-                  <strong>Nombre:</strong>{" "}
-                  {user.firstName && user.lastName ? (
-                    `${user.firstName} ${user.lastName}`
-                  ) : (
-                    <span style={{ color: "red" }}>
-                      Complete información en su perfil
-                    </span>
-                  )}
-                </li>
-                <li>
-                  <strong>Cédula:</strong>{" "}
-                  {user.cI ? (
-                    user.cI
-                  ) : (
-                    <span style={{ color: "red" }}>
-                      Complete información en su perfil
-                    </span>
-                  )}
-                </li>
-                <li>
-                  <strong>Email:</strong>{" "}
-                  {user.email ? (
-                    user.email
-                  ) : (
-                    <span style={{ color: "red" }}>
-                      Complete información en su perfil
-                    </span>
-                  )}
-                </li>
-                <li>
-                  <strong>Celular:</strong>{" "}
-                  {user.cellular ? (
-                    user.cellular
-                  ) : (
-                    <span style={{ color: "red" }}>
-                      Complete información en su perfil
-                    </span>
-                  )}
-                </li>
-                <li>
-                  <strong>Edad:</strong>{" "}
-                  {user.dateBirth ? (
-                    calcularEdad(user.dateBirth)
-                  ) : (
-                    <span style={{ color: "red" }}>
-                      Complete información en su perfil
-                    </span>
-                  )}
-                </li>
-                <li>
-                  <strong>Provincia:</strong>{" "}
-                  {user.province ? (
-                    user.province
-                  ) : (
-                    <span style={{ color: "red" }}>
-                      Complete información en su perfil
-                    </span>
-                  )}
-                </li>
-                <li>
-                  <strong>Ciudad:</strong>{" "}
-                  {user.city ? (
-                    user.city
-                  ) : (
-                    <span style={{ color: "red" }}>
-                      Complete información en su perfil
-                    </span>
-                  )}
-                </li>
+                <li><strong>Nombre:</strong> {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : <span style={{ color: "red" }}>Complete información</span>}</li>
+                <li><strong>Cédula:</strong> {user.cI || <span style={{ color: "red" }}>Complete información</span>}</li>
+                <li><strong>Email:</strong> {user.email || <span style={{ color: "red" }}>Complete información</span>}</li>
+                <li><strong>Celular:</strong> {user.cellular || <span style={{ color: "red" }}>Complete información</span>}</li>
+                <li><strong>Edad:</strong> {user.dateBirth ? calcularEdad(user.dateBirth) : <span style={{ color: "red" }}>Complete información</span>}</li>
+                <li><strong>Provincia:</strong> {user.province || <span style={{ color: "red" }}>Complete información</span>}</li>
+                <li><strong>Ciudad:</strong> {user.city || <span style={{ color: "red" }}>Complete información</span>}</li>
               </ul>
-            ) : (
-              <IsLoading />
-            )}
+            ) : <IsLoading />}
           </section>
         )}
 
-        {activeSection === "cursos" && (
-          <section className="section cursos">
-            <h2>📚 Cursos inscritos y Certificados</h2>
-            {cursosInscritos?.length > 0 ? (
-              <ul className="curso-list">
-                {cursosInscritos.map((curso) => {
-                  const certificado = certificados?.find(
-                    (c) =>
-                      c.cedula === user?.cI &&
-                      c.curso === curso.sigla &&
-                      inscripciones?.some(
-                        (i) =>
-                          i.courseId === curso.id && i.email === user?.email
-                      )
-                  );
+{activeSection === "cursos" && (
+  <section className="section cursos">
+    <h2>📚 Cursos y Certificados</h2>
+    {user?.courses?.length > 0 ? (
+      <ul className="curso-list">
+        {user.courses.map((curso, i) => (
+          <li key={i} className="curso-item">
+            <span className="curso-icon">🔹</span>{" "}
+            <a
+              href={`https://acadexeduc.com/course/view.php?name=${curso.sigla}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none", color: "#007bff", fontWeight: "bold" }}
+            >
+              {curso.fullname}
+            </a>
+            
+            <div style={{ marginTop: "0.5rem", marginLeft: "1.5rem" }}>
+              {curso.url ? (
+                <a
+                  href={curso.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "green",
+                    textDecoration: "underline",
+                    fontWeight: "500"
+                  }}
+                >
+                  Ver certificado
+                </a>
+              ) : (
+                <span style={{ color: "#888", fontStyle: "italic" }}>
+                  No hay certificado disponible
+                </span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>No hay cursos registrados.</p>
+    )}
+  </section>
+)}
 
-                  return (
-                    <li key={curso.id} className="curso-item">
-                      <span className="curso-icon">🔹</span>{" "}
-                      <a
-                        href={`https://acadexeduc.com/course/view.php?name=${curso.sigla}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          textDecoration: "none",
-                          color: "#007bff",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {curso.nombre}
-                      </a>
-                      {certificado?.url && (
-                        <>
-                          {" "}
-                          —{" "}
-                          <a
-                            href={certificado.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              color: "green",
-                              textDecoration: "underline",
-                              fontWeight: "500",
-                              marginLeft: "0.3rem",
-                            }}
-                          >
-                            Ver certificado
-                          </a>
-                        </>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p>No hay cursos inscritos.</p>
-            )}
-          </section>
-        )}
 
         {activeSection === "calificaciones" && (
           <section className="section calificaciones">
-
             <h2>📝 Calificaciones</h2>
-            {moodle?.courses?.length > 0 ? (
+            {user?.courses?.length > 0 ? (
               <ul className="curso-list">
-                {moodle.courses.map((curso, index) => {
+                {user.courses.map((curso, index) => {
                   const calificaciones = curso.grades || {};
                   const estaAbierto = cursoAbiertoIndex === index;
-
                   return (
                     <li key={index} className="curso-item">
                       <button
-                        onClick={() =>
-                          setCursoAbiertoIndex(estaAbierto ? null : index)
-                        }
+                        onClick={() => setCursoAbiertoIndex(estaAbierto ? null : index)}
                         className="curso-toggle"
-                        style={{
-                          background: "none",
-                          border: "none",
-                          fontSize: "1rem",
-                          fontWeight: "bold",
-                          color: "#0053a0",
-                          cursor: "pointer",
-                          marginBottom: "0.5rem",
-                        }}
+                        style={{ background: "none", border: "none", fontSize: "1rem", fontWeight: "bold", color: "#0053a0", cursor: "pointer", marginBottom: "0.5rem" }}
                       >
-                        {estaAbierto ? "▼" : "▶"}{" "}
-                        {course.find(c => c.sigla === curso.fullname)?.nombre || curso.fullname}
+                        {estaAbierto ? "▼" : "▶"} {curso.fullname}
                       </button>
-
                       {estaAbierto && Object.keys(calificaciones).length > 0 ? (
                         <ul className="nota-list" style={{ marginLeft: "1rem" }}>
                           {Object.entries(calificaciones).map(([actividad, nota]) => (
-                            <li key={actividad}>
-                              <strong>{actividad}:</strong> {nota}
-                            </li>
+                            <li key={actividad}><strong>{actividad}:</strong> {nota}</li>
                           ))}
                         </ul>
-                      ) : estaAbierto ? (
-                        <p style={{ marginLeft: "1rem", color: "gray" }}>
-                          No hay calificaciones registradas.
-                        </p>
-                      ) : null}
+                      ) : estaAbierto ? <p style={{ marginLeft: "1rem", color: "gray" }}>No hay calificaciones registradas.</p> : null}
                     </li>
                   );
                 })}
-
               </ul>
-            ) : (
-              <p>No hay cursos registrados.</p>
-            )}
+            ) : <p>No hay cursos registrados.</p>}
           </section>
         )}
 
         {activeSection === "pagos" && (
           <section className="section pagos">
             <h2>💳 Pagos</h2>
-            {user ? (
-              (() => {
-                const pagosDelUsuario = pago?.filter((p) =>
-                  inscripciones?.some(
-                    (i) => i.id === p.inscripcionId && i.email === user.email
-                  )
-                );
-
-                if (pagosDelUsuario?.length > 0) {
-                  return pagosDelUsuario.map((pagoItem, i) => {
-                    const insc = inscripciones?.find(
-                      (i) => i.id === pagoItem.inscripcionId
-                    );
-                    const curso = course?.find((c) => c.id === insc?.courseId);
-
-                    const extras = [];
-                    if (pagoItem.moneda) extras.push("moneda");
-                    if (pagoItem.distintivo) extras.push("distintivo");
-
-                    return (
-                      <div
-                        key={pagoItem.id}
-                        className="pago_item"
-                        style={{ marginBottom: "1.5rem" }}
-                      >
-                        <p>
-                          <strong>Pago #{i + 1}</strong>{" "}
-                          {i === 0
-                            ? `por el certificado${extras.length > 0
-                              ? ", incluyendo " + extras.join(" y ")
-                              : ""
-                            }`
-                            : extras.length > 0
-                              ? `por ${extras.join(" y ")}`
-                              : ""}
-                          .
-                        </p>
-                        <p>
-                          <strong>Curso:</strong> {curso?.nombre || "—"}
-                        </p>
-                        <p>
-                          <strong>Estado:</strong>{" "}
-                          {pagoItem.verificado
-                            ? "✅ Verificado"
-                            : "⏳ Por verificar"}
-                        </p>
-                        <p>
-                          <strong>Monto:</strong> ${pagoItem.valorDepositado}
-                        </p>
-                        <a
-                          className="modal_pago_ver_imagen"
-                          href={pagoItem.pagoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            color: "#007bff",
-                            textDecoration: "underline",
-                          }}
-                        >
-                          Ver comprobante de pago
-                        </a>
-                        <hr />
-                      </div>
-                    );
-                  });
-                } else {
-                  return <p>No se encontraron pagos registrados.</p>;
-                }
-              })()
-            ) : (
-              <p>No se encontraron pagos registrados.</p>
-            )}
+            {user?.courses?.some(c => c.pagoUrl) ? (
+              user.courses.map((curso, i) => {
+                if (!curso.pagoUrl) return null;
+                const extras = [];
+                if (curso.moneda) extras.push("moneda");
+                if (curso.distintivo) extras.push("distintivo");
+                return (
+                  <div key={i} className="pago_item" style={{ marginBottom: "1.5rem" }}>
+                    <p>
+                      <strong>Pago #{i + 1}</strong>{" "}
+                      {i === 0 ? `por el certificado${extras.length > 0 ? ", incluyendo " + extras.join(" y ") : ""}` : extras.length > 0 ? `por ${extras.join(" y ")}` : ""}.
+                    </p>
+                    <p><strong>Curso:</strong> {curso.fullname}</p>
+                    <p><strong>Estado:</strong> {curso.verificado ? "✅ Verificado" : "⏳ Por verificar"}</p>
+                    <p><strong>Monto:</strong> ${curso.valorDepositado}</p>
+                    <a
+                      href={curso.pagoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-block",
+                        padding: "10px 20px",
+                        backgroundColor: "#007bff",
+                        color: "#fff",
+                        fontWeight: "bold",
+                        borderRadius: "8px",
+                        textDecoration: "none",
+                        textAlign: "center",
+                        marginTop: "10px"
+                      }}
+                    >
+                      Ver comprobante de pago
+                    </a>
+                    <hr />
+                  </div>
+                )
+              })
+            ) : <p>No se encontraron pagos registrados.</p>}
           </section>
         )}
 
