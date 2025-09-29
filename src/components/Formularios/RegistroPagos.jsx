@@ -9,15 +9,15 @@ import IsLoading from "../shared/isLoading";
 import ModalPagoExistente from "./ModalPagoExistente";
 
 export const RegistroPagos = () => {
-  const PATH_INSCRIPCIONES = "/inscripcion";
   const PATH_COURSES = "/courses";
   const PATH_PAGOS = "/pagos";
+  const PATH_PAGOSVALIDATE = "/pagovalidate";
 
   const dispatch = useDispatch();
   const { code } = useParams();
 
-  const [response, getInscripcion, , , , , isLoading2] = useCrud();
   const [courses, getCourse, , , , , isLoading3, , , ,] = useCrud();
+  const [, , postVlidate, , , err, , newValidate] = useCrud();
   const [usuario, setUsuario] = useState(null);
   const [cursoActual, setCursoActual] = useState(null);
   const [inscrito, setInscrito] = useState();
@@ -54,7 +54,6 @@ export const RegistroPagos = () => {
   const watchExtras = watch(["moneda", "distintivo"]);
 
   useEffect(() => {
-    getInscripcion(PATH_INSCRIPCIONES);
     getCourse(PATH_COURSES);
     getUpload(PATH_PAGOS);
   }, [inscrito]);
@@ -76,48 +75,32 @@ export const RegistroPagos = () => {
   // Buscar curso activo según code
   const cursoActivo = courses.find((c) => c.sigla === code);
 
+  useEffect(() => {
+    if (newValidate) {
+      setUsuario(newValidate?.user);
+      setInscrito(newValidate?.inscripcion);
+    }
+
+    if (newValidate?.pagos.length > 0) {
+      setPagoExistente(newValidate?.pagos);
+    }
+
+    if (newValidate?.message) {
+      dispatch(
+        showAlert({
+          message: newValidate?.message,
+          alertType: 1,
+        })
+      );
+      return;
+    }
+  }, [newValidate]);
+
   const buscarCedula = (data) => {
-    if (!cursoActivo) {
-      dispatch(
-        showAlert({
-          message: `⚠️ El curso con código ${code} no está disponible.`,
-          alertType: 1,
-        })
-      );
-      return;
-    }
+    const cedula = data?.cedula.trim();
+    const body = { cedula, code };
 
-    const cedulaLimpia = data.cedula.trim(); // Elimina espacios al inicio y final
-
-    const encontrado = response?.find(
-      (r) => r.cedula === cedulaLimpia && r.curso === code
-    );
-
-    setInscrito(encontrado);
-
-    if (!encontrado) {
-      dispatch(
-        showAlert({
-          message: "⚠️ No se encontró una inscripción con esa cédula.",
-          alertType: 1,
-        })
-      );
-      return;
-    }
-
-    const encontradoPago = resUpload.find(
-      (r) => r.inscripcionId === encontrado.id && r.curso === code
-    );
-
-    if (encontradoPago) {
-      setPagoExistente(encontradoPago);
-      setTotal(0);
-      return;
-    }
-
-    setUsuario(encontrado);
-    const curso = courses?.find((c) => c.id === encontrado.courseId);
-    setCursoActual(curso);
+    postVlidate(PATH_PAGOSVALIDATE, body);
   };
 
   const submit = (data) => {
@@ -126,15 +109,16 @@ export const RegistroPagos = () => {
       curso: code,
       inscripcionId: inscrito.id,
     };
+
     const file = data.archivo[0];
 
     uploadPdf(PATH_PAGOS, body, file);
 
     reset();
-    setUsuario(null);
     setCursoActual(null);
     setTotal(26);
   };
+
 
   useEffect(() => {
     if (newUpload) {
@@ -146,11 +130,12 @@ export const RegistroPagos = () => {
         extras.length > 0 ? `, incluyendo ${extras.join(" y ")}` : "";
       dispatch(
         showAlert({
-          message: `✅ Estimado/a ${inscrito?.nombres} ${inscrito?.apellidos}, se registro tu pago de $${newUpload.valorDepositado} por el certificado${extrasTexto}.`,
+          message: `✅ Estimado/a ${usuario?.firstName} ${usuario?.lastName}, se registro tu pago de $${newUpload.valorDepositado} por el certificado${extrasTexto}.`,
           alertType: 2,
         })
       );
-      setInscrito();
+      setUsuario(null);
+      setInscrito(null);
     }
   }, [newUpload]);
 
@@ -172,7 +157,7 @@ export const RegistroPagos = () => {
   }
 
   const onRegistrarNuevo = () => {
-    setUsuario(inscrito); // permite continuar al formulario
+    setUsuario(newValidate?.user); // permite continuar al formulario
     const curso = courses?.find((c) => c.id === pagoExistente.courseId);
     setCursoActual(curso);
     setPagoExistente(null);
@@ -191,7 +176,10 @@ export const RegistroPagos = () => {
         <ModalPagoExistente
           pagos={resUpload}
           onRegistrarNuevo={onRegistrarNuevo}
-          onClose={() => setPagoExistente(null)}
+          onClose={() => {
+            setPagoExistente(null);
+            setUsuario(null);
+          }}
           inscrito={inscrito}
         />
       )}
@@ -243,19 +231,19 @@ export const RegistroPagos = () => {
               <div className="datos_usuario">
                 {cursoActual && <h2>🎓 {cursoActual.nombre}</h2>}
                 <p>
-                  <strong>Nombres:</strong> {usuario.nombres}
+                  <strong>Nombres:</strong> {usuario.firstName}
                 </p>
                 <p>
-                  <strong>Apellidos:</strong> {usuario.apellidos}
+                  <strong>Apellidos:</strong> {usuario.lastName}
                 </p>
                 <p>
                   <strong>Email:</strong> {usuario.email}
                 </p>
                 <p>
-                  <strong>Celular:</strong> {usuario.celular}
+                  <strong>Celular:</strong> {usuario.cellular}
                 </p>
                 <p>
-                  <strong>Cédula:</strong> {usuario.cedula}
+                  <strong>Cédula:</strong> {usuario.cI}
                 </p>
               </div>
 

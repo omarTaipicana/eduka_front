@@ -26,6 +26,8 @@ const Login = () => {
   const [selectedProvincia, setSelectedProvincia] = useState("");
   const [selectedCanton, setSelectedCanton] = useState("");
   const [selectedGenero, setSelectedGenero] = useState("");
+  const [selectedGrado, setSelectedGrado] = useState("");
+  const [selectedSubsistema, setSelectedSubsistema] = useState("");
   const [variables, getVariables, , , , ,] = useCrud();
 
   const [
@@ -71,6 +73,13 @@ const Login = () => {
     checkToken();
   }, [token]);
 
+//   useEffect(()=>{
+// loggedUser();
+//   },[])
+
+//   console.log(userLogged)
+
+
   const senpladesVal = senplades ? senplades : [];
 
   const obtenerCantonesPorProvincia = (provincia) => {
@@ -85,15 +94,9 @@ const Login = () => {
 
   const handleLogout = () => {
     if (userLogged) {
-      const capitalizeWord = (str) =>
-        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
-
-      const firstName = capitalizeWord(userLogged?.firstName);
-      const lastName = capitalizeWord(userLogged?.lastName);
-
       dispatch(
         showAlert({
-          message: `⚠️ Hasta pronto ${firstName} ${lastName}, te esperamos.`,
+          message: `⚠️ Hasta pronto ${userLogged?.firstName} ${userLogged?.lastName}, te esperamos.`,
           alertType: 4,
         })
       );
@@ -121,15 +124,9 @@ const Login = () => {
 
   useEffect(() => {
     if (userLogged && prevUser === null && isNewLogin) {
-      const capitalizeWord = (str) =>
-        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
-
-      const firstName = capitalizeWord(userLogged?.firstName);
-      const lastName = capitalizeWord(userLogged?.lastName);
-
       dispatch(
         showAlert({
-          message: `⚠️ Bienvenido ${firstName} ${lastName} a EDUKA, tu Plataforma Educativa`,
+          message: `⚠️ Bienvenido ${userLogged?.firstName} ${userLogged?.lastName} a EDUKA, tu Plataforma Educativa`,
           alertType: 2,
         })
       );
@@ -141,16 +138,10 @@ const Login = () => {
 
   useEffect(() => {
     if (userUpdate) {
-      const capitalizeWord = (str) =>
-        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
-
-      const firstName = capitalizeWord(userLogged?.firstName);
-      const lastName = capitalizeWord(userLogged?.lastName);
-
       loggedUser();
       dispatch(
         showAlert({
-          message: `⚠️ Estimado ${firstName} ${lastName}, se actualizo tu información correctamente`,
+          message: `⚠️ Estimado ${userLogged?.firstName} ${userLogged?.lastName}, se actualizo tu información correctamente`,
           alertType: 2,
         })
       );
@@ -163,6 +154,8 @@ const Login = () => {
       setCantonesOption(obtenerCantonesPorProvincia(userLogged.province));
       setSelectedCanton(userLogged.city || "");
       setSelectedGenero(userLogged.genre || "");
+      setSelectedGrado(userLogged.grado || "");
+      setSelectedSubsistema(userLogged.subsistema || "");
 
       setFormReady(true);
     }
@@ -180,6 +173,8 @@ const Login = () => {
         province: selectedProvincia,
         city: selectedCanton,
         genre: selectedGenero,
+        grado: selectedGrado,
+        subsistema: selectedSubsistema,
       });
 
       setFormReady(false);
@@ -194,7 +189,7 @@ const Login = () => {
 
   const validarCedula = (cedula) => {
     // Eliminar todos los caracteres que no sean dígitos
-    cedula = cedula.replace(/\D/g, ""); // \D = todo lo que NO sea dígito
+    cedula = cedula ? cedula.replace(/\D/g, "") : "";
 
     // Verificar que tenga exactamente 10 dígitos
     if (!/^\d{10}$/.test(cedula)) return false;
@@ -225,8 +220,11 @@ const Login = () => {
   };
 
   const submitUpdate = (data) => {
-    const isValidCedula = validarCedula(data.cI);
-    const celularLimpio = data.cellular.replace(/\D/g, ""); // Elimina todo lo que no sea dígito
+    const cedulaLimpia = data.cI ? data.cI.trim().replace(/\D/g, "") : "";
+    const isValidCedula = validarCedula(cedulaLimpia);
+    const celularLimpio = data.cellular
+      ? data.cellular.trim().replace(/\D/g, "")
+      : "";
     const isValidCellular = /^09\d{8}$/.test(celularLimpio);
     const emailFormateado = data.email.trim().toLowerCase();
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailFormateado);
@@ -258,7 +256,11 @@ const Login = () => {
       ...data,
       firstName: capitalizeWords(data.firstName),
       lastName: capitalizeWords(data.lastName),
+      cI: cedulaLimpia,
+      cellular: celularLimpio,
     };
+
+    console.log(formattedData);
 
     if (
       data?.dateBirth &&
@@ -266,7 +268,9 @@ const Login = () => {
       data?.cellular &&
       data?.province &&
       data?.city &&
-      data?.genre
+      data?.genre &&
+      data?.grado &&
+      data?.subsistema
     ) {
       setIsInfoComplete(true);
     } else {
@@ -290,7 +294,9 @@ const Login = () => {
       userLogged?.cellular &&
       userLogged?.province &&
       userLogged?.city &&
-      userLogged?.genre
+      userLogged?.genre &&
+      userLogged?.grado &&
+      userLogged?.subsistema
     ) {
       setIsInfoComplete(true);
     } else {
@@ -319,6 +325,19 @@ const Login = () => {
                     }}
                     required
                     {...register("firstName")}
+                    className="input__form__info"
+                    type="text"
+                  />
+                </label>
+                <label className="label__user__info">
+                  <span className="span__user__info">Apellidos: </span>
+                  <input
+                    readOnly={!userEdit}
+                    style={{
+                      border: "none",
+                    }}
+                    required
+                    {...register("lastName")}
                     className="input__form__info"
                     type="text"
                   />
@@ -354,6 +373,9 @@ const Login = () => {
                     type="date"
                   />
                 </label>
+              </article>
+
+              <article className="form__user__seccion">
                 <label className="label__user__info">
                   <span className="span__user__info">Número de Cédula: </span>
                   <input
@@ -380,22 +402,60 @@ const Login = () => {
                     type="text"
                   />
                 </label>
+
+                <label className="label__user__info">
+                  <span className="span__user__info">Género:</span>
+                  {!userEdit ? (
+                    <input
+                      className="input__form__info"
+                      readOnly={!userEdit}
+                      {...register("genre")}
+                      style={{
+                        border: "none",
+                      }}
+                    />
+                  ) : (
+                    <select
+                      style={{
+                        border: "2px solid #ccc",
+                      }}
+                      {...register("genre")}
+                      className="input__form__info"
+                      value={selectedGenero}
+                      onChange={(e) => setSelectedGenero(e.target.value)}
+                    >
+                      <option value="">Seleccione su Género</option>
+                      {variables
+                        ?.filter((e) => e.genero)
+                        .map((genero) => (
+                          <option key={genero.id} value={genero.genero}>
+                            {genero.genero}
+                          </option>
+                        ))}
+                    </select>
+                  )}
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!userEdit) {
+                      setUserEdit(true);
+                    } else {
+                      handleSubmit(submitUpdate)();
+                    }
+                  }}
+                  className="btn__logout__user"
+                >
+                  {userEdit
+                    ? "Actualizar"
+                    : isInfoComplete
+                    ? "Editar perfil"
+                    : "Completar Perfil"}
+                </button>
               </article>
 
               <article className="form__user__seccion">
-                <label className="label__user__info">
-                  <span className="span__user__info">Apellidos: </span>
-                  <input
-                    readOnly={!userEdit}
-                    style={{
-                      border: "none",
-                    }}
-                    required
-                    {...register("lastName")}
-                    className="input__form__info"
-                    type="text"
-                  />
-                </label>
                 <label className="label__user__info">
                   <span className="span__user__info">Provincia:</span>
                   {!userEdit ? (
@@ -463,12 +523,12 @@ const Login = () => {
                 </label>
 
                 <label className="label__user__info">
-                  <span className="span__user__info">Género:</span>
+                  <span className="span__user__info">Eje Policial:</span>
                   {!userEdit ? (
                     <input
                       className="input__form__info"
                       readOnly={!userEdit}
-                      {...register("genre")}
+                      {...register("subsistema")}
                       style={{
                         border: "none",
                       }}
@@ -478,40 +538,58 @@ const Login = () => {
                       style={{
                         border: "2px solid #ccc",
                       }}
-                      {...register("genre")}
+                      {...register("subsistema")}
                       className="input__form__info"
-                      value={selectedGenero}
-                      onChange={(e) => setSelectedGenero(e.target.value)}
+                      value={selectedSubsistema}
+                      onChange={(e) => setSelectedSubsistema(e.target.value)}
                     >
-                      <option value="">Seleccione su Género</option>
+                      <option value="">Seleccione el Eje Policial</option>
                       {variables
-                        ?.filter((e) => e.genero)
-                        .map((genero) => (
-                          <option key={genero.id} value={genero.genero}>
-                            {genero.genero}
+                        ?.filter((e) => e.subsistema)
+                        .map((subsistema) => (
+                          <option
+                            key={subsistema.id}
+                            value={subsistema.subsistema}
+                          >
+                            {subsistema.subsistema}
                           </option>
                         ))}
                     </select>
                   )}
                 </label>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!userEdit) {
-                      setUserEdit(true);
-                    } else {
-                      handleSubmit(submitUpdate)();
-                    }
-                  }}
-                  className="btn__logout__user"
-                >
-                  {userEdit
-                    ? "Actualizar"
-                    : isInfoComplete
-                    ? "Editar perfil"
-                    : "Completar Perfil"}
-                </button>
+                <label className="label__user__info">
+                  <span className="span__user__info">Grado:</span>
+                  {!userEdit ? (
+                    <input
+                      className="input__form__info"
+                      readOnly={!userEdit}
+                      {...register("grado")}
+                      style={{
+                        border: "none",
+                      }}
+                    />
+                  ) : (
+                    <select
+                      style={{
+                        border: "2px solid #ccc",
+                      }}
+                      {...register("grado")}
+                      className="input__form__info"
+                      value={selectedGrado}
+                      onChange={(e) => setSelectedGrado(e.target.value)}
+                    >
+                      <option value="">Seleccione su Grado</option>
+                      {variables
+                        ?.filter((e) => e.grado)
+                        .map((grado) => (
+                          <option key={grado.id} value={grado.grado}>
+                            {grado.grado}
+                          </option>
+                        ))}
+                    </select>
+                  )}
+                </label>
               </article>
             </form>
 

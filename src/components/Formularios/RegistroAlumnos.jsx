@@ -8,9 +8,10 @@ import "./styles/RegistroAlumnos.css";
 import IsLoading from "../shared/isLoading";
 
 const RegistroAlumnos = () => {
-  const PATH_INSCRIPCIONES = "/inscripcion";
   const PATH_COURSES = "/courses";
   const PATH_VARIABLES = "/variables";
+  const PATH_VALIDATE = "/validate";
+  const PATH_INSCRIPCIONES = "/inscripcion";
 
   const dispatch = useDispatch();
   const { code } = useParams();
@@ -18,17 +19,13 @@ const RegistroAlumnos = () => {
   const [idCourse, setIdCourse] = useState();
   const [course, getCourse, , , , , isLoading, , , ,] = useCrud();
   const [variables, getVariables] = useCrud();
-  const [
-    response,
-    getInscripcion,
-    postInscripcion,
-    ,
-    ,
-    ,
-    isLoading2,
-    newInscripcion,
-  ] = useCrud();
-  const [usuarioExistente, setUsuarioExistente] = useState(null);
+  const [, , postValidate, , , , , validate] = useCrud();
+
+  const [, , postInscripcion, , , error, isLoading2, newInscripcion] =
+    useCrud();
+  const [inscripcionExistente, setInscripcionExistente] = useState(null);
+  const [userValidacion, setUserValidacion] = useState(null);
+  const [userRegister, setUserRegister] = useState(null);
 
   const {
     register,
@@ -38,16 +35,27 @@ const RegistroAlumnos = () => {
   } = useForm();
 
   useEffect(() => {
-    getInscripcion(PATH_INSCRIPCIONES);
     getCourse(PATH_COURSES);
     getVariables(PATH_VARIABLES);
   }, []);
 
   useEffect(() => {
+    if (error) {
+      const message = error.response?.data?.message ?? "Error inesperado";
+      dispatch(
+        showAlert({
+          message: `⚠️ ${message}`,
+          alertType: 1,
+        })
+      );
+    }
+  }, [error]);
+
+  useEffect(() => {
     if (newInscripcion) {
       dispatch(
         showAlert({
-          message: `⚠️ Estimad@ ${newInscripcion.nombres} ${newInscripcion.apellidos}, se realizo tu inscripción correctamente`,
+          message: `⚠️ Estimad@ ${newInscripcion.user.firstName} ${newInscripcion.user.lastName}, se realizo tu inscripción correctamente`,
           alertType: 2,
         })
       );
@@ -93,18 +101,48 @@ const RegistroAlumnos = () => {
       .join(" ");
   };
 
+  const submitVal = (data) => {
+    const body = { ...data, code };
+    postValidate(PATH_VALIDATE, body);
+  };
+
+  useEffect(() => {
+    if (validate) {
+      setUserValidacion(validate);
+      setUserRegister(validate.user);
+    }
+  }, [validate]);
+
+  useEffect(() => {
+    // Si está inscrito
+    if (validate?.enrolled) {
+      setInscripcionExistente(validate.user);
+      setUserValidacion(null);
+      dispatch(
+        showAlert({
+          message: "⚠️ Ya estás inscrito en este curso.",
+          alertType: 1,
+        })
+      );
+    }
+  }, [validate, dispatch]);
+
   const submit = (data) => {
     // Ajustar nombres y apellidos
-    const nombreFormateado = capitalizeWords(data.nombres);
-    const apellidoFormateado = capitalizeWords(data.apellidos);
+    const nombreFormateado = data.nombres ? capitalizeWords(data.nombres) : "";
+    const apellidoFormateado = data.apellidos
+      ? capitalizeWords(data.apellidos)
+      : "";
 
     // Ajustar email a minúsculas y quitar espacios al inicio/final
-    const emailFormateado = data.email.trim().toLowerCase();
-    const confirmEmailFormateado = data.confirmEmail.trim().toLowerCase();
+    const emailFormateado = data.email ? data.email.trim().toLowerCase() : "";
+    const confirmEmailFormateado = data.confirmEmail
+      ? data.confirmEmail.trim().toLowerCase()
+      : "";
 
     // Validaciones con datos formateados
-    
-    const cedulaLimpia = data.cedula.trim().replace(/\D/g, ""); 
+
+    const cedulaLimpia = data.cedula.trim().replace(/\D/g, "");
     const isValidCedula = validarCedula(cedulaLimpia);
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailFormateado);
     const celularLimpio = data.celular.replace(/\D/g, ""); // Elimina todo lo que no sea dígito
@@ -117,14 +155,21 @@ const RegistroAlumnos = () => {
           alertType: 1,
         })
       );
+
     if (!isValidEmail)
       return dispatch(
         showAlert({ message: "⚠️ El email es incorrecto.", alertType: 1 })
       );
-    if (emailFormateado !== confirmEmailFormateado)
+
+    if (!userRegister && emailFormateado !== confirmEmailFormateado) {
       return dispatch(
-        showAlert({ message: "⚠️ Los correos no coinciden.", alertType: 1 })
+        showAlert({
+          message: "⚠️ Su correo no coincide con el correo de validación.",
+          alertType: 1,
+        })
       );
+    }
+
     if (!isValidCellular)
       return dispatch(
         showAlert({
@@ -134,57 +179,139 @@ const RegistroAlumnos = () => {
         })
       );
 
-    const yaRegistradoPorCedula = response?.find(
-      (r) => r.cedula === data.cedula && r.courseId === idCourse
-    );
-    if (yaRegistradoPorCedula) {
-      setUsuarioExistente(yaRegistradoPorCedula);
-      return dispatch(
-        showAlert({
-          message: "⚠️ Ya estás inscrito en este curso.",
-          alertType: 1,
-        })
-      );
-    }
-
-    const yaRegistradoPorEmail = response?.find(
-      (r) => r.email === emailFormateado && r.courseId === idCourse
-    );
-    if (yaRegistradoPorEmail) {
-      return dispatch(
-        showAlert({
-          message:
-            "⚠️ Este correo ya fue usado para registrarse en este curso.",
-          alertType: 1,
-        })
-      );
-    }
-
     const body = {
       ...data,
-      cedula: cedulaLimpia,
-      nombres: nombreFormateado,
-      apellidos: apellidoFormateado,
-      email: emailFormateado,
+      cedula: userRegister?.cI ? userRegister.cI : cedulaLimpia,
+      nombres: userRegister?.firstName
+        ? userRegister.firstName
+        : nombreFormateado,
+      apellidos: userRegister?.lastName
+        ? userRegister.lastName
+        : apellidoFormateado,
+      email: userRegister?.email ? userRegister.email : emailFormateado,
+      grado: userRegister?.grado ? userRegister.grado : data.grado,
+      subsistema: userRegister?.subsistema
+        ? userRegister.subsistema
+        : data.subsistema,
+
       confirmEmail: confirmEmailFormateado,
       curso: code,
       courseId: idCourse,
     };
 
     postInscripcion(PATH_INSCRIPCIONES, body);
+    setUserValidacion();
     reset();
   };
 
   const cursoActivo = course.find((c) => c.sigla === code);
 
-  if (cursoActivo) {
+  if (!cursoActivo) {
     return (
-      <div
-        className="registro_container"
-        style={{ backgroundImage: `url(/images/fondo_${code}.jpg)` }}
-      >
-        {isLoading2 && <IsLoading />}
+      <div className="registro_container curso_no_encontrado">
+        {isLoading && <IsLoading />}
 
+        <div className="mensaje_curso_caja">
+          <h2>❌ Curso no disponible</h2>
+          <p>
+            El curso con el código <strong>{code}</strong> no se encuentra
+            disponible o no existe en nuestra base de datos.
+          </p>
+          <p>Por favor verifica el enlace o contacta con el administrador.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="registro_container"
+      style={{ backgroundImage: `url(/images/fondo_${code}.jpg)` }}
+    >
+      {isLoading2 && <IsLoading />}
+
+      {!userValidacion ? (
+        <div className="registro_wrapper">
+          <div className="registro_left animate_slide_left">
+            <form
+              className="formulario_registro_val"
+              onSubmit={handleSubmit(submitVal)}
+            >
+              <div className="felicitacion_mensaje">
+                <h2>✉️ Verifica tu inscripción</h2>
+                <p>
+                  Ingresa tu correo electrónico para comprobar si ya te
+                  encuentras inscrito en este curso o si deseas registrarte para
+                  iniciar tu formación.
+                </p>
+                <p>
+                  🔎 Si ya tienes una inscripción, te mostraremos tus datos y el
+                  estado de tu participación.
+                </p>
+                <p>
+                  🚀 Si aún no te has inscrito, podrás hacerlo fácilmente y
+                  comenzar tu aprendizaje con nosotros.
+                </p>
+                <p>
+                  ¡El primer paso para avanzar en tu capacitación está aquí! 💡
+                </p>
+              </div>
+
+              <div className="form_column">
+                <label>
+                  Email:
+                  <input type="email" required {...register("email")} />
+                </label>
+
+                <div className="form_button_inscripcion">
+                  <button className="btn_inscripcion" type="submit">
+                    🚀 Verificar
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div className="registro_right animate_slide_right">
+            {cursoActivo && (
+              <div className="curso_fondo">
+                <div className="curso_overlay">
+                  <h2>{cursoActivo.nombre}</h2>
+                  <p>{cursoActivo.objetivo}</p>
+                </div>
+                <div
+                  className="curso_imagen"
+                  style={{
+                    backgroundImage: `url(/images/${code}.jpg)`,
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          {inscripcionExistente && (
+            <div className="usuario_existente">
+              <h3>Ya estás registrado en este curso:</h3>
+              <p>
+                <strong>Nombres:</strong> {inscripcionExistente.firstName}{" "}
+                {inscripcionExistente.lastName}
+              </p>
+              <p>
+                <strong>Email:</strong> {inscripcionExistente.email}
+              </p>
+
+              <button
+                onClick={() => {
+                  setInscripcionExistente(null);
+                  setUserValidacion(null);
+                  setUserRegister(null);
+                }}
+              >
+                Cerrar
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
         <div className="registro_wrapper">
           <div className="registro_left animate_slide_left">
             <form
@@ -192,71 +319,129 @@ const RegistroAlumnos = () => {
               onSubmit={handleSubmit(submit)}
             >
               <div className="form_column">
-                <label>
-                  Grado:
-                  <select required {...register("grado")}>
-                    <option value="">Seleccione una opción</option>
-                    {[
-                      ...new Set(variables.map((v) => v.grado).filter(Boolean)),
-                    ].map((grado, i) => (
-                      <option key={i} value={grado}>
-                        {grado}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                {userRegister && (
+                  <div className="incripcion_existente">
+                    <h3>✅ Usuario Existente</h3>
+                    <p>
+                      <strong>Nombres:</strong> {userRegister.firstName}
+                    </p>
+                    <p>
+                      <strong>Apellidos:</strong> {userRegister.lastName}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {userRegister.email}
+                    </p>
+                  </div>
+                )}
+
+                {!userRegister && (
+                  <>
+                    <label>
+                      Confirmar Email:
+                      <input
+                        type="email"
+                        required
+                        {...register("confirmEmail")}
+                      />
+                    </label>
+
+                    <label>
+                      Nombres:
+                      <input
+                        placeholder="Nombres completos (tildes y ñ si aplica)"
+                        required
+                        {...register("nombres")}
+                      />
+                    </label>
+                    <label>
+                      Apellidos:
+                      <input
+                        placeholder="Apellidos completos (tildes y ñ si aplica)"
+                        required
+                        {...register("apellidos")}
+                      />
+                    </label>
+                  </>
+                )}
 
                 <label>
-                  Nombres:
-                  <input
-                    placeholder="Nombres completos (tildes y ñ si aplica)"
-                    required
-                    {...register("nombres")}
-                  />
-                </label>
-                <label>
-                  Apellidos:
-                  <input
-                    placeholder="Apellidos completos (tildes y ñ si aplica)"
-                    required
-                    {...register("apellidos")}
-                  />
+                  Grado:
+                  {userRegister?.grado ? (
+                    <input
+                      type="text"
+                      value={userRegister.grado}
+                      readOnly
+                      className="form_input" // igual que Cédula
+                    />
+                  ) : (
+                    <select
+                      required
+                      {...register("grado")}
+                      className="form_input"
+                    >
+                      <option value="">Seleccione una opción</option>
+                      {[
+                        ...new Set(
+                          variables.map((v) => v.grado).filter(Boolean)
+                        ),
+                      ].map((grado, i) => (
+                        <option key={i} value={grado}>
+                          {grado}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </label>
 
                 <label>
                   Cédula:
-                  <input required {...register("cedula")} />
+                  <input
+                    required
+                    {...register("cedula")}
+                    defaultValue={userRegister?.cI || ""}
+                    readOnly={!!userRegister?.cI} // solo readonly si ya tiene valor
+                  />
                 </label>
 
-                <label>
-                  Email:
-                  <input type="email" required {...register("email")} />
-                </label>
-                <label>
-                  Confirmar Email:
-                  <input type="email" required {...register("confirmEmail")} />
-                </label>
-              </div>
-              <div className="form_column">
                 <label>
                   Celular:
-                  <input required {...register("celular")} />
+                  <input
+                    required
+                    {...register("celular")}
+                    defaultValue={userRegister?.cellular || ""}
+                    readOnly={!!userRegister?.cellular} // solo readonly si ya hay celular
+                  />
                 </label>
+              </div>
 
+              <div className="form_column">
                 <label>
                   Eje Policial:
-                  <select required {...register("subsistema")}>
-                    <option value="">Seleccione una opción</option>
-                    {[
-                      ...new Set(
-                        variables.map((v) => v.subsistema).filter(Boolean)
-                      ),
-                    ].map((subsistema, i) => (
-                      <option key={i} value={subsistema}>
-                        {subsistema}
-                      </option>
-                    ))}
-                  </select>
+                  {userRegister?.subsistema ? (
+                    <input
+                      type="text"
+                      value={userRegister.subsistema}
+                      readOnly
+                      className="form_input"
+                    />
+                  ) : (
+                    <select
+                      required
+                      {...register("subsistema")}
+                      className="form_input"
+                    >
+                      <option value="">Seleccione una opción</option>
+                      {[
+                        ...new Set(
+                          variables.map((v) => v.subsistema).filter(Boolean)
+                        ),
+                      ].map((subsistema, i) => (
+                        <option key={i} value={subsistema}>
+                          {subsistema}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </label>
 
                 <div className="form_check_container">
@@ -304,38 +489,8 @@ const RegistroAlumnos = () => {
               </div>
             )}
           </div>
-
-          {usuarioExistente && (
-            <div className="usuario_existente">
-              <h3>Ya estás registrado en este curso:</h3>
-              <p>
-                <strong>Nombre:</strong> {usuarioExistente.nombres}
-              </p>
-              <p>
-                <strong>Email:</strong> {usuarioExistente.email}
-              </p>
-              <p>
-                <strong>Celular:</strong> {usuarioExistente.celular}
-              </p>
-              <button onClick={() => setUsuarioExistente(null)}>Cerrar</button>
-            </div>
-          )}
         </div>
-      </div>
-    );
-  }
-  return (
-    <div className="registro_container curso_no_encontrado">
-      {isLoading && <IsLoading />}
-
-      <div className="mensaje_curso_caja">
-        <h2>❌ Curso no disponible</h2>
-        <p>
-          El curso con el código <strong>{code}</strong> no se encuentra
-          disponible o no existe en nuestra base de datos.
-        </p>
-        <p>Por favor verifica el enlace o contacta con el administrador.</p>
-      </div>
+      )}
     </div>
   );
 };

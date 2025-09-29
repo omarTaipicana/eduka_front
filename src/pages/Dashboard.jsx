@@ -19,20 +19,20 @@ import useCrud from "../hooks/useCrud";
 import CustomLabel from "../components/Home/CustomLabel";
 
 const Dashboard = () => {
-  const [inscripciones, getInscripciones] = useCrud();
-  const PATH = "/inscripcion";
-  const PATH_PAGOS = "/pagos";
-  const [pagos, getPago] = useCrud();
-  const pago = pagos.filter((p) => p.confirmacion === true);
+  const [inscripcionDashboard, getInscipcionDashboard,,,,,isLoading] = useCrud();
+  const [pagoDashboard, getPagoDashboard,,,,,isLoading2] = useCrud();
 
   const [activeSection, setActiveSection] = useState("resumen");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [verificadoFiltro, setVerificadoFiltro] = useState("todos");
-  const [cursoFiltro, setCursoFiltro] = useState("todos");
+
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
+
+  const [verificadoFiltro, setVerificadoFiltro] = useState("todos");
+  const [cursoFiltro, setCursoFiltro] = useState("todos");
   const [fechaDesdePagos, setFechaDesdePagos] = useState("");
   const [fechaHastaPagos, setFechaHastaPagos] = useState("");
+
   const [fechaDesdeInscripciones, setFechaDesdeInscripciones] = useState("");
   const [fechaHastaInscripciones, setFechaHastaInscripciones] = useState("");
 
@@ -40,9 +40,16 @@ const Dashboard = () => {
   const hamburgerRef = useRef();
 
   useEffect(() => {
-    getInscripciones(PATH);
-    getPago(PATH_PAGOS);
-  }, []);
+    getInscipcionDashboard(
+      `/inscripcion_dashboard?desde=${fechaDesdeInscripciones}&hasta=${fechaHastaInscripciones}`
+    );
+  }, [fechaDesdeInscripciones, fechaHastaInscripciones]);
+
+  useEffect(() => {
+    getPagoDashboard(
+      `/pagos_dashboard?desde=${fechaDesdePagos}&hasta=${fechaHastaPagos}&curso=${cursoFiltro}&verificado=${verificadoFiltro}`
+    );
+  }, [fechaHastaPagos, fechaDesdePagos, cursoFiltro, verificadoFiltro]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -68,117 +75,14 @@ const Dashboard = () => {
     };
   }, [menuOpen]);
 
-  // Helper función para obtener fecha local YYYY-MM-DD en UTC-5 (Ecuador)
-  const fechaLocalISO = (fechaISO) => {
-    const fechaObj = new Date(fechaISO);
-    // Ajuste para UTC -5:
-    // Opcionalmente podrías ajustar con fechaObj.setHours(fechaObj.getHours() - 5)
-    // Pero Date() interpreta la fecha en local, por eso usamos getFullYear y demás:
-    const year = fechaObj.getFullYear();
-    const month = (fechaObj.getMonth() + 1).toString().padStart(2, "0");
-    const day = fechaObj.getDate().toString().padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  const totalInscritos = inscripciones?.length || 0;
-
-  // Total depositado para resumen general
-  const totalDepositado = pago?.reduce(
-    (acc, p) => acc + (p.valorDepositado || 0),
-    0
-  );
-
-  const contarPorGrado = (data) => {
-    const conteo = {};
-    data?.forEach((i) => {
-      conteo[i.grado] = (conteo[i.grado] || 0) + 1;
-    });
-    return Object.entries(conteo).map(([grado, cantidad]) => ({
-      grado,
-      cantidad,
-    }));
-  };
-
-  const contarPorSubsistema = (data) => {
-    const conteo = {};
-    data?.forEach((i) => {
-      conteo[i.subsistema] = (conteo[i.subsistema] || 0) + 1;
-    });
-    return Object.entries(conteo).map(([subsistema, cantidad]) => ({
-      subsistema,
-      cantidad,
-    }));
-  };
-
-  const contarPorFranjaHoraria = (data) => {
-    const franjas = [
-      { label: "00H-03H", from: 0, to: 3 },
-      { label: "04H-07H", from: 4, to: 7 },
-      { label: "08H-11H", from: 8, to: 11 },
-      { label: "12H-15H", from: 12, to: 15 },
-      { label: "16H-19H", from: 16, to: 19 },
-      { label: "20H-23H", from: 20, to: 23 },
-    ];
-    const conteo = franjas.map((franja) => ({ ...franja, cantidad: 0 }));
-    data?.forEach((i) => {
-      const hour = new Date(i.createdAt).getHours();
-      conteo.forEach((franja) => {
-        if (hour >= franja.from && hour <= franja.to) {
-          franja.cantidad++;
-        }
-      });
-    });
-    return conteo.map(({ label, cantidad }) => ({ label, value: cantidad }));
-  };
-
-  const contarPorFecha = (data) => {
-    const conteo = {};
-    data?.forEach((i) => {
-      const fechaClave = fechaLocalISO(i.createdAt);
-      conteo[fechaClave] = (conteo[fechaClave] || 0) + 1;
-    });
-    return Object.entries(conteo)
-      .map(([fecha, cantidad]) => ({ fecha, cantidad }))
-      .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-  };
-
-  // En tu componente, justo después de declarar fechaDesde y fechaHasta:
-
-  const inscritosFiltradosPorFecha =
-    inscripciones?.filter((i) => {
-      const fechaInscripcion = fechaLocalISO(i.createdAt);
-      return (
-        (!fechaDesde || fechaInscripcion >= fechaDesde) &&
-        (!fechaHasta || fechaInscripcion <= fechaHasta)
-      );
-    }) || [];
-
-  const pagosFiltradosPorFecha =
-    pago?.filter((p) => {
-      const fechaPago = fechaLocalISO(p.createdAt);
-      return (
-        (!fechaDesde || fechaPago >= fechaDesde) &&
-        (!fechaHasta || fechaPago <= fechaHasta)
-      );
-    }) || [];
-
-  const totalInscritosF = inscritosFiltradosPorFecha.length;
-
-  const inscritosFiltrados =
-    inscripciones?.filter((i) => {
-      const fecha = new Date(i.createdAt);
-      const desde = fechaDesdeInscripciones
-        ? new Date(fechaDesdeInscripciones)
-        : null;
-      const hasta = fechaHastaInscripciones
-        ? new Date(fechaHastaInscripciones)
-        : null;
-      return (!desde || fecha >= desde) && (!hasta || fecha <= hasta);
-    }) || [];
-
   const renderContent = () => {
     switch (activeSection) {
       case "resumen":
+        // Totales directos desde pagoDashboard
+        const totalInscritosF = inscripcionDashboard?.totalInscritos || 0;
+        const totalDepositado = pagoDashboard?.totalPagos || 0;
+        const totalCertificados = pagoDashboard?.totalPagosDinstint || 0;
+
         return (
           <section className="resumen">
             <h2>📋 Resumen General</h2>
@@ -196,7 +100,11 @@ const Dashboard = () => {
                 <input
                   type="date"
                   value={fechaDesde}
-                  onChange={(e) => setFechaDesde(e.target.value)}
+                  onChange={(e) => {
+                    setFechaDesde(e.target.value);
+                    setFechaDesdeInscripciones(e.target.value);
+                    setFechaDesdePagos(e.target.value);
+                  }}
                 />
               </div>
 
@@ -205,7 +113,11 @@ const Dashboard = () => {
                 <input
                   type="date"
                   value={fechaHasta}
-                  onChange={(e) => setFechaHasta(e.target.value)}
+                  onChange={(e) => {
+                    setFechaHasta(e.target.value);
+                    setFechaHastaInscripciones(e.target.value);
+                    setFechaHastaPagos(e.target.value);
+                  }}
                 />
               </div>
               <div>
@@ -213,6 +125,14 @@ const Dashboard = () => {
                   onClick={() => {
                     setFechaDesde("");
                     setFechaHasta("");
+
+                    setCursoFiltro("todos");
+                    setVerificadoFiltro("todos");
+                    setFechaDesdePagos("");
+                    setFechaHastaPagos("");
+
+                    setFechaDesdeInscripciones("");
+                    setFechaHastaInscripciones("");
                   }}
                   style={{
                     padding: "0.5rem 1rem",
@@ -239,28 +159,18 @@ const Dashboard = () => {
               <div className="summary-card-2">
                 <div>
                   <h3>Total depositado</h3>
-                  <p className="big-number">
-                    $
-                    {pagosFiltradosPorFecha
-                      .reduce((acc, p) => acc + (p.valorDepositado || 0), 0)
-                      .toFixed(2)}
-                  </p>
+                  <p className="big-number">${totalDepositado.toFixed(2)}</p>
                 </div>
 
                 <div>
                   <h3>Total Certificados</h3>
-                  <p className="big-number">
-                    {
-                      new Set(
-                        pagosFiltradosPorFecha.map((p) => p.inscripcionId)
-                      ).size
-                    }
-                  </p>
+                  <p className="big-number">{totalCertificados}</p>
                 </div>
               </div>
             </div>
           </section>
         );
+
       case "inscripciones":
         return (
           <section className="inscripciones">
@@ -289,6 +199,14 @@ const Dashboard = () => {
                 <button
                   className="btn-reset-filtros"
                   onClick={() => {
+                    setFechaDesde("");
+                    setFechaHasta("");
+
+                    setCursoFiltro("todos");
+                    setVerificadoFiltro("todos");
+                    setFechaDesdePagos("");
+                    setFechaHastaPagos("");
+
                     setFechaDesdeInscripciones("");
                     setFechaHastaInscripciones("");
                   }}
@@ -301,13 +219,15 @@ const Dashboard = () => {
 
             <div className="summary-card">
               <h3>Total de inscritos</h3>
-              <p className="big-number">{inscritosFiltrados.length}</p>
+              <p className="big-number">
+                {inscripcionDashboard.totalInscritos}
+              </p>
             </div>
 
             <div className="chart-box">
               <h4>Inscritos por grado</h4>
               <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={contarPorGrado(inscritosFiltrados)}>
+                <BarChart data={inscripcionDashboard.inscritosPorGrado}>
                   <XAxis dataKey="grado" />
                   <YAxis />
                   <Tooltip />
@@ -325,7 +245,7 @@ const Dashboard = () => {
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
-                    data={contarPorFranjaHoraria(inscritosFiltrados)}
+                    data={inscripcionDashboard.inscritosPorFranjaHoraria}
                     dataKey="value"
                     nameKey="label"
                     cx="50%"
@@ -334,7 +254,7 @@ const Dashboard = () => {
                     fill="#0053a0"
                     label
                   >
-                    {contarPorFranjaHoraria(inscritosFiltrados).map(
+                    {inscripcionDashboard.inscritosPorFranjaHoraria.map(
                       (entry, index) => (
                         <Cell
                           key={`cell-${index}`}
@@ -360,7 +280,7 @@ const Dashboard = () => {
             <div className="chart-box">
               <h4>Inscritos por subsistema</h4>
               <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={contarPorSubsistema(inscritosFiltrados)}>
+                <BarChart data={inscripcionDashboard.inscritosPorSubsistema}>
                   <XAxis dataKey="subsistema" />
                   <YAxis />
                   <Tooltip />
@@ -377,7 +297,7 @@ const Dashboard = () => {
               <h4>Evolutivo diario de inscripciones</h4>
               <ResponsiveContainer width="100%" height={250}>
                 <LineChart
-                  data={contarPorFecha(inscritosFiltrados)}
+                  data={inscripcionDashboard.inscritosPorDia}
                   margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
@@ -400,95 +320,47 @@ const Dashboard = () => {
         );
 
       case "pagos":
-        const cursosUnicos = [...new Set(pago?.map((p) => p.curso))];
-
-        const fechaLocalISO = (fechaUTC) => {
-          const fecha = new Date(fechaUTC);
-          fecha.setHours(fecha.getHours() - 5);
-          return fecha.toISOString().split("T")[0];
-        };
-
-        const pagosFiltrados =
-          pago?.filter((p) => {
-            const cumpleVerificado =
-              verificadoFiltro === "todos" ||
-              (verificadoFiltro === "verificados" && p.verificado) ||
-              (verificadoFiltro === "no_verificados" && !p.verificado);
-
+        // Cursos únicos desde pagosPorCurso
+        const cursosUnicos =
+          pagoDashboard?.pagosPorCurso?.map((c) => c.curso) || [];
+       
+       // Filtro por verificación y curso
+        const pagosPorCursoFiltrados =
+          pagoDashboard?.pagosPorCurso?.filter((p) => {
             const cumpleCurso =
               cursoFiltro === "todos" || p.curso === cursoFiltro;
-
-            const fechaPago = fechaLocalISO(p.createdAt);
-            const cumpleFechaDesde =
-              !fechaDesdePagos || fechaPago >= fechaDesdePagos;
-            const cumpleFechaHasta =
-              !fechaHastaPagos || fechaPago <= fechaHastaPagos;
-
-            return (
-              cumpleVerificado &&
-              cumpleCurso &&
-              cumpleFechaDesde &&
-              cumpleFechaHasta
-            );
+            // Para verificación, asumimos que ya está contado en pagosPorCurso
+            const cumpleVerificado = true; // no hay verificado aquí, ajusta si traes ese dato
+            return cumpleCurso && cumpleVerificado;
           }) || [];
 
-        const countMonedas = pagosFiltrados.filter((p) => p.moneda).length;
-        const countDistintivos = pagosFiltrados.filter(
-          (p) => p.distintivo
-        ).length;
-        const totalMonedas = countMonedas * 15;
-        const totalDistintivos = countDistintivos * 10;
-        const totalConceptos = totalMonedas + totalDistintivos;
+        // Conteo Distintivo vs Moneda
+        const conteoDistMoneda = pagoDashboard?.conteoDistMoneda || [];
 
-        const totalPagos = pagosFiltrados.reduce(
-          (acc, p) => acc + (p.valorDepositado || 0),
-          0
-        );
+        // Total recaudado por conceptos
+        const totalMonedas = pagoDashboard?.totalMonedas || 0;
+        const totalDistintivos = pagoDashboard?.totalDistintivos || 0;
+        const totalConceptos = pagoDashboard?.totalConceptos || 0;
+        const totalPagos = pagoDashboard?.totalPagos || 0;
+        const pagosPorGrado = pagoDashboard?.pagosPorGrado || [];
 
-        const conteoDistMoneda = [
-          { name: "Distintivo", value: countDistintivos },
-          { name: "Moneda", value: countMonedas },
-        ];
 
-        const pagosPorFechaMap = {};
-        pagosFiltrados.forEach((p) => {
-          const fecha = fechaLocalISO(p.createdAt);
-          pagosPorFechaMap[fecha] =
-            (pagosPorFechaMap[fecha] || 0) + (p.valorDepositado || 0);
+        // Evolutivo diario de pagos
+        const pagosPorFecha = pagoDashboard?.pagosPorFecha || [];
+
+        // Pagos por grado: si tu backend no los envía, puedes derivarlos de pagosPorCursoFiltrados
+        const pagosPorGradoMap = {};
+        pagosPorCursoFiltrados.forEach((p) => {
+          const grado = p.grado || "Sin grado"; // ajusta si el dato viene
+          pagosPorGradoMap[grado] = (pagosPorGradoMap[grado] || 0) + 1;
         });
-        const pagosPorFecha = Object.entries(pagosPorFechaMap)
-          .map(([fecha, total]) => ({ fecha, total }))
-          .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-
-        const gradoPagosCount = {};
-        pagosFiltrados.forEach((p) => {
-          const inscrip = inscripciones?.find((i) => i.id === p.inscripcionId);
-          if (inscrip) {
-            gradoPagosCount[inscrip.grado] =
-              (gradoPagosCount[inscrip.grado] || 0) + 1;
-          }
-        });
-        const pagosPorGrado = Object.entries(gradoPagosCount).map(
-          ([grado, cantidad]) => ({ grado, cantidad })
-        );
+     
 
         return (
           <section className="pagos">
             <h2>💳 Pagos</h2>
 
             <div className="filtro-container">
-              <div>
-                <label>Filtrar por verificación:</label>
-                <select
-                  value={verificadoFiltro}
-                  onChange={(e) => setVerificadoFiltro(e.target.value)}
-                >
-                  <option value="todos">Todos</option>
-                  <option value="verificados">Verificados</option>
-                  <option value="no_verificados">No Verificados</option>
-                </select>
-              </div>
-
               <div>
                 <label>Filtrar por curso:</label>
                 <select
@@ -501,6 +373,18 @@ const Dashboard = () => {
                       {curso}
                     </option>
                   ))}
+                </select>
+              </div>
+
+              <div>
+                <label>Filtrar por verificación:</label>
+                <select
+                  value={verificadoFiltro}
+                  onChange={(e) => setVerificadoFiltro(e.target.value)}
+                >
+                  <option value="todos">Todos</option>
+                  <option value="verificados">Verificados</option>
+                  <option value="no_verificados">No Verificados</option>
                 </select>
               </div>
 
@@ -526,10 +410,16 @@ const Dashboard = () => {
                 <button
                   className="btn-reset-filtros"
                   onClick={() => {
-                    setVerificadoFiltro("todos");
+                    setFechaDesde("");
+                    setFechaHasta("");
+
                     setCursoFiltro("todos");
+                    setVerificadoFiltro("todos");
                     setFechaDesdePagos("");
                     setFechaHastaPagos("");
+
+                    setFechaDesdeInscripciones("");
+                    setFechaHastaInscripciones("");
                   }}
                   type="button"
                 >
@@ -548,9 +438,7 @@ const Dashboard = () => {
                 <div>
                   <h3>Total Certificados</h3>
                   <p className="big-number">
-                    {pagosFiltrados
-                      ? new Set(pagosFiltrados.map((p) => p.inscripcionId)).size
-                      : 0}
+                    {pagoDashboard?.totalPagosDinstint || 0}
                   </p>
                 </div>
               </div>
@@ -594,8 +482,7 @@ const Dashboard = () => {
                   ${totalConceptos.toFixed(2)}
                 </p>
                 <p style={{ fontSize: "0.9rem", color: "#555" }}>
-                  (Moneda: {countMonedas} × $15 = ${totalMonedas}, Distintivo:{" "}
-                  {countDistintivos} × $10 = ${totalDistintivos})
+                  (Moneda: {totalMonedas}, Distintivo: {totalDistintivos})
                 </p>
               </div>
             </div>
@@ -617,17 +504,6 @@ const Dashboard = () => {
                     dataKey="total"
                     stroke="#8884d8"
                     strokeWidth={2}
-                    label={({ x, y, value }) => (
-                      <text
-                        x={x}
-                        y={y - 10}
-                        fill="#666"
-                        fontSize={12}
-                        textAnchor="middle"
-                      >
-                        ${value.toFixed(2)}
-                      </text>
-                    )}
                     dot={{ r: 4 }}
                   />
                 </LineChart>

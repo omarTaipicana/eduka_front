@@ -54,6 +54,7 @@ const useAuth = () => {
       })
       .catch((err) => {
         setError(err);
+        console.log(err)
         localStorage.removeItem("token");
         // localStorage.removeItem("user");
       })
