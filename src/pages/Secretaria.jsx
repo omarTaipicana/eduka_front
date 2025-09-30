@@ -27,8 +27,8 @@ const Secretaria = () => {
   const [busquedaRealizada, setBusquedaRealizada] = useState(false);
 
   const [cedulaTemporal, setCedulaTemporal] = useState("");
-  const [paginaActual, setPaginaActual] = useState(1); // page
-  const [limit, setLimit] = useState(10); // cantidad de registros por página
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [limit, setLimit] = useState(15);
   const [editInscripcionId, setEditInscripcionId] = useState();
   const inputNombreDiferido = useDeferredValue(inputNombre);
 
@@ -36,17 +36,33 @@ const Secretaria = () => {
   const [nombreCertificado, setNombreCertificado] = useState("");
   const [sugerenciasCertificados, setSugerenciasCertificados] = useState([]);
   const [certificadosFiltrados, setCertificadosFiltrados] = useState([]);
+  const [usersData, setUsersData] = useState([]);
+
+  
+
+  // Debajo de tus useState, define:
+  const cargaTimeoutRef = useRef(null);
 
   const debounceRef = useRef(null);
 
   const observacionRef = useRef(null);
   const cedulaRef = useRef();
 
-  const registrosPorPagina = 10;
+  const registrosPorPagina = 15;
 
   const [sugerencias, setSugerencias] = useState([]);
   const menuRef = useRef();
   const hamburgerRef = useRef();
+
+  const cargarDatosConQuery = (pagina, limite) => {
+    if (cargaTimeoutRef.current) clearTimeout(cargaTimeoutRef.current);
+
+    cargaTimeoutRef.current = setTimeout(() => {
+      getUsers(
+        `/users?cedula=${cedulaBuscada}&search=${nombreBuscado}&notaFinal=${filtroDetalle}&acces=${filtroUltimoAcceso}&pagos=${filtroPago}&certificado=${filtroCertificado}&curso=${filtroCurso}&page=${pagina}&limit=${limite}`
+      );
+    }, 2000); // 2 segundos de espera
+  };
 
   const PATH_INSCRIPCIONES = "/inscripcion";
   const PATH_COURSES = "/courses";
@@ -58,21 +74,70 @@ const Secretaria = () => {
 
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
 
+
+// Refs para mantener los filtros y la página actual
+const filtrosRef = useRef({
+  cedula: "",
+  nombre: "",
+  notaFinal: "",
+  acces: "",
+  pagos: "",
+  certificado: "",
+  curso: "",
+  page: 1,
+});
+
+// Cada vez que cambie un filtro o página, actualizamos la ref
+useEffect(() => {
+  filtrosRef.current = {
+    cedula: cedulaBuscada,
+    nombre: nombreBuscado,
+    notaFinal: filtroDetalle,
+    acces: filtroUltimoAcceso,
+    pagos: filtroPago,
+    certificado: filtroCertificado,
+    curso: filtroCurso,
+    page: paginaActual,
+  };
+}, [
+  cedulaBuscada,
+  nombreBuscado,
+  filtroDetalle,
+  filtroUltimoAcceso,
+  filtroPago,
+  filtroCertificado,
+  filtroCurso,
+  paginaActual,
+]);
+
+// useEffect para socket
+useEffect(() => {
+  const socket = io(BASEURL);
+
+  const actualizarUsuarios = () => {
+    const f = filtrosRef.current; // usamos los valores actuales de los filtros
+    getUsers(
+      `/users?cedula=${f.cedula}&search=${f.nombre}&notaFinal=${f.notaFinal}&acces=${f.acces}&pagos=${f.pagos}&certificado=${f.certificado}&curso=${f.curso}&page=${f.page}`
+    );
+  };
+
+  socket.on("inscripcionActualizada", actualizarUsuarios);
+
+  // Carga inicial
+  actualizarUsuarios();
+
+  return () => {
+    socket.disconnect();
+  };
+}, []);
+
+
+
+
   useEffect(() => {
     getUsers(
       `/users?cedula=${cedulaBuscada}&search=${nombreBuscado}&notaFinal=${filtroDetalle}&acces=${filtroUltimoAcceso}&pagos=${filtroPago}&certificado=${filtroCertificado}&curso=${filtroCurso}&page=${paginaActual}`
     );
-    const socket = io(BASEURL);
-    socket.on("inscripcionActualizada", () => {
-      getUsers(
-        `/users?cedula=${cedulaBuscada}&search=${nombreBuscado}&notaFinal=${filtroDetalle}&acces=${filtroUltimoAcceso}&pagos=${filtroPago}&certificado=${filtroCertificado}&curso=${filtroCurso}&page=${paginaActual}`
-      );
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-    `/users?cedula=${cedulaBuscada}&search=${nombreBuscado}&notaFinal=${filtroDetalle}&acces=${filtroUltimoAcceso}&pagos=${filtroPago}&certificado=${filtroCertificado}&curso=${filtroCurso}&page=${paginaActual}`;
   }, [
     cedulaBuscada,
     nombreBuscado,
@@ -81,9 +146,20 @@ const Secretaria = () => {
     filtroCertificado,
     filtroCurso,
     paginaActual,
+    filtroUltimoAcceso,
   ]);
 
-  console.log(paginaActual);
+  useEffect(() => {
+    setPaginaActual(1); // 👈 cada vez que cambian los filtros, resetear a 1
+  }, [
+    cedulaBuscada,
+    nombreBuscado,
+    filtroDetalle,
+    filtroPago,
+    filtroCertificado,
+    filtroCurso,
+    filtroUltimoAcceso,
+  ]);
 
   const users = usersAll
     ? {
@@ -171,12 +247,13 @@ const Secretaria = () => {
     setCedulaBuscada("");
     setCedulaBuscada("");
     setNombreBuscado("");
+    setInputNombre("");
     setFiltroPago("");
     setFiltroCertificado("");
     setFiltroCurso("");
     setFiltroDetalle("");
     setFiltroUltimoAcceso("");
-    setBusquedaRealizada(false)
+    setBusquedaRealizada(false);
     setSugerencias([]);
   };
 
@@ -188,15 +265,13 @@ const Secretaria = () => {
   };
 
   const handleBuscar = () => {
-    const cedulaValor = cedulaRef.current?.value || "";
-
-    setCedulaBuscada(cedulaValor);
+    setCedulaBuscada(cedulaBuscada);
     setNombreBuscado(inputNombre);
     setSugerencias([]); // opcionalmente vacía sugerencias
     setBusquedaRealizada(true); // ✅ activamos la visualización de resultados
   };
 
-  const totalPaginas = Math.ceil(users?.total / registrosPorPagina);
+  const totalPaginas = Math.ceil((users?.total || 0) / registrosPorPagina);
 
   const iniciarEdicion = (inscripcion) => {
     setEditInscripcionId(inscripcion.id);
@@ -555,8 +630,8 @@ const Secretaria = () => {
                     className="buscador_input"
                   >
                     <option value="">Acceso a Acadex</option>
-                    <option value="sin_usuario">Accede</option>
-                    <option value="no_ingresa">No Accede</option>
+                    <option value="true">Accede</option>
+                    <option value="false">No Accede</option>
                   </select>
                 </div>
 
@@ -631,71 +706,75 @@ const Secretaria = () => {
               </div>
 
               <div className="paginacion">
-                <button
-                  onClick={() => {
-                    setPaginaActual(1);
-                    cargarDatosConQuery(1, limit);
-                  }}
-                  disabled={paginaActual === 1}
-                >
-                  «
-                </button>
+                <div className="paginacion-flechas izquierda">
+                  <button
+                    onClick={() => {
+                      setPaginaActual(1);
+                      cargarDatosConQuery(1, limit);
+                    }}
+                    disabled={paginaActual === 1}
+                  >
+                    «
+                  </button>
+                  <button
+                    onClick={() => {
+                      const prev = Math.max(paginaActual - 1, 1);
+                      setPaginaActual(prev);
+                      cargarDatosConQuery(prev, limit);
+                    }}
+                    disabled={paginaActual === 1}
+                  >
+                    ‹
+                  </button>
+                </div>
 
-                <button
-                  onClick={() => {
-                    const prev = Math.max(paginaActual - 1, 1);
-                    setPaginaActual(prev);
-                    cargarDatosConQuery(prev, limit);
-                  }}
-                  disabled={paginaActual === 1}
-                >
-                  ‹
-                </button>
+                <div className="paginacion-numeros">
+                  {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+                    .filter(
+                      (n) =>
+                        n === 1 ||
+                        n === totalPaginas ||
+                        (n >= paginaActual - 2 && n <= paginaActual + 2)
+                    )
+                    .map((n, idx, arr) => (
+                      <React.Fragment key={n}>
+                        {idx > 0 && n - arr[idx - 1] > 1 && (
+                          <span className="puntos">...</span>
+                        )}
+                        <button
+                          onClick={() => {
+                            setPaginaActual(n);
+                            cargarDatosConQuery(n, limit);
+                          }}
+                          className={paginaActual === n ? "pagina-actual" : ""}
+                        >
+                          {n}
+                        </button>
+                      </React.Fragment>
+                    ))}
+                </div>
 
-                {Array.from({ length: totalPaginas }, (_, i) => i + 1)
-                  .filter(
-                    (n) =>
-                      n === 1 ||
-                      n === totalPaginas ||
-                      (n >= paginaActual - 2 && n <= paginaActual + 2)
-                  )
-                  .map((n, idx, arr) => (
-                    <React.Fragment key={n}>
-                      {idx > 0 && n - arr[idx - 1] > 1 && (
-                        <span className="puntos">...</span>
-                      )}
-                      <button
-                        onClick={() => {
-                          setPaginaActual(n);
-                          cargarDatosConQuery(n, limit);
-                        }}
-                        className={paginaActual === n ? "pagina-actual" : ""}
-                      >
-                        {n}
-                      </button>
-                    </React.Fragment>
-                  ))}
-
-                <button
-                  onClick={() => {
-                    const next = Math.min(paginaActual + 1, totalPaginas);
-                    setPaginaActual(next);
-                    cargarDatosConQuery(next, limit);
-                  }}
-                  disabled={paginaActual === totalPaginas}
-                >
-                  ›
-                </button>
-
-                <button
-                  onClick={() => {
-                    setPaginaActual(totalPaginas);
-                    cargarDatosConQuery(totalPaginas, limit);
-                  }}
-                  disabled={paginaActual === totalPaginas}
-                >
-                  »
-                </button>
+                <div className="paginacion-flechas derecha">
+                  <button
+                    onClick={() => {
+                      const next = Math.min(paginaActual + 1, totalPaginas);
+                      setPaginaActual(next);
+                      cargarDatosConQuery(next, limit);
+                    }}
+                    disabled={paginaActual === totalPaginas}
+                  >
+                    ›
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPaginaActual(totalPaginas);
+                      cargarDatosConQuery(totalPaginas, limit);
+                    }}
+                    disabled={paginaActual === totalPaginas}
+                  >
+                    »
+                  </button>
+                </div>
               </div>
 
               <div className="numero-registros">
