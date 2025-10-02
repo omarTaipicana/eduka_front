@@ -9,6 +9,8 @@ import IsLoading from "../components/shared/isLoading";
 import { useForm } from "react-hook-form";
 
 const BASEURL = import.meta.env.VITE_API_URL;
+const SUPERADMIN = import.meta.env.VITE_CI_SUPERADMIN;
+
 const PATH_PAGOS = "/pagos";
 
 const ValidacionPago = () => {
@@ -26,6 +28,7 @@ const ValidacionPago = () => {
 
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
   const [pagoDashboard, getPagoDashboard, , , , , isLoading3] = useCrud();
+  const [inscripcion, getInscripcion] = useCrud();
 
   const [showDelete, setShowDelete] = useState(false);
   const [pagoIdDelete, setPagoIdDelete] = useState(null);
@@ -123,6 +126,7 @@ const ValidacionPago = () => {
 
   useEffect(() => {
     getPago(PATH_PAGOS);
+    getInscripcion("/inscripcion");
     loggedUser();
 
     getPagoDashboard(`/pagos_dashboard`);
@@ -262,6 +266,44 @@ const ValidacionPago = () => {
 
     // Descargar archivo con nombre
     saveAs(blob, "pagos_filtrados.xlsx");
+  };
+
+  const descargarExcelInscripcion = () => {
+    // Preparar datos para Excel
+const datosExcel = [...inscripcion] // clonamos para no alterar el original
+  .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)) // orden ascendente
+  // .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // orden descendente
+  .map((i) => {
+    return {
+      id: i?.id || "",
+      grado: i?.user?.grado || "",
+      nombres: i?.user?.firstName || "",
+      apellidos: i?.user?.lastName || "",
+      cedula: i?.user?.cI || "",
+      email: i?.user?.email || "",
+      aceptacion: i?.aceptacion || "",
+      curso: i?.curso || "",
+      userId: i?.userId || "",
+      createdAt: i?.createdAt || "",
+      updatedAt: i?.updatedAt || "",
+      courseId: i?.courseId || "",
+      observacion: i?.observacion || "",
+      usuarioEdicion: i?.usuarioEdicion || "",
+    };
+  });
+
+
+    // Crear libro y hoja
+    const ws = XLSX.utils.json_to_sheet(datosExcel);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "inscripcion");
+
+    // Generar archivo excel en formato blob
+    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([wbout], { type: "application/octet-stream" });
+
+    // Descargar archivo con nombre
+    saveAs(blob, "inscripciones.xlsx");
   };
 
   const renderContent = () => {
@@ -1132,13 +1174,25 @@ const ValidacionPago = () => {
                 Eliminar filtros
               </button>
 
-              <button
-                onClick={descargarExcel}
-                className="vp-btn-clear"
-                style={{ height: "2.5rem", marginLeft: "auto" }}
-              >
-                Descragra
-              </button>
+              {SUPERADMIN === user?.cI && (
+                <button
+                  onClick={descargarExcel}
+                  className="vp-btn-clear"
+                  style={{ height: "2.5rem", marginLeft: "auto" }}
+                >
+                  Descragra Pagos
+                </button>
+              )}
+
+              {SUPERADMIN === user?.cI && (
+                <button
+                  onClick={descargarExcelInscripcion}
+                  className="vp-btn-clear"
+                  style={{ height: "2.5rem", marginLeft: "auto" }}
+                >
+                  Descragra Inscripciones
+                </button>
+              )}
             </div>
 
             <div style={{ fontWeight: 600, margin: "10px 0" }}>

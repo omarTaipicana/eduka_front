@@ -15,6 +15,8 @@ const BASEURL = import.meta.env.VITE_API_URL;
 const Secretaria = () => {
   const [activeSection, setActiveSection] = useState("inscripciones");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [inputNombre, setInputNombre] = useState("");
+  const [inputCedula, setInputCedula] = useState();
   const [cedulaBuscada, setCedulaBuscada] = useState("");
   const [nombreBuscado, setNombreBuscado] = useState("");
   const [filtroPago, setFiltroPago] = useState("");
@@ -22,7 +24,6 @@ const Secretaria = () => {
   const [filtroDetalle, setFiltroDetalle] = useState("");
   const [filtroUltimoAcceso, setFiltroUltimoAcceso] = useState("");
   const [filtroCurso, setFiltroCurso] = useState("");
-  const [inputNombre, setInputNombre] = useState("");
   const [busquedaTemporal, setBusquedaTemporal] = useState("");
   const [busquedaRealizada, setBusquedaRealizada] = useState(false);
 
@@ -37,8 +38,6 @@ const Secretaria = () => {
   const [sugerenciasCertificados, setSugerenciasCertificados] = useState([]);
   const [certificadosFiltrados, setCertificadosFiltrados] = useState([]);
   const [usersData, setUsersData] = useState([]);
-
-  
 
   // Debajo de tus useState, define:
   const cargaTimeoutRef = useRef(null);
@@ -70,69 +69,72 @@ const Secretaria = () => {
   const PATH_USERS = "/users";
 
   const [courses, getCourses] = useCrud();
-  const [usersAll, getUsers] = useCrud();
+  const [usersAll, getUsers, , , , , isLoading] = useCrud();
 
   const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
 
+  // Refs para mantener los filtros y la página actual
+  const filtrosRef = useRef({
+    cedula: "",
+    nombre: "",
+    notaFinal: "",
+    acces: "",
+    pagos: "",
+    certificado: "",
+    curso: "",
+    page: 1,
+  });
 
-// Refs para mantener los filtros y la página actual
-const filtrosRef = useRef({
-  cedula: "",
-  nombre: "",
-  notaFinal: "",
-  acces: "",
-  pagos: "",
-  certificado: "",
-  curso: "",
-  page: 1,
-});
+  // Cada vez que cambie un filtro o página, actualizamos la ref
+  useEffect(() => {
+    filtrosRef.current = {
+      cedula: cedulaBuscada,
+      nombre: nombreBuscado,
+      notaFinal: filtroDetalle,
+      acces: filtroUltimoAcceso,
+      pagos: filtroPago,
+      certificado: filtroCertificado,
+      curso: filtroCurso,
+      page: paginaActual,
+    };
+  }, [
+    cedulaBuscada,
+    nombreBuscado,
+    filtroDetalle,
+    filtroUltimoAcceso,
+    filtroPago,
+    filtroCertificado,
+    filtroCurso,
+    paginaActual,
+  ]);
 
-// Cada vez que cambie un filtro o página, actualizamos la ref
-useEffect(() => {
-  filtrosRef.current = {
-    cedula: cedulaBuscada,
-    nombre: nombreBuscado,
-    notaFinal: filtroDetalle,
-    acces: filtroUltimoAcceso,
-    pagos: filtroPago,
-    certificado: filtroCertificado,
-    curso: filtroCurso,
-    page: paginaActual,
-  };
-}, [
-  cedulaBuscada,
-  nombreBuscado,
-  filtroDetalle,
-  filtroUltimoAcceso,
-  filtroPago,
-  filtroCertificado,
-  filtroCurso,
-  paginaActual,
-]);
+  // useEffect para socket
+  useEffect(() => {
+    const socket = io(BASEURL);
 
-// useEffect para socket
-useEffect(() => {
-  const socket = io(BASEURL);
+    const actualizarUsuarios = () => {
+      const f = filtrosRef.current; // usamos los valores actuales de los filtros
+      getUsers(
+        `/users?cedula=${f.cedula}&search=${f.nombre}&notaFinal=${f.notaFinal}&acces=${f.acces}&pagos=${f.pagos}&certificado=${f.certificado}&curso=${f.curso}&page=${f.page}`
+      );
+    };
 
-  const actualizarUsuarios = () => {
-    const f = filtrosRef.current; // usamos los valores actuales de los filtros
-    getUsers(
-      `/users?cedula=${f.cedula}&search=${f.nombre}&notaFinal=${f.notaFinal}&acces=${f.acces}&pagos=${f.pagos}&certificado=${f.certificado}&curso=${f.curso}&page=${f.page}`
-    );
-  };
+    // Escuchar tanto actualizaciones como creaciones
+    socket.on("inscripcionActualizada", actualizarUsuarios);
+    socket.on("inscripcionCreada", actualizarUsuarios);
+    socket.on("pagoCreado", actualizarUsuarios);
 
-  socket.on("inscripcionActualizada", actualizarUsuarios);
+    // Carga inicial
+    actualizarUsuarios();
 
-  // Carga inicial
-  actualizarUsuarios();
+    return () => {
+      socket.off("inscripcionActualizada", actualizarUsuarios);
+      socket.off("inscripcionCreada", actualizarUsuarios);
+      socket.on("pagoCreado", actualizarUsuarios);
 
-  return () => {
-    socket.disconnect();
-  };
-}, []);
-
-
-
+      socket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     getUsers(
@@ -239,6 +241,8 @@ useEffect(() => {
     };
   }, [menuOpen]);
 
+  // ---------------------------------------------------------------------------------------------------------------------
+
   const limpiarFiltros = () => {
     // cedulaRef.current.value = "";
 
@@ -248,6 +252,7 @@ useEffect(() => {
     setCedulaBuscada("");
     setNombreBuscado("");
     setInputNombre("");
+    setInputCedula("");
     setFiltroPago("");
     setFiltroCertificado("");
     setFiltroCurso("");
@@ -265,7 +270,7 @@ useEffect(() => {
   };
 
   const handleBuscar = () => {
-    setCedulaBuscada(cedulaBuscada);
+    setCedulaBuscada(inputCedula);
     setNombreBuscado(inputNombre);
     setSugerencias([]); // opcionalmente vacía sugerencias
     setBusquedaRealizada(true); // ✅ activamos la visualización de resultados
@@ -296,7 +301,7 @@ useEffect(() => {
     } finally {
     }
   };
-
+  // ----------------------------------------------------------------------------------------------------
   const handleBuscarCertificados = () => {
     const resultados = certificados.filter((c) => {
       const matchCedula =
@@ -348,7 +353,7 @@ useEffect(() => {
 
   return (
     <div>
-      {isLoadingI && <IsLoading />}
+      {(isLoadingI || (isLoading && busquedaRealizada)) && <IsLoading />}
 
       <div className="secretaria_container">
         <button
@@ -403,8 +408,8 @@ useEffect(() => {
                     type="text"
                     className="buscador_input"
                     placeholder="🔍 Buscar por cédula"
-                    value={cedulaBuscada}
-                    onChange={(e) => setCedulaBuscada(e.target.value)}
+                    value={inputCedula}
+                    onChange={(e) => setInputCedula(e.target.value)}
                   />
                 </div>
 
@@ -447,141 +452,146 @@ useEffect(() => {
               </div>
 
               {/* Resultados */}
-              {!busquedaRealizada ? (
-                inputNombre.trim() === "" && cedulaBuscada.trim() === "" ? (
-                  <p className="mensaje_sin_resultados">
-                    ✍️ Por favor, ingrese un criterio de búsqueda para comenzar.
-                  </p>
+              {busquedaRealizada && !isLoading ? (
+                users.total > 0 ? (
+                  users?.data?.map((i) => {
+                    return (
+                      <div key={i.id} className="grid_dos_columnas">
+                        <div className="card_inscripcion">
+                          <h3>
+                            {i.firstName} {i.lastName}
+                          </h3>
+                          <p>
+                            <strong>Cédula:</strong> {i.cI}
+                          </p>
+                          <p>
+                            <strong>Celular:</strong> {i.cellular}
+                          </p>
+                          <p>
+                            <strong>Subsistema:</strong> {i.subsistema}
+                          </p>
+                          <p>
+                            <strong>Grado:</strong> {i.grado}
+                          </p>
+                          <p>
+                            <strong>Email:</strong> {i.email}
+                          </p>
+                          <article>
+                            <strong>Cursos Inscrito:</strong> <br />
+                            {i.courses && i.courses.length > 0
+                              ? i.courses.map((curso) => (
+                                  <div
+                                    key={curso.id}
+                                    style={{ marginBottom: "8px" }}
+                                  >
+                                    <hr />
+                                    <span>✅ {curso.fullname}</span>
+                                    <br />
+                                    <span>
+                                      <strong>Fecha de inscripción:</strong>{" "}
+                                      {curso.createdAt
+                                        ? new Date(curso.createdAt)
+                                            .toLocaleString("es-EC", {
+                                              year: "numeric",
+                                              month: "2-digit",
+                                              day: "2-digit",
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                              second: "2-digit",
+                                              hour12: false,
+                                              timeZone: "America/Guayaquil",
+                                            })
+                                            .replace(",", "")
+                                        : "No encontrado"}
+                                    </span>
+                                    <br />
+                                    <span>
+                                      {" "}
+                                      <strong>Matricula:</strong>{" "}
+                                      {curso.matriculado
+                                        ? "Matriculado en Acadex"
+                                        : "Aun no registra matricula"}
+                                    </span>{" "}
+                                    <br />
+                                    <span>
+                                      {" "}
+                                      <strong>Calificación:</strong>{" "}
+                                      {curso.grades["Nota Final"]}
+                                    </span>
+                                    <br />
+                                    <span></span>
+                                    <hr />
+                                  </div>
+                                ))
+                              : "No encontrado"}
+                          </article>
+                        </div>
+
+                        <div className="card_cursos_inscripcion">
+                          {i.courses && i.courses.length > 0 ? (
+                            i.courses.map((curso) => (
+                              <div key={curso.id} className="curso_detalle">
+                                <h4>📚 {curso.fullname}</h4>
+
+                                <div className="card_pagos_inscripcion">
+                                  <h4>💳 Pagos relacionados</h4>
+                                  {curso.pagos && curso.pagos.length > 0 ? (
+                                    curso.pagos.map((pago, idx) => (
+                                      <div
+                                        key={pago.id}
+                                        className="pago_detalle"
+                                      >
+                                        <p>
+                                          <strong>Pago #{idx + 1}</strong>
+                                        </p>
+                                        <p>Monto: ${pago.valorDepositado}</p>
+                                        {pago.moneda && (
+                                          <p>💰 Incluye moneda</p>
+                                        )}
+                                        {pago.distintivo && (
+                                          <p>🎖️ Incluye distintivo</p>
+                                        )}
+                                        <p>
+                                          Estado:{" "}
+                                          {pago.verificado
+                                            ? "✅ Verificado"
+                                            : "⏳ Por verificar"}
+                                        </p>
+                                        {pago.pagoUrl && (
+                                          <a
+                                            className="btn_ver_comprobante"
+                                            href={pago.pagoUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                          >
+                                            Ver comprobante
+                                          </a>
+                                        )}
+                                        <hr />
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <p>Sin pagos registrados.</p>
+                                  )}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p>No hay cursos registrados.</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
                 ) : (
                   <p className="mensaje_sin_resultados">
                     🔍 No se encontraron resultados para esta búsqueda.
                   </p>
                 )
               ) : (
-                users?.data?.map((i) => {
-                  return (
-                    <div key={i.id} className="grid_dos_columnas">
-                      <div className="card_inscripcion">
-                        <h3>
-                          {i.firstName} {i.lastName}
-                        </h3>
-                        <p>
-                          <strong>Cédula:</strong> {i.cI}
-                        </p>
-                        <p>
-                          <strong>Celular:</strong> {i.cellular}
-                        </p>
-                        <p>
-                          <strong>Subsistema:</strong> {i.subsistema}
-                        </p>
-                        <p>
-                          <strong>Grado:</strong> {i.grado}
-                        </p>
-                        <p>
-                          <strong>Email:</strong> {i.email}
-                        </p>
-                        <article>
-                          <strong>Cursos Inscrito:</strong> <br />
-                          {i.courses && i.courses.length > 0
-                            ? i.courses.map((curso) => (
-                                <div
-                                  key={curso.id}
-                                  style={{ marginBottom: "8px" }}
-                                >
-                                  <hr />
-                                  <span>✅ {curso.fullname}</span>
-                                  <br />
-                                  <span>
-                                    <strong>Fecha de inscripción:</strong>{" "}
-                                    {curso.createdAt
-                                      ? new Date(curso.createdAt)
-                                          .toLocaleString("es-EC", {
-                                            year: "numeric",
-                                            month: "2-digit",
-                                            day: "2-digit",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            second: "2-digit",
-                                            hour12: false,
-                                            timeZone: "America/Guayaquil",
-                                          })
-                                          .replace(",", "")
-                                      : "No encontrado"}
-                                  </span>
-                                  <br />
-                                  <span>
-                                    {" "}
-                                    <strong>Matricula:</strong>{" "}
-                                    {curso.matriculado
-                                      ? "Matriculado en Acadex"
-                                      : "Aun no registra matricula"}
-                                  </span>{" "}
-                                  <br />
-                                  <span>
-                                    {" "}
-                                    <strong>Calificación:</strong>{" "}
-                                    {curso.grades["Nota Final"]}
-                                  </span>
-                                  <br />
-                                  <span></span>
-                                  <hr />
-                                </div>
-                              ))
-                            : "No encontrado"}
-                        </article>
-                      </div>
-
-                      <div className="card_cursos_inscripcion">
-                        {i.courses && i.courses.length > 0 ? (
-                          i.courses.map((curso) => (
-                            <div key={curso.id} className="curso_detalle">
-                              <h4>📚 {curso.fullname}</h4>
-
-                              <div className="card_pagos_inscripcion">
-                                <h4>💳 Pagos relacionados</h4>
-                                {curso.pagos && curso.pagos.length > 0 ? (
-                                  curso.pagos.map((pago, idx) => (
-                                    <div key={pago.id} className="pago_detalle">
-                                      <p>
-                                        <strong>Pago #{idx + 1}</strong>
-                                      </p>
-                                      <p>Monto: ${pago.valorDepositado}</p>
-                                      {pago.moneda && <p>💰 Incluye moneda</p>}
-                                      {pago.distintivo && (
-                                        <p>🎖️ Incluye distintivo</p>
-                                      )}
-                                      <p>
-                                        Estado:{" "}
-                                        {pago.verificado
-                                          ? "✅ Verificado"
-                                          : "⏳ Por verificar"}
-                                      </p>
-                                      {pago.pagoUrl && (
-                                        <a
-                                          className="btn_ver_comprobante"
-                                          href={pago.pagoUrl}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                        >
-                                          Ver comprobante
-                                        </a>
-                                      )}
-                                      <hr />
-                                    </div>
-                                  ))
-                                ) : (
-                                  <p>Sin pagos registrados.</p>
-                                )}
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <p>No hay cursos registrados.</p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
+                <p className="mensaje_sin_resultados">
+                  ✍️ Por favor, ingrese un criterio de búsqueda para comenzar.
+                </p>
               )}
             </>
           )}
