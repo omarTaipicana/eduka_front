@@ -19,14 +19,32 @@ import useCrud from "../hooks/useCrud";
 import CustomLabel from "../components/Home/CustomLabel";
 
 const Dashboard = () => {
-  const [inscripcionDashboard, getInscipcionDashboard,,,,,isLoading] = useCrud();
-  const [pagoDashboard, getPagoDashboard,,,,,isLoading2] = useCrud();
+  const [courses, getCourses] = useCrud();
+
+  const [inscripcionDashboard, getInscipcionDashboard, , , , , isLoading] =
+    useCrud();
+  const [pagoDashboard, getPagoDashboard, , , , , isLoading2] = useCrud();
+  const [
+    inscripcionDashboardObservacion,
+    getInscipcionDashboardObservacion,
+    ,
+    ,
+    ,
+    ,
+    isLoading3,
+  ] = useCrud();
 
   const [activeSection, setActiveSection] = useState("resumen");
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
+
+  const [usuarioEdicion, setusUarioEdicion] = useState("todos");
+  const [cursoFiltroObservaciones, setCursoFiltroObservaciones] =
+    useState("todos");
+  const [fechaDesdeObservaciones, setFechaDesdeObservaciones] = useState("");
+  const [fechaHastaObservaciones, setFechaHastaObservaciones] = useState("");
 
   const [verificadoFiltro, setVerificadoFiltro] = useState("todos");
   const [cursoFiltro, setCursoFiltro] = useState("todos");
@@ -38,12 +56,28 @@ const Dashboard = () => {
 
   const menuRef = useRef();
   const hamburgerRef = useRef();
+  const PATH_COURSES = "/courses";
+
+  useEffect(() => {
+    getCourses(PATH_COURSES);
+  }, []);
 
   useEffect(() => {
     getInscipcionDashboard(
       `/inscripcion_dashboard?desde=${fechaDesdeInscripciones}&hasta=${fechaHastaInscripciones}`
     );
   }, [fechaDesdeInscripciones, fechaHastaInscripciones]);
+
+  useEffect(() => {
+    getInscipcionDashboardObservacion(
+      `/inscripcion_dashboard_observacion?desde=${fechaDesdeObservaciones}&hasta=${fechaHastaObservaciones}&curso=${cursoFiltroObservaciones}&usuarioEdicion=${usuarioEdicion}`
+    );
+  }, [
+    fechaDesdeObservaciones,
+    fechaHastaObservaciones,
+    cursoFiltroObservaciones,
+    usuarioEdicion,
+  ]);
 
   useEffect(() => {
     getPagoDashboard(
@@ -323,8 +357,8 @@ const Dashboard = () => {
         // Cursos únicos desde pagosPorCurso
         const cursosUnicos =
           pagoDashboard?.pagosPorCurso?.map((c) => c.curso) || [];
-       
-       // Filtro por verificación y curso
+
+        // Filtro por verificación y curso
         const pagosPorCursoFiltrados =
           pagoDashboard?.pagosPorCurso?.filter((p) => {
             const cumpleCurso =
@@ -344,7 +378,6 @@ const Dashboard = () => {
         const totalPagos = pagoDashboard?.totalPagos || 0;
         const pagosPorGrado = pagoDashboard?.pagosPorGrado || [];
 
-
         // Evolutivo diario de pagos
         const pagosPorFecha = pagoDashboard?.pagosPorFecha || [];
 
@@ -354,7 +387,6 @@ const Dashboard = () => {
           const grado = p.grado || "Sin grado"; // ajusta si el dato viene
           pagosPorGradoMap[grado] = (pagosPorGradoMap[grado] || 0) + 1;
         });
-     
 
         return (
           <section className="pagos">
@@ -529,12 +561,193 @@ const Dashboard = () => {
         );
 
       case "calificaciones":
+        // Transformamos la data para los gráficos
+        const observacionesPorDiaChart = (
+          inscripcionDashboardObservacion?.observacionesPorDiaOrdenado || []
+        ).map((o) => ({
+          fecha: o.cantidad.fecha,
+          cantidad: o.cantidad.cantidad,
+        }));
+
+        const observacionesPorFranjaChart = (
+          inscripcionDashboardObservacion?.observacionesPorFranjaHoraria || []
+        ).map((f) => ({
+          label: f.label,
+          value: f.value,
+        }));
+
+        const observacionesPorUsuarioChart = (
+          inscripcionDashboardObservacion?.observacionesPorUsuario || []
+        ).map((u) => ({
+          usuario: u.usuario,
+          cantidad: u.cantidad,
+        }));
+
+        const totalObservaciones =
+          inscripcionDashboardObservacion?.totalObservaciones || 0;
+
+        // Cursos únicos (opcional si tu backend los devuelve)
+        const cursosUnicosObs = []; // si no los tienes, puedes dejar vacío
+
+        // Usuarios edición únicos
+        const usuariosUnicos =
+          inscripcionDashboardObservacion?.observacionesPorUsuario?.map(
+            (u) => u.usuario
+          ) || [];
+
         return (
-          <section className="calificaciones">
-            <h2>📝 Calificaciones</h2>
-            <p>Próximamente podrás ver calificaciones.</p>
+          <section className="observaciones">
+            <h2>📝 Lamadas</h2>
+
+            {/* Filtros */}
+            <div className="filtro-container">
+              <div>
+                <label>Filtrar por curso:</label>
+                <select
+                  value={cursoFiltroObservaciones}
+                  onChange={(e) => setCursoFiltroObservaciones(e.target.value)}
+                >
+                  <option value="todos">Todos</option>
+                  {courses?.map((c) => (
+                    <option key={c.id} value={c.sigla}>
+                      {c.sigla}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label>Filtrar por usuario edición:</label>
+                <select
+                  value={usuarioEdicion}
+                  onChange={(e) => setusUarioEdicion(e.target.value)}
+                >
+                  <option value="todos">Todos</option>
+                  {usuariosUnicos.map((u, index) => (
+                    <option key={index} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label>Desde:</label>
+                <input
+                  type="date"
+                  value={fechaDesdeObservaciones}
+                  onChange={(e) => setFechaDesdeObservaciones(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label>Hasta:</label>
+                <input
+                  type="date"
+                  value={fechaHastaObservaciones}
+                  onChange={(e) => setFechaHastaObservaciones(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <button
+                  className="btn-reset-filtros"
+                  onClick={() => {
+                    setusUarioEdicion("todos");
+                    setCursoFiltroObservaciones("todos");
+                    setFechaDesdeObservaciones("");
+                    setFechaHastaObservaciones("");
+                  }}
+                  type="button"
+                >
+                  Eliminar filtros
+                </button>
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="summary-card">
+              <h3>Total de observaciones</h3>
+              <p className="big-number">{totalObservaciones}</p>
+            </div>
+
+            {/* Observaciones por día */}
+            <div className="chart-box">
+              <h4>Evolutivo diario de observaciones</h4>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart
+                  data={observacionesPorDiaChart}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="fecha" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="cantidad"
+                    stroke="#ff7c43"
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Observaciones por franja horaria */}
+            <div className="chart-box">
+              <h4>Franja horaria de observaciones</h4>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={observacionesPorFranjaChart}
+                    dataKey="value"
+                    nameKey="label"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
+                  >
+                    {observacionesPorFranjaChart.map((entry, index) => (
+                      <Cell
+                        key={index}
+                        fill={
+                          [
+                            "#0077cc",
+                            "#00a8e8",
+                            "#00d4ff",
+                            "#1de9b6",
+                            "#ffd166",
+                            "#ff7c43",
+                          ][index % 6]
+                        }
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Observaciones por usuarioEdicion */}
+            <div className="chart-box">
+              <h4>Observaciones por usuario edición</h4>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={observacionesPorUsuarioChart}>
+                  <XAxis dataKey="usuario" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar
+                    dataKey="cantidad"
+                    fill="#0077cc"
+                    label={{ position: "insideTop", fill: "#fff" }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </section>
         );
+
       case "progreso":
         return (
           <section className="progreso">
@@ -593,7 +806,7 @@ const Dashboard = () => {
           }`}
           onClick={() => setActiveSection("calificaciones")}
         >
-          📝 Calificaciones
+          📝 Llamadas{" "}
         </button>
         <button
           className={`menu-btn ${activeSection === "progreso" ? "active" : ""}`}
