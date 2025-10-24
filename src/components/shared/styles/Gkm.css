@@ -14,7 +14,7 @@
 }
 
 .gkm_img {
-  width: 20em;
+  width: 30em;
   cursor: pointer;
   transition: transform 0.3s ease;
   border-radius: 0.5em;
@@ -44,4 +44,10 @@
 .gkm_close:hover {
   background: #f44336;
   color: #fff;
+}
+
+@media (max-width: 768px) {
+  .gkm_img {
+    width: 20em;
+  }
 }
