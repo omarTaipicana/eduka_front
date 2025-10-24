@@ -22,6 +22,7 @@ import ValidacionPago from "./pages/ValidacionPago";
 import Dashboard from "./pages/Dashboard";
 import Secretaria from "./pages/Secretaria";
 import SecretariaRoutes from "./routes/SecretariaRoutes";
+import Gkm from "./components/shared/Gkm";
 
 const App = () => {
   const location = useLocation();
@@ -29,6 +30,7 @@ const App = () => {
   return (
     <div>
       {location.pathname !== "/" && <PrincipalHeader />}
+      <Gkm />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<Register />} />
