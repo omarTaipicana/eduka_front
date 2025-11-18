@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./styles/Gkm.css";
 
 const Gkm = () => {
-  const [showImage, setShowImage] = useState(true);
+  const [showImage, setShowImage] = useState(false);
 
   if (!showImage) return null;
 

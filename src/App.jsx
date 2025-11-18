@@ -30,7 +30,7 @@ const App = () => {
   return (
     <div>
       {location.pathname !== "/" && <PrincipalHeader />}
-      <Gkm />
+      {/* <Gkm /> */}
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<Register />} />
