@@ -163,27 +163,6 @@ const LandingPage = () => {
       >
         <h2>Nuestros Cursos</h2>
         <div className="curso_lista">
-          <Link to="/giscopensc">
-            <div className="curso_card giscopnsc">
-              <div className="curso_card_overlay">
-                <h3 className="curso_title">
-                  Gestión Integral de la Seguridad Ciudadana y el Orden Público
-                  con enfoque en Negociación en Situación de Crisis
-                </h3>
-                <p className="curso_description">
-                  Capacitar a los servidores policiales en la gestión integral
-                  de la seguridad ciudadana y el orden público, dotándolos de
-                  conocimientos teóricos, herramientas técnicas y habilidades
-                  prácticas para diseñar, implementar y evaluar políticas y
-                  estrategias efectivas que contribuyan a la prevención,
-                  investigación del delito, la reducción de la violencia y la
-                  construcción de entornos seguros y pacíficos para la
-                  ciudadanía.
-                </p>
-                <button className="curso_btn">Ver mas</button>
-              </div>
-            </div>
-          </Link>
           <Link to="/accv">
             <div className="curso_card accv">
               <div className="curso_card_overlay">
@@ -197,6 +176,19 @@ const LandingPage = () => {
                   los fenómenos delictivos, sus causas, consecuencias y las
                   dinámicas de victimización, promoviendo una atención ética,
                   interdisciplinaria y centrada en los derechos de las víctimas.
+                </p>
+                <button className="curso_btn">Ver mas</button>
+              </div>
+            </div>
+          </Link>
+          <Link to="/cdp">
+            <div className="curso_card giscopnsc">
+              <div className="curso_card_overlay">
+                <h3 className="curso_title">
+                  Curso de Prueba
+                </h3>
+                <p className="curso_description">
+                CURSO DE PRUEBAS
                 </p>
                 <button className="curso_btn">Ver mas</button>
               </div>

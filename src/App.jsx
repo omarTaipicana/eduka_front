@@ -23,6 +23,7 @@ import Dashboard from "./pages/Dashboard";
 import Secretaria from "./pages/Secretaria";
 import SecretariaRoutes from "./routes/SecretariaRoutes";
 import Gkm from "./components/shared/Gkm";
+import Cdp from "./components/Cursos/Cdp";
 
 const App = () => {
   const location = useLocation();
@@ -42,6 +43,7 @@ const App = () => {
         <Route path="/register_pago/:code" element={<RegistroPagos />} />
 
         <Route path="/giscopensc" element={<Giscopnsc />} />
+        <Route path="/cdp" element={<Cdp />} />
         <Route path="/accv" element={<Accv />} />
         <Route path="/login" element={<Login />} />
 
