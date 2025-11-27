@@ -2,16 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link,} from "react-router-dom";
 import "./Styles/Giscopnsc.css";
 import IsLoading from "../shared/isLoading";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `../../../files/pdf.worker.min.js`;
 
 const Cdp = () => {
-
-    const navigate = useNavigate();
-    const { code } = useParams();
     const urlRegister = `${location.protocol}//${location.host}/#/register_discente/cdp`;
     const urlPago = `${location.protocol}//${location.host}/#/register_pago/cdp`;
 
@@ -131,3 +128,4 @@ const Cdp = () => {
 };
 
 export default Cdp;
+

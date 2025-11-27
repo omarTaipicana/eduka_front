@@ -60,11 +60,16 @@
   font-size: 1.2rem;
 }
 
+.input_validacion {
+  font-size: 1em;
+}
+
 @keyframes fadeInContent {
   from {
     opacity: 0;
     transform: translateX(10px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -117,9 +122,11 @@
 .line1.open {
   transform: translateY(9px) rotate(45deg);
 }
+
 .line2.open {
   opacity: 0;
 }
+
 .line3.open {
   transform: translateY(-9px) rotate(-45deg);
 }
@@ -132,9 +139,11 @@
   background-color: #eaf1fb;
   border-radius: 8px;
   margin-bottom: 1rem;
-  flex-wrap: nowrap; /* <-- Para mantener en línea horizontal en escritorio */
+  flex-wrap: nowrap;
+  /* <-- Para mantener en línea horizontal en escritorio */
   align-items: flex-end;
-  overflow-x: auto; /* Si hay demasiados filtros en pantallas pequeñas */
+  overflow-x: auto;
+  /* Si hay demasiados filtros en pantallas pequeñas */
 }
 
 /* Cada filtro con label y control */
@@ -164,6 +173,7 @@
   outline-color: #0053a0;
   cursor: pointer;
 }
+
 .vp-filtro input[type="date"] {
   padding: 6px 8px;
   border-radius: 5px;
@@ -231,6 +241,7 @@
   margin: 0 auto;
   display: block;
 }
+
 /* Botones con un tamaño menor y padding ajustado */
 .vp-btn-edit,
 .vp-btn-save,
@@ -249,6 +260,7 @@
   color: white;
   font-size: 1em;
 }
+
 .vp-btn-edit:hover {
   background-color: #003d70;
 }
@@ -257,6 +269,7 @@
   background-color: #2e7d32;
   color: white;
 }
+
 .vp-btn-save:hover {
   background-color: #225522;
 }
@@ -265,6 +278,7 @@
   background-color: #b00020;
   color: white;
 }
+
 .vp-btn-cancel:hover {
   background-color: #7a0013;
 }
@@ -302,7 +316,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999; /* o más si es necesario */
+  z-index: 999;
+  /* o más si es necesario */
 }
 
 /* Contenido del modal */
@@ -353,7 +368,7 @@
   width: 3em;
 }
 
-.restaurar_btn{
+.restaurar_btn {
   width: 1.5em;
 }
 
@@ -412,6 +427,7 @@
   .vp-filtro {
     min-width: 100%;
   }
+
   /* Contenedor para la tabla con scroll horizontal */
   .vp-tabla-scroll {
     width: 100%;
@@ -421,8 +437,10 @@
 
   /* Tabla con ancho mínimo y fuente pequeña en móviles */
   .vp-pagos-table {
-    min-width: 800px; /* asegura que la tabla no colapse */
-    width: max-content; /* ajusta al contenido sin romper el diseño */
+    min-width: 800px;
+    /* asegura que la tabla no colapse */
+    width: max-content;
+    /* ajusta al contenido sin romper el diseño */
     font-size: 0.6rem;
   }
 }

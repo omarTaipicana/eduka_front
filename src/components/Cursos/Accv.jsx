@@ -2,14 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./Styles/Accv.css";
 import IsLoading from "../shared/isLoading";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `../../../files/pdf.worker.min.js`;
 
 const Accv = () => {
-  const navigate = useNavigate();
   const urlRegister = `${location.protocol}//${location.host}/#/register_discente/accv`;
   const urlPago = `${location.protocol}//${location.host}/#/register_pago/accv`;
 

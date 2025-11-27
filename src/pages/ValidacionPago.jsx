@@ -23,11 +23,10 @@ const ValidacionPago = () => {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
   } = useForm();
 
-  const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
-  const [pagoDashboard, getPagoDashboard, , , , , isLoading3] = useCrud();
+  const [, , , loggedUser, , , , , , , , , , user] = useAuth();
+  const [pagoDashboard, getPagoDashboard] = useCrud();
   const [inscripcion, getInscripcion] = useCrud();
 
   const [showDelete, setShowDelete] = useState(false);
@@ -41,24 +40,21 @@ const ValidacionPago = () => {
   const [
     pago,
     getPago,
-    postPago,
-    deletePagPro,
+    ,
+    ,
     updatePago,
-    error,
+    ,
     isLoading,
-    newReg,
-    deleteReg,
-    updateReg,
+    ,
+    ,
+    ,
     PagoPdf,
-    newPago,
+    ,
   ] = useCrud();
 
   const [editPagoId, setEditPagoId] = useState(null);
-  const [editValorDepositado, setEditValorDepositado] = useState("");
   const [observacion, setObservacion] = useState("");
   const [editVerificado, setEditVerificado] = useState(false);
-  const [editMoneda, setEditMoneda] = useState(false);
-  const [editDistintivo, setEditDistintivo] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
   const [editingEntregaId, setEditingEntregaId] = useState(null);
@@ -136,6 +132,8 @@ const ValidacionPago = () => {
     setEditPagoId(pago.id);
     reset({
       valorDepositado: pago.valorDepositado || "",
+      entidad: pago.entidad || "",
+      idDeposito: pago.idDeposito || "",
       verificado: pago.verificado || false,
       moneda: pago.moneda || false,
       distintivo: pago.distintivo || false,
@@ -145,11 +143,8 @@ const ValidacionPago = () => {
 
   const cancelarEdicion = () => {
     setEditPagoId(null);
-    setEditValorDepositado("");
     setObservacion("");
     setEditVerificado(false);
-    setEditMoneda(false);
-    setEditDistintivo(false);
   };
 
   const guardarEdicion = async (pagoId, data) => {
@@ -270,27 +265,27 @@ const ValidacionPago = () => {
 
   const descargarExcelInscripcion = () => {
     // Preparar datos para Excel
-const datosExcel = [...inscripcion] // clonamos para no alterar el original
-  .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)) // orden ascendente
-  // .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // orden descendente
-  .map((i) => {
-    return {
-      id: i?.id || "",
-      grado: i?.user?.grado || "",
-      nombres: i?.user?.firstName || "",
-      apellidos: i?.user?.lastName || "",
-      cedula: i?.user?.cI || "",
-      email: i?.user?.email || "",
-      aceptacion: i?.aceptacion || "",
-      curso: i?.curso || "",
-      userId: i?.userId || "",
-      createdAt: i?.createdAt || "",
-      updatedAt: i?.updatedAt || "",
-      courseId: i?.courseId || "",
-      observacion: i?.observacion || "",
-      usuarioEdicion: i?.usuarioEdicion || "",
-    };
-  });
+    const datosExcel = [...inscripcion] // clonamos para no alterar el original
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)) // orden ascendente
+      // .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // orden descendente
+      .map((i) => {
+        return {
+          id: i?.id || "",
+          grado: i?.user?.grado || "",
+          nombres: i?.user?.firstName || "",
+          apellidos: i?.user?.lastName || "",
+          cedula: i?.user?.cI || "",
+          email: i?.user?.email || "",
+          aceptacion: i?.aceptacion || "",
+          curso: i?.curso || "",
+          userId: i?.userId || "",
+          createdAt: i?.createdAt || "",
+          updatedAt: i?.updatedAt || "",
+          courseId: i?.courseId || "",
+          observacion: i?.observacion || "",
+          usuarioEdicion: i?.usuarioEdicion || "",
+        };
+      });
 
 
     // Crear libro y hoja
@@ -557,7 +552,9 @@ const datosExcel = [...inscripcion] // clonamos para no alterar el original
                       <th>Distintivo</th>
                       <th>Moneda</th>
                       <th>Valor Depositado</th>
-                      <th>Pago (comprobante)</th>
+                      <th>Entidad</th>
+                      <th>Id Pago</th>
+                      <th>Pago</th>
                       <th>Verificado</th>
                       <th>Observacion</th>
                       <th>Editor</th>
@@ -585,15 +582,7 @@ const datosExcel = [...inscripcion] // clonamos para no alterar el original
                             </td>
                             <td>{p.curso}</td>
                             <td style={{ textAlign: "center" }}>
-                              {isEditing ? (
-                                <input
-                                  type="checkbox"
-                                  checked={editDistintivo}
-                                  onChange={(e) =>
-                                    setEditDistintivo(e.target.checked)
-                                  }
-                                />
-                              ) : p.distintivo ? (
+                              {p.distintivo ? (
                                 "✅"
                               ) : (
                                 "❌"
@@ -601,15 +590,7 @@ const datosExcel = [...inscripcion] // clonamos para no alterar el original
                             </td>
 
                             <td style={{ textAlign: "center" }}>
-                              {isEditing ? (
-                                <input
-                                  type="checkbox"
-                                  checked={editMoneda}
-                                  onChange={(e) =>
-                                    setEditMoneda(e.target.checked)
-                                  }
-                                />
-                              ) : p.moneda ? (
+                              {p.moneda ? (
                                 "✅"
                               ) : (
                                 "❌"
@@ -617,19 +598,16 @@ const datosExcel = [...inscripcion] // clonamos para no alterar el original
                             </td>
 
                             <td>
-                              {isEditing ? (
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  value={editValorDepositado}
-                                  onChange={(e) =>
-                                    setEditValorDepositado(e.target.value)
-                                  }
-                                />
-                              ) : (
-                                `$${p.valorDepositado?.toFixed(2) || "0.00"}`
-                              )}
+                              ${p.valorDepositado?.toFixed(2) || "0.00"}
                             </td>
+                            <td>
+                              {p.entidad || "---"}
+                            </td>
+                            <td>
+                              {p.idDeposito || "---"}
+                            </td>
+
+
                             <td>
                               {p.pagoUrl ? (
                                 <a
@@ -748,6 +726,33 @@ const datosExcel = [...inscripcion] // clonamos para no alterar el original
                                 `$${p.valorDepositado?.toFixed(2) || "0.00"}`
                               )}
                             </td>
+
+                            <td>
+                              {isEditing ? (
+                                <input
+                                className = "input_validacion"
+                                  type="text"
+                                  {...register("entidad")}
+                                />
+                              ) : (
+                                `${p.entidad || "---"}`
+                              )}
+                            </td>
+
+                            <td>
+                              {isEditing ? (
+                                <input
+                                className = "input_validacion"
+                                  type="text"
+                                  {...register("idDeposito")}
+                                />
+                              ) : (
+                                `${p.idDeposito || "---"}`
+                              )}
+                            </td>
+
+
+
                             <td>
                               {p.pagoUrl ? (
                                 <a
@@ -777,6 +782,7 @@ const datosExcel = [...inscripcion] // clonamos para no alterar el original
                               {" "}
                               {isEditing ? (
                                 <input
+                                className = "input_validacion"
                                   type="text"
                                   {...register("observacion")}
                                 />
@@ -1305,41 +1311,36 @@ const datosExcel = [...inscripcion] // clonamos para no alterar el original
         <nav className={`vp-menu ${menuOpen ? "open" : ""}`} ref={menuRef}>
           <h3>📊 Menú Principal</h3>
           <button
-            className={`vp-menu-btn ${
-              activeSection === "resumen" ? "active" : ""
-            }`}
+            className={`vp-menu-btn ${activeSection === "resumen" ? "active" : ""
+              }`}
             onClick={() => setActiveSection("resumen")}
           >
             📋 Resumen General
           </button>
           <button
-            className={`vp-menu-btn ${
-              activeSection === "validarPagos" ? "active" : ""
-            }`}
+            className={`vp-menu-btn ${activeSection === "validarPagos" ? "active" : ""
+              }`}
             onClick={() => setActiveSection("validarPagos")}
           >
             ✅ Validar Pagos
           </button>
           <button
-            className={`vp-menu-btn ${
-              activeSection === "registrarEntregas" ? "active" : ""
-            }`}
+            className={`vp-menu-btn ${activeSection === "registrarEntregas" ? "active" : ""
+              }`}
             onClick={() => setActiveSection("registrarEntregas")}
           >
             🎁 Registrar Entregas de Distintivos
           </button>
           <button
-            className={`vp-menu-btn ${
-              activeSection === "listaPagos" ? "active" : ""
-            }`}
+            className={`vp-menu-btn ${activeSection === "listaPagos" ? "active" : ""
+              }`}
             onClick={() => setActiveSection("listaPagos")}
           >
             💳 Lista de Pagos
           </button>
           <button
-            className={`vp-menu-btn ${
-              activeSection === "listaInscritos" ? "active" : ""
-            }`}
+            className={`vp-menu-btn ${activeSection === "listaInscritos" ? "active" : ""
+              }`}
             onClick={() => setActiveSection("listaInscritos")}
           >
             📋 Lista de Inscritos
