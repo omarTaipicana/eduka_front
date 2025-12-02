@@ -12,6 +12,8 @@ const BASEURL = import.meta.env.VITE_API_URL;
 const SUPERADMIN = import.meta.env.VITE_CI_SUPERADMIN;
 
 const PATH_PAGOS = "/pagos";
+const PATH_VARIABLES = "/variables";
+
 
 const ValidacionPago = () => {
   const [activeSection, setActiveSection] = useState("resumen");
@@ -28,6 +30,8 @@ const ValidacionPago = () => {
   const [, , , loggedUser, , , , , , , , , , user] = useAuth();
   const [pagoDashboard, getPagoDashboard] = useCrud();
   const [inscripcion, getInscripcion] = useCrud();
+  const [variables, getVariables] = useCrud();
+
 
   const [showDelete, setShowDelete] = useState(false);
   const [pagoIdDelete, setPagoIdDelete] = useState(null);
@@ -122,6 +126,7 @@ const ValidacionPago = () => {
 
   useEffect(() => {
     getPago(PATH_PAGOS);
+    getVariables(PATH_VARIABLES);
     getInscripcion("/inscripcion");
     loggedUser();
 
@@ -729,11 +734,26 @@ const ValidacionPago = () => {
 
                             <td>
                               {isEditing ? (
-                                <input
-                                className = "input_validacion"
-                                  type="text"
+                                <select
+                                  required
                                   {...register("entidad")}
-                                />
+                                  className="slected_entidad"
+
+                                >
+                                  <option value="">Entidad</option>
+                                  {[
+                                    ...new Set(
+                                      variables.map((v) => v.entidad).filter(Boolean)
+                                    ),
+                                  ].map((entidad, i) => (
+                                    <option key={i} value={entidad}>
+                                      {entidad}
+                                    </option>
+                                  ))}
+                                </select>
+
+
+
                               ) : (
                                 `${p.entidad || "---"}`
                               )}
@@ -742,7 +762,7 @@ const ValidacionPago = () => {
                             <td>
                               {isEditing ? (
                                 <input
-                                className = "input_validacion"
+                                  className="input_validacion"
                                   type="text"
                                   {...register("idDeposito")}
                                 />
@@ -782,7 +802,7 @@ const ValidacionPago = () => {
                               {" "}
                               {isEditing ? (
                                 <input
-                                className = "input_validacion"
+                                  className="input_validacion"
                                   type="text"
                                   {...register("observacion")}
                                 />

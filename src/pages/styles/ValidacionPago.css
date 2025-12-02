@@ -64,6 +64,10 @@
   font-size: 1em;
 }
 
+.slected_entidad{
+  font-size: 0.7em;
+}
+
 @keyframes fadeInContent {
   from {
     opacity: 0;
