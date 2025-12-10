@@ -58,9 +58,68 @@ const Giscopnsc = () => {
         de la violencia y la construcción de entornos seguros y pacíficos para
         la ciudadanía.
       </section>
-      <section className="giscopnsc_section">
-        CURSO CERRADO
-      </section>
+
+      <div className="button_group">
+        <a
+          href="https://docs.google.com/forms/d/e/1FAIpQLScU-wtNwU8Nb1qSPIUURQc3ov9Yh4-xc_vqxWZH7gB6VQF-cg/viewform"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn_inscribirse"
+        >
+          Inscribirse
+        </a>
+        <a
+          href="https://docs.google.com/forms/d/e/1FAIpQLSeDNkytJEU_IlbXlj3SQN60YYcJFiC7jpzwxStdqaMjFULj8Q/viewform"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn_registrar_pago"
+        >
+          Registrar pago
+        </a>
+        <a
+          href="/files/giscopensc_c.pdf"
+          download="Brochure-Giscopensc.pdf"
+          className="btn_descargar_pdf"
+        >
+          Descargar PDF
+        </a>
+      </div>
+
+      <div className="pagination_controls">
+        <button onClick={goToPrevPage} disabled={pageNumber <= 1}>
+          Anterior
+        </button>
+        <span>
+          Página {pageNumber} de {numPages || "--"}
+        </span>
+        <button onClick={goToNextPage} disabled={pageNumber >= numPages}>
+          Siguiente
+        </button>
+      </div>
+
+      <div className="giscopnsc_container" ref={containerRef}>
+        <div className="pdf_container">
+          {" "}
+          <Document
+            file="/files/giscopensc_c.pdf"
+            onLoadSuccess={onDocumentLoadSuccess}
+            loading="Cargando PDF..."
+          >
+            <Page pageNumber={pageNumber} width={pdfWidth} />
+          </Document>
+        </div>
+        <div className="pagination_controls">
+          <button onClick={goToPrevPage} disabled={pageNumber <= 1}>
+            Anterior
+          </button>
+          <span>
+            Página {pageNumber} de {numPages || "--"}
+          </span>
+          <button onClick={goToNextPage} disabled={pageNumber >= numPages}>
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

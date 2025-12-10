@@ -8,9 +8,9 @@ import IsLoading from "../shared/isLoading";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `../../../files/pdf.worker.min.js`;
 
-const Cdp = () => {
-    const urlRegister = `${location.protocol}//${location.host}/#/register_discente/cdp`;
-    const urlPago = `${location.protocol}//${location.host}/#/register_pago/cdp`;
+const Ciccenic = () => {
+  const urlRegister = `${location.protocol}//${location.host}/#/register_discente/ciccenic`;
+    const urlPago = `${location.protocol}//${location.host}/#/register_pago/ciccenic`;
 
 
     const [numPages, setNumPages] = useState(null);
@@ -126,6 +126,4 @@ const Cdp = () => {
         </div>
     );
 };
-
-export default Cdp;
-
+export default Ciccenic

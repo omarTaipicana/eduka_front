@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import LandingPage from "./pages/LandingPage";
@@ -23,7 +22,7 @@ import Dashboard from "./pages/Dashboard";
 import Secretaria from "./pages/Secretaria";
 import SecretariaRoutes from "./routes/SecretariaRoutes";
 import Gkm from "./components/shared/Gkm";
-import Cdp from "./components/Cursos/Cdp";
+import Ciccenic from "./components/Cursos/Ciccenic";
 
 const App = () => {
   const location = useLocation();
@@ -43,7 +42,7 @@ const App = () => {
         <Route path="/register_pago/:code" element={<RegistroPagos />} />
 
         <Route path="/giscopensc" element={<Giscopnsc />} />
-        <Route path="/cdp" element={<Cdp />} />
+        <Route path="/ciccenic" element={<Ciccenic />} />
         <Route path="/accv" element={<Accv />} />
         <Route path="/login" element={<Login />} />
 

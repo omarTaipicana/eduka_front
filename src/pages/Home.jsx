@@ -26,6 +26,8 @@ const Home = () => {
     checkToken();
   }, [token]);
 
+  console.log(user)
+
   // Cerrar menú si clic fuera de menú y fuera del botón hamburguesa
   useEffect(() => {
     const handleClickOutside = (event) => {
