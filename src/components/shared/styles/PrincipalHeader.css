@@ -305,6 +305,8 @@
   }
 }
 
+
+
 /* Deshabilitar scroll al abrir el menú */
 body.menu-open {
   overflow: hidden;

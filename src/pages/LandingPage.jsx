@@ -10,7 +10,9 @@ import {
   FaBars,
   FaTimes,
   FaTiktok,
+  FaMapMarkerAlt,
 } from "react-icons/fa";
+
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import useCrud from "../hooks/useCrud";
@@ -85,8 +87,11 @@ const LandingPage = () => {
   const nosotrosRef = useRef(null);
   const contactoRef = useRef(null);
 
-  const handleRegisterClick = () => {
+  const handleLoginClick = () => {
     navigate("/login");
+  };
+  const handleRegisterClick = () => {
+    navigate("/register");
   };
 
   const toggleMenu = () => {
@@ -104,55 +109,115 @@ const LandingPage = () => {
     <div className="app">
       {isLoading && <IsLoading />}
 
+      {/* FRANJA BLANCA SUPERIOR */}
+      <div className="topbar">
+        <div className="topbar-left">
+          <a
+            href="https://www.google.com/maps?q=-0.200737103819847,-78.4886245727539"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link_footer"
+          >
+            <span className="topbar-item">
+              <FaMapMarkerAlt />
+              Reina Victoria y Cristobal Colón / Quito - Ecuador
+            </span>
+          </a>
+          <a
+            href="https://wa.me/593980773229"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="topbar-item">
+              <FaWhatsapp />
+              +593 980 773 229
+            </span>
+          </a>
+
+        </div>
+
+        <div className="topbar-right">
+          {!token ? (
+            <>
+              <button className="topbar-link" onClick={handleRegisterClick}>
+                <img
+                  className="user_icon"
+                  src="../../../user.png"
+                  alt="User Icon"
+                  onClick={handleRegisterClick}
+                />Registrarse
+              </button>
+              <span className="topbar-separator">|</span>
+              <button className="topbar-link" onClick={handleLoginClick}>
+                Ingresar
+              </button>
+            </>
+          ) : (
+            <button className="topbar-link" onClick={handleRegisterClick}>
+              Mi cuenta
+            </button>
+          )}
+        </div>
+      </div>
+
       <nav className="navbar">
+        <div className="menu_icon" onClick={toggleMenu}>
+          {menuOpen ? <FaTimes /> : <FaBars />}
+        </div>
+
+        <div className="navbar_links navbar_links-left">
+          <button onClick={() => scrollToSection(inicioRef)}>Inicio</button>
+          <button onClick={() => scrollToSection(nosotrosRef)}>Nosotros</button>
+        </div>
+
         <img
           src="/images/eduka_sf.png"
           alt="Logo Eduka"
           className="logo_navbar"
         />
-        <div className="menu_icon" onClick={toggleMenu}>
-          {menuOpen ? <FaTimes /> : <FaBars />}
-        </div>
 
-        <div className={`navbar_links ${menuOpen ? "open" : ""}`}>
-          <button onClick={() => scrollToSection(inicioRef)}>Inicio</button>
+        <div className="navbar_links navbar_links-right">
           <button onClick={() => scrollToSection(cursosRef)}>Cursos</button>
-          <button onClick={() => scrollToSection(nosotrosRef)}>Nosotros</button>
-          <button onClick={() => scrollToSection(contactoRef)}>Contacto</button>
-          {!token ? (
-            <button onClick={handleRegisterClick}>Login</button>
-          ) : (
-            <img
-              className="user__icon"
-              src="../../../user.png"
-              alt="User Icon"
-              onClick={handleRegisterClick}
-            />
-          )}
+          <button onClick={() => scrollToSection(contactoRef)}>Contactos</button>
+
         </div>
       </nav>
 
-      <header className="header" ref={inicioRef}>
-        <motion.img
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.8 }}
-          src="/images/eduka_sf.png"
-          alt="Logo Eduka"
-          className="logo"
-        />
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          Tu camino al conocimiento empieza aquí
-        </motion.h1>
-        <p>Aprende, crece, y mejora con nuestros cursos.</p>
-        <a onClick={() => scrollToSection(contactoRef)} className="cta_button">
-          Contáctanos
-        </a>
-      </header>
+
+            <div
+        className={`navbar_mobile_menu ${
+          menuOpen ? "navbar_mobile_menu--open" : ""
+        }`}
+      >
+        <button onClick={() => scrollToSection(inicioRef)}>Inicio</button>
+        <button onClick={() => scrollToSection(nosotrosRef)}>Nosotros</button>
+        <button onClick={() => scrollToSection(cursosRef)}>Cursos</button>
+        <button onClick={() => scrollToSection(contactoRef)}>Contactos</button>
+      </div>
+
+
+
+
+       <motion.section
+        className="hero"
+        ref={inicioRef}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        <div className="hero-card">
+          <h1>¡Tu camino hacia el conocimiento empieza aquí!</h1>
+          <p>Aprende, crece y mejora con nuestros cursos.</p>
+          <button
+            type="button"
+            className="hero-cta"
+            onClick={() => scrollToSection(contactoRef)}
+          >
+            Contáctanos <span className="hero-cta-arrow">➜</span>
+          </button>
+        </div>
+      </motion.section>
+
 
       <motion.section
         initial={{ opacity: 0, y: 30 }}
