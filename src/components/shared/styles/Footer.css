@@ -1,5 +1,5 @@
 .ul_footer {
-  background: linear-gradient(180deg, #0377b1cc, #010e32cc);
+  background: linear-gradient(180deg, #1b326b, #4d4d4d);
   color: white;
   display: flex;
   justify-content: right;
@@ -8,6 +8,7 @@
   height: 2.2em;
   position: fixed;
   bottom: 0;
+  z-index: 10000;
 }
 
 .li_footer {

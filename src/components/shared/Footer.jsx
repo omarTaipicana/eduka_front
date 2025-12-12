@@ -1,11 +1,7 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
 import "./styles/Footer.css";
 
 const Footer = () => {
-  const location = useLocation();
-  const token = localStorage.getItem("token");
-  const currentPage = location.pathname.split("/")[1];
 
   return (
     <div>
@@ -102,7 +98,7 @@ const Footer = () => {
           <li className="li_footer">
             <span className="span_footer">Copyright</span>
             <img className="img_footer_c" src="../../../copyright.png" alt="" />
-            <span className="span_footer">EDUKA</span>
+            <span className="span_footer">Eduka Corporación Educativa</span>
           </li>
         </ul>
       </section>

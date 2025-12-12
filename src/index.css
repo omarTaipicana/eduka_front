@@ -51,4 +51,31 @@ button {
   --color-blanco: #ffffff;
   --color-gris-oscuro: #4d4d4d;
   --color-gris: #464a5e;
+
+  --alert1-color: #e30513;
+  --alert2-color: #054321;
+  --alert3-color: #ff9e15;
+  --alert4-color: #022c5b;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+/* por defecto sin header (landing) */
+.app-main {
+  width: 100%;
+}
+
+/* cuando hay PrincipalHeader fixed */
+.app-main--with-header {
+  /* topbar (5em) + navbar (5rem) */
+  padding-top: calc(5em + 5rem);
+}
+
+/* Versión mobile: topbar más baja + navbar 3.5rem */
+@media (max-width: 768px) {
+  .app-main--with-header {
+    padding-top: 8.5rem; /* ajusta si ves que falta/sobra un poquito */
+  }
 }

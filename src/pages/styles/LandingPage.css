@@ -822,32 +822,40 @@
 
 
 
-
-/* ========= RESPONSIVE (MOBILE) ========= */
+/* ========= RESPONSIVE (MOBILE ≤ 768px) ========= */
 @media (max-width: 768px) {
+  /* ---------- TOPBAR ---------- */
   .topbar {
-    padding: 0.3rem 1rem;
+    height: auto;
+    padding: 0.4rem 1rem;
     font-size: 0.7rem;
+    flex-direction: row;
+    align-items: flex-start;
   }
 
+  .topbar-left {
+    gap: 0.1rem;
+  }
+
+  .topbar-right {
+    gap: 0.8rem;
+  }
+
+  /* ---------- NAVBAR + MENÚ MOBILE ---------- */
   .navbar {
-    top: 2.5rem;
+    top: 2.7rem;              /* debajo de la topbar */
     height: 3.5rem;
     grid-template-columns: auto 1fr auto;
-    /* hamburguesa - logo - espacio */
     padding: 0 1rem;
+    align-items: center;
   }
 
   .logo_navbar {
-    height: 3.8rem;
-    margin-top: -1rem;
     height: 3rem !important;
     transform: translateY(40%);
-
-
+    margin-top: 0;
   }
 
-  /* mostramos hamburguesa, ocultamos links desktop */
   .menu_icon {
     display: block;
     font-size: 1.4rem;
@@ -860,11 +868,9 @@
     display: none;
   }
 
-  /* menú desplegable */
   .navbar_mobile_menu {
     position: fixed;
-    top: calc(2.5rem + 3.5rem);
-    /* topbar + navbar */
+    top: calc(2.7rem + 3.5rem); /* topbar + navbar */
     left: 0;
     width: 100%;
     background-color: #1b326b;
@@ -894,8 +900,9 @@
     font-weight: 600;
   }
 
+  /* ---------- HERO ---------- */
   .hero {
-    margin-top: 8.5rem;
+    margin-top: 8.5rem;                     /* topbar + navbar */
     min-height: calc(100vh - 8.5rem);
     padding: 1.5rem 1rem;
     justify-content: center;
@@ -920,20 +927,42 @@
     justify-content: center;
   }
 
+  /* ---------- NOSOTROS + MVV ---------- */
   .nosotros {
     padding: 2.5rem 1.2rem 3rem;
+  }
+
+  .nosotros-inner {
+    width: 100%;
+  }
+
+  .nosotros-header {
+    width: 100%;
   }
 
   .nosotros-title {
     font-size: 1.6rem;
   }
 
-  .nosotros-icon {
-    font-size: 2.4rem;
+  .mano_1 {
+    width: 3rem;
   }
 
   .nosotros-content {
+    grid-template-columns: 1fr;  /* 1 columna */
     font-size: 0.95rem;
+    row-gap: 1.2rem;
+  }
+
+  .mvv-section {
+    margin-top: 2.5rem;
+    padding: 2.5rem 1.2rem;
+    grid-template-columns: 1fr;  /* 3 tarjetas una debajo de otra */
+    row-gap: 2rem;
+  }
+
+  .mvv-card {
+    padding: 0.5rem 0;
   }
 
   .mvv-title {
@@ -948,8 +977,13 @@
     font-size: 0.92rem;
   }
 
+  /* ---------- CURSOS ---------- */
   .cursos {
     padding: 3rem 1.2rem 3.5rem;
+  }
+
+  .cursos-inner {
+    width: 100%;
   }
 
   .cursos-title {
@@ -957,7 +991,7 @@
   }
 
   .cursos-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr;  /* 1 curso por fila */
     gap: 2rem;
   }
 
@@ -970,8 +1004,15 @@
     justify-content: center;
   }
 
+  /* ---------- CONTACTO ---------- */
   .contacto {
     padding: 2.5rem 1.2rem 3.5rem;
+  }
+
+  .contacto-inner {
+    width: 100%;
+    grid-template-columns: 1fr;  /* formulario arriba, mapa abajo */
+    row-gap: 2rem;
   }
 
   .contacto-title {
@@ -980,6 +1021,9 @@
 
   .contacto-subtitle {
     font-size: 0.95rem;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 1.2rem;
   }
 
   .contacto-form input,
@@ -987,11 +1031,64 @@
     font-size: 0.95rem;
   }
 
-  .footer-subscribe-title {
-    font-size: 1.7rem;
+  .contacto-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .contacto-map {
+    min-height: 18rem;
+  }
+
+  /* ---------- FOOTER ---------- */
+  .footer {
+    padding: 2.5rem 1.2rem 2rem;
+  }
+
+  .footer-inner {
+    width: 100%;
+    grid-template-columns: 1fr;   /* columnas apiladas */
+    row-gap: 2.5rem;
+    align-items: flex-start;
+  }
+
+  .footer-left {
+    align-items: flex-start;
   }
 
   .footer-logo {
     width: 5.5rem;
+  }
+
+  .footer-subscribe-title {
+    font-size: 1.7rem;
+  }
+
+  .footer-subscribe {
+    width: 100%;
+  }
+
+  .footer-btn {
+    width: 100%;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  .footer-middle,
+  .footer-right {
+    width: 100%;
+  }
+
+  .footer-section-title {
+    font-size: 1.6rem;
+  }
+
+  .footer-social {
+    justify-content: flex-start;
+  }
+
+  .footer-bottom {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 }

@@ -11,7 +11,8 @@
   pointer-events: none;
   animation: fadeInOut 3s forwards;
   height: 6vh;
-  font-size: 1rem; /* Tamaño base del texto */
+  font-size: 1rem; 
+  z-index: 10000000;
 }
 
 /* --- Responsividad --- */

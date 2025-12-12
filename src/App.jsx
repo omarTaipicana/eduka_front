@@ -26,10 +26,12 @@ import Ciccenic from "./components/Cursos/Ciccenic";
 
 const App = () => {
   const location = useLocation();
+  const showHeader = location.pathname !== "/";
 
   return (
     <div>
       {location.pathname !== "/" && <PrincipalHeader />}
+      <main className={showHeader ? "app-main app-main--with-header" : "app-main"}></main>
       {/* <Gkm /> */}
       <Routes>
         <Route path="/" element={<LandingPage />} />
