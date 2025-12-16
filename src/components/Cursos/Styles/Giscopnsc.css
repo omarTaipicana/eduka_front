@@ -1,181 +1,118 @@
-.giscopnsc_wrapper {
-  max-width: 70%;
-  margin: 2rem auto;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f8fcbe;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
+/* ====== ESTRUCTURA GENERAL ====== */
+.giscopnsc_page {
+  width: 95%;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+/* ====== SECCIÓN SUPERIOR: PDF + TEXTO ====== */
+.giscopnsc_header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: flex-start;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+/* ====== PDF ====== */
+.giscopnsc_pdf_container {
+  background: #f3f3f3;
+  padding: 1rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 0.5rem 1.2rem rgba(0, 0, 0, 0.15);
+}
+
+.giscopnsc_pdf {
+  border-radius: 0.5rem;
+}
+
+.pagination_controls {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pagination_controls button {
+  padding: 0.6rem 1rem;
+  background: #1b326b;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pagination_controls button:disabled {
+  background: #9ea5b8;
+  cursor: not-allowed;
+}
+
+/* ====== INFORMACIÓN DEL CURSO ====== */
+.giscopnsc_info {
+  text-align: center;
+}
+
+.giscopnsc_icon {
+  width: 4rem;
+  margin-bottom: 1rem;
 }
 
 .giscopnsc_title {
   font-size: 1.7rem;
-  color: #00509e;
+  font-weight: 800;
+  color: #464a5e;
+  line-height: 1.3;
   margin-bottom: 1rem;
-  text-align: center;
 }
 
-.giscopnsc_section {
-  font-size: 1rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-  padding: 0 10px;
+.giscopnsc_description {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #4b4b4b;
   text-align: justify;
-  color: #0c0d0d;
-  font-weight: 500;
 }
 
+/* ====== BOTONES ====== */
 .button_group {
+  margin-top: 2rem;
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 2rem;
 }
 
-.btn_inscribirse,
-.btn_registrar_pago,
-  .btn_descargar_pdf {
+.btn_primary {
+  background: #0f2a63;
+  color: #ffffff;
+  padding: 1rem 2rem;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 0.6rem;
   text-decoration: none;
-  background-color: #031e39;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  display: inline-block;
+  box-shadow: 0 0.7rem 1.6rem rgba(0, 0, 0, 0.3);
+  transition: 0.2s;
 }
 
-.btn_inscribirse:hover,
-.btn_registrar_pago:hover,
-  .btn_descargar_pdf:hover {
-  background-color: #0a76c1; /* azul más brillante */
-  color: white;
-  text-decoration: none;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+.btn_primary:hover {
+  background: #081a3f;
+  transform: translateY(-2px);
 }
 
-
-.giscopnsc_container {
-  width: 100%;
-}
-
-.pdf_container {
-  width: 100%;
-  border: 2px solid #00509e;
-  border-radius: 8px;
-  padding: 10px;
-  background-color: white;
-  text-align: center;
-  margin-bottom: 0.5em;
-}
-
-.pagination_controls {
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  align-items: center;
-}
-
-.pagination_controls button {
-  background-color: #00509e;
-  color: white;
-  border: none;
-  padding: 0.5rem 1.2rem;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.25s ease;
-}
-
-.pagination_controls button:disabled {
-  background-color: #aac7e7;
-  cursor: not-allowed;
-}
-
-.pagination_controls span {
-  font-weight: 600;
-  color: #3a3f55;
-  user-select: none;
-}
-
-/* Responsive */
-/* Responsivo para Accv */
-
-@media screen and (max-width: 992px) {
-  .giscopnsc_wrapper {
-    max-width: 90%;
-    padding: 15px;
-  }
-
-  .giscopnsc_title {
-    font-size: 1.5rem;
-  }
-
-  .giscopnsc_section {
-    font-size: 0.95rem;
-    padding: 0 8px;
+/* ====== RESPONSIVE ====== */
+@media (max-width: 900px) {
+  .giscopnsc_header {
+    grid-template-columns: 1fr;
   }
 
   .button_group {
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 1rem;
   }
 
-  .btn_inscribirse,
-  .btn_registrar_pago,
-  .btn_descargar_pdf {
+  .btn_primary {
     width: 100%;
-    padding: 0.7rem 0;
-    font-size: 1rem;
-  }
-
-  .pagination_controls {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .pagination_controls span {
-    flex-basis: 100%;
     text-align: center;
   }
 }
-
-@media screen and (max-width: 600px) {
-  .giscopnsc_wrapper {
-    max-width: 100%;
-    margin: 1rem;
-    padding: 10px;
-  }
-
-  .giscopnsc_title {
-    font-size: 1.3rem;
-  }
-
-  .giscopnsc_section {
-    font-size: 0.9rem;
-  }
-
-  .button_group {
-    gap: 0.5rem;
-  }
-
-  .btn_inscribirse,
-  .btn_registrar_pago,
-  .btn_descargar_pdf {
-    font-size: 0.95rem;
-    padding: 0.6rem 0;
-  }
-
-  .pdf_container {
-    padding: 0.8em;
-  }
-
-  .pagination_controls button {
-    padding: 0.4rem 1rem;
-    font-size: 0.9rem;
-  }
-}
-

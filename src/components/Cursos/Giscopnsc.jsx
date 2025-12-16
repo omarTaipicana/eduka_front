@@ -41,87 +41,84 @@ const Giscopnsc = () => {
   }
 
   return (
-    <div className="giscopnsc_wrapper">
-      {loadingPdf && <IsLoading />}
+    <div className="giscopnsc_page">
 
-      <h3 className="giscopnsc_title">
-        Gestión Integral de la Seguridad Ciudadana y el Orden Público con
-        enfoque en Negociación en Situación de Crisis
-      </h3>
+      <div className="giscopnsc_header">
+        <div className="giscopnsc_pdf_container" ref={containerRef}>
+          {loadingPdf && <IsLoading />}
 
-      <section className="giscopnsc_section">
-        Objetivo: Capacitar a los servidores policiales en la gestión integral
-        de la seguridad ciudadana y el orden público, dotándolos de
-        conocimientos teóricos, herramientas técnicas y habilidades prácticas
-        para diseñar, implementar y evaluar políticas y estrategias efectivas
-        que contribuyan a la prevención, investigación del delito, la reducción
-        de la violencia y la construcción de entornos seguros y pacíficos para
-        la ciudadanía.
-      </section>
-
-      <div className="button_group">
-        <a
-          href="https://docs.google.com/forms/d/e/1FAIpQLScU-wtNwU8Nb1qSPIUURQc3ov9Yh4-xc_vqxWZH7gB6VQF-cg/viewform"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn_inscribirse"
-        >
-          Inscribirse
-        </a>
-        <a
-          href="https://docs.google.com/forms/d/e/1FAIpQLSeDNkytJEU_IlbXlj3SQN60YYcJFiC7jpzwxStdqaMjFULj8Q/viewform"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn_registrar_pago"
-        >
-          Registrar pago
-        </a>
-        <a
-          href="/files/giscopensc_c.pdf"
-          download="Brochure-Giscopensc.pdf"
-          className="btn_descargar_pdf"
-        >
-          Descargar PDF
-        </a>
-      </div>
-
-      <div className="pagination_controls">
-        <button onClick={goToPrevPage} disabled={pageNumber <= 1}>
-          Anterior
-        </button>
-        <span>
-          Página {pageNumber} de {numPages || "--"}
-        </span>
-        <button onClick={goToNextPage} disabled={pageNumber >= numPages}>
-          Siguiente
-        </button>
-      </div>
-
-      <div className="giscopnsc_container" ref={containerRef}>
-        <div className="pdf_container">
-          {" "}
           <Document
             file="/files/giscopensc_c.pdf"
             onLoadSuccess={onDocumentLoadSuccess}
-            loading="Cargando PDF..."
           >
-            <Page pageNumber={pageNumber} width={pdfWidth} />
+            <Page
+              pageNumber={pageNumber}
+              width={pdfWidth}
+              className="giscopnsc_pdf"
+            />
           </Document>
+
+          <div className="pagination_controls">
+            <button onClick={goToPrevPage} disabled={pageNumber <= 1}>Anterior</button>
+            <span>Página {pageNumber} de {numPages}</span>
+            <button onClick={goToNextPage} disabled={pageNumber >= numPages}>Siguiente</button>
+          </div>
         </div>
-        <div className="pagination_controls">
-          <button onClick={goToPrevPage} disabled={pageNumber <= 1}>
-            Anterior
-          </button>
-          <span>
-            Página {pageNumber} de {numPages || "--"}
-          </span>
-          <button onClick={goToNextPage} disabled={pageNumber >= numPages}>
-            Siguiente
-          </button>
+
+        {/* --- TEXTO A LA DERECHA --- */}
+        <div className="giscopnsc_info">
+          <img src="/giscopensc.png" alt="icon" className="giscopnsc_icon" />
+
+          <h3 className="giscopnsc_title">
+            Gestión integral de la Seguridad Ciudadana y el Orden Público con
+            enfoque en Negociación en Situación de Crisis
+          </h3>
+
+          <p className="giscopnsc_description">
+            Objetivo: Capacitar a los servidores policiales en la gestión integral
+            de la seguridad ciudadana y el orden público, dotándolos de
+            conocimientos teóricos, herramientas técnicas y habilidades prácticas
+            para diseñar, implementar y evaluar políticas y estrategias efectivas
+            que contribuyan a la prevención, investigación del delito, la reducción
+            de la violencia y la construcción de entornos seguros y pacíficos para
+            la ciudadanía.
+          </p>
+          {/* --- BOTONES INFERIORES --- */}
+          <div className="button_group">
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLScU-wtNwU8Nb1qSPIUURQc3ov9Yh4-xc_vqxWZH7gB6VQF-cg/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn_primary"
+            >
+              Inscribirse ➜
+            </a>
+
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSeDNkytJEU_IlbXlj3SQN60YYcJFiC7jpzwxStdqaMjFULj8Q/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn_primary"
+            >
+              Registrar pago ➜
+            </a>
+
+            <a
+              href="/files/giscopensc_c.pdf"
+              download="Brochure-Giscopensc.pdf"
+              className="btn_primary"
+            >
+              Descargar PDF ➜
+            </a>
+          </div>
         </div>
       </div>
+
+
+
     </div>
   );
+
 };
 
 export default Giscopnsc;

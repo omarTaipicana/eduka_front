@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { Link,} from "react-router-dom";
-import "./Styles/Giscopnsc.css";
+import { Link, } from "react-router-dom";
+import "./Styles/Ciccenic.css";
 import IsLoading from "../shared/isLoading";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `../../../files/pdf.worker.min.js`;
 
 const Ciccenic = () => {
-  const urlRegister = `${location.protocol}//${location.host}/#/register_discente/ciccenic`;
+    const urlRegister = `${location.protocol}//${location.host}/#/register_discente/ciccenic`;
     const urlPago = `${location.protocol}//${location.host}/#/register_pago/ciccenic`;
 
 
@@ -46,84 +46,78 @@ const Ciccenic = () => {
     }
 
     return (
-        <div className="giscopnsc_wrapper">
+        <div className="ciccenic_page">
             {loadingPdf && <IsLoading />}
 
-            <h3 className="giscopnsc_title">
-                Gestión Integral de la Seguridad Ciudadana y el Orden Público con
-                enfoque en Negociación en Situación de Crisis
-            </h3>
-
-            <section className="giscopnsc_section">
-                Objetivo: Capacitar a los servidores policiales en la gestión integral
-                de la seguridad ciudadana y el orden público, dotándolos de
-                conocimientos teóricos, herramientas técnicas y habilidades prácticas
-                para diseñar, implementar y evaluar políticas y estrategias efectivas
-                que contribuyan a la prevención, investigación del delito, la reducción
-                de la violencia y la construcción de entornos seguros y pacíficos para
-                la ciudadanía.
-            </section>
-
-            <div className="button_group">
-                <a
-                    href={urlRegister}
-                    rel="noopener noreferrer"
-                    className="btn_inscribirse"
-                >
-                    Inscribirse
-                </a>
-                <a
-                    href={urlPago}
-                    rel="noopener noreferrer"
-                    className="btn_registrar_pago"
-                >
-                    Registrar pago
-                </a>
-                <a
-                    href="/files/accv_c.pdf"
-                    download="Brochure-Accv.pdf"
-                    className="btn_descargar_pdf"
-                >
-                    Descargar PDF
-                </a>
-            </div>
-
-            <div className="pagination_controls">
-                <button onClick={goToPrevPage} disabled={pageNumber <= 1}>
-                    Anterior
-                </button>
-                <span>
-                    Página {pageNumber} de {numPages || "--"}
-                </span>
-                <button onClick={goToNextPage} disabled={pageNumber >= numPages}>
-                    Siguiente
-                </button>
-            </div>
-
-            <div className="giscopnsc_container" ref={containerRef}>
-                <div className="pdf_container">
-                    {" "}
+            {/* ====== SECCIÓN SUPERIOR: PDF + TEXTO ====== */}
+            <div className="ciccenic_header">
+                {/* PDF A LA IZQUIERDA */}
+                <div className="ciccenic_pdf_container" ref={containerRef}>
                     <Document
-                        file="/files/giscopensc_c.pdf"
+                        file="/files/ciccenic_c.pdf"
                         onLoadSuccess={onDocumentLoadSuccess}
                         loading="Cargando PDF..."
                     >
-                        <Page pageNumber={pageNumber} width={pdfWidth} />
+                        <Page
+                            pageNumber={pageNumber}
+                            width={pdfWidth}
+                            className="ciccenic_pdf"
+                        />
                     </Document>
+
+                    {/* Controles debajo del PDF */}
+                    <div className="pagination_controls">
+                        <button onClick={goToPrevPage} disabled={pageNumber <= 1}>
+                            Anterior
+                        </button>
+
+                        <span>
+                            Página {pageNumber} de {numPages || "--"}
+                        </span>
+
+                        <button onClick={goToNextPage} disabled={pageNumber >= numPages}>
+                            Siguiente
+                        </button>
+                    </div>
                 </div>
-                <div className="pagination_controls">
-                    <button onClick={goToPrevPage} disabled={pageNumber <= 1}>
-                        Anterior
-                    </button>
-                    <span>
-                        Página {pageNumber} de {numPages || "--"}
-                    </span>
-                    <button onClick={goToNextPage} disabled={pageNumber >= numPages}>
-                        Siguiente
-                    </button>
+
+                {/* INFORMACIÓN A LA DERECHA */}
+                <div className="ciccenic_info">
+                    <img src="/ciccenic.png" alt="ícono CICENIC" className="ciccenic_icon" />
+
+                    <h3 className="ciccenic_title">
+                        Curso Internacional en Comando Comunicacional y Estrategias de
+                        Negociación en Incidentes Críticos
+                    </h3>
+
+                    <p className="ciccenic_description">
+                        Objetivo: Formar líderes capaces de resolver incidentes críticos con negociación táctica y comunicación estratégica,minimizando la fuerza y garantizando la seguridad y los derechos humanos.
+
+                    </p>
+                    {/* ====== BOTONES INFERIORES ====== */}
+                    <div className="button_group">
+                        <a href={urlRegister} rel="noopener noreferrer" className="btn_primary">
+                            Inscribirse ➜
+                        </a>
+
+                        <a href={urlPago} rel="noopener noreferrer" className="btn_primary">
+                            Registrar pago ➜
+                        </a>
+
+                        <a
+                            href="/files/ciccenic_c.pdf"
+                            download="Brochure-Ciccenic.pdf"
+                            className="btn_primary"
+                        >
+                            Descargar PDF ➜
+                        </a>
+                    </div>
                 </div>
             </div>
+
+
         </div>
     );
+
 };
 export default Ciccenic
