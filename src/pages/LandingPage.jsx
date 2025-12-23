@@ -392,7 +392,7 @@ const LandingPage = () => {
               </article>
             </Link>
 
-            <Link to="/ciccenic">
+            {/* <Link to="/ciccenic">
               <article className="curso-item">
                 <img
                   src="/ciccenic.png"
@@ -407,7 +407,7 @@ const LandingPage = () => {
                   Conocer más <span>➜</span>
                 </button>
               </article>
-            </Link>
+            </Link> */}
           </div>
         </div>
       </motion.section>
