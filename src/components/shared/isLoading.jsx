@@ -1,11 +1,13 @@
 import React from "react";
 import "./styles/IsLoading.css";
 
-const IsLoading = () => {
+const IsLoading = ({ text = "Cargando..." }) => {
   return (
-    <div className="isLoading">
-      <img className="img__loading" src="../../../../cargando.gif" alt="" />
-      <span className="text__loading">  Cargando...</span>
+    <div className="isLoadingOverlay" role="status" aria-live="polite">
+      <div className="isLoadingCard">
+        <div className="edukaSpinner" aria-hidden="true" />
+        <p className="isLoadingText">{text}</p>
+      </div>
     </div>
   );
 };

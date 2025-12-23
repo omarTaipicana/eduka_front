@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { showAlert } from "../../store/states/alert.slice";
 import "./styles/Verify.css";
@@ -9,14 +8,15 @@ import "./styles/Verify.css";
 const Verify = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { code: code } = useParams();
+  const { code } = useParams();
+
   const [
-    registerUser,
-    updateUser,
-    loginUser,
-    loggedUser,
+    ,
+    ,
+    ,
+    ,
     verifyUser,
-    userRegister,
+    ,
     isLoading,
     error,
     verified,
@@ -28,55 +28,70 @@ const Verify = () => {
 
   useEffect(() => {
     localStorage.removeItem("token");
-    // localStorage.removeItem("user");
   }, [code]);
 
   useEffect(() => {
     if (verified) {
       dispatch(
         showAlert({
-          message: `⚠️ ${verified?.message}` || "Verificado",
+          message: `⚠️ ${verified?.message}` || "Usuario verificado",
           alertType: 2,
         })
       );
-    } else {
+    } else if (error) {
       dispatch(
         showAlert({
-          message: `⚠️ ${error?.response?.data?.message}` || "Error inesperado",
+          message:
+            `⚠️ ${error?.response?.data?.message}` ||
+            "Error inesperado",
           alertType: 1,
         })
       );
     }
-  }, [error, verified]);
-
-  const handleBtn = () => {
-    navigate("/login");
-  };
+  }, [error, verified, dispatch]);
 
   return (
-    <div className="contenedor">
-      {!verified ? (
-        <section className="verify_content">
-          <img
-            className="verify_false"
-            src={`../../../no_verificado.png`}
-            alt=""
-          />
-          <h3 className="h3_verify_false">Su Código de Verificación es Incorrecto</h3>
+    <div className="verifyPage">
+      <div className="verifyContainer">
+        <section className="verifyCard">
+          {!verified ? (
+            <>
+              <img
+                className="verifyIcon"
+                src="../../../no_verificado.png"
+                alt="No verificado"
+              />
+              <h3 className="verifyTitle error">
+                Código de verificación inválido
+              </h3>
+              <p className="verifyText">
+                El enlace de verificación no es válido o ya fue utilizado.
+              </p>
+            </>
+          ) : (
+            <>
+              <img
+                className="verifyIcon"
+                src="../../../verificado.png"
+                alt="Verificado"
+              />
+              <h3 className="verifyTitle success">
+                Usuario verificado correctamente
+              </h3>
+              <p className="verifyText">
+                Tu cuenta ha sido activada con éxito. Ya puedes iniciar sesión.
+              </p>
+
+              <button
+                className="verifyBtn"
+                onClick={() => navigate("/login")}
+              >
+                Iniciar sesión <span>➜</span>
+              </button>
+            </>
+          )}
         </section>
-      ) : (
-        <section className="verify_content">
-          <img
-            className="verify_true"
-            src={`../../../verificado.png`}
-            alt=""
-          />
-          <h3 className="h3_verify_true">Usuario Verificado Correctamente</h3>
-          <button className="btn__form__verify" onClick={handleBtn}>
-            Iniciar Sesión
-          </button>
-        </section>
-      )}
+      </div>
     </div>
   );
 };

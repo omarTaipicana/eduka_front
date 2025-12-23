@@ -98,13 +98,6 @@ const PrincipalHeader = () => {
           <Link to="/secre" onClick={onClick}>
             Secretaria
           </Link>
-          <Link to="/dashboard" onClick={onClick}>
-            Dashboard
-          </Link>
-          <Link to="/validacion" onClick={onClick}>
-            Validacion
-          </Link>
-
         </>
       );
     }
@@ -118,13 +111,6 @@ const PrincipalHeader = () => {
           <Link to="/secre" onClick={onClick}>
             Secretaria
           </Link>
-          <Link to="/dashboard" onClick={onClick}>
-            Dashboard
-          </Link>
-          <Link to="/validacion" onClick={onClick}>
-            Validacion
-          </Link>
-
         </>
       );
     }
@@ -138,10 +124,6 @@ const PrincipalHeader = () => {
           <Link to="/validacion" onClick={onClick}>
             Validacion
           </Link>
-          <Link to="/secre" onClick={onClick}>
-            Secretaria
-          </Link>
-
         </>
       );
     }
@@ -152,10 +134,6 @@ const PrincipalHeader = () => {
           <Link to="/home" onClick={onClick}>
             Home
           </Link>
-          <Link to="/validacion" onClick={onClick}>
-            Validacion
-          </Link>
-
         </>
       );
     }
@@ -166,10 +144,6 @@ const PrincipalHeader = () => {
           <Link to="/home" onClick={onClick}>
             Home
           </Link>
-          <Link to="/secre" onClick={onClick}>
-            Secretaria
-          </Link>
-
         </>
       );
     }
@@ -186,19 +160,75 @@ const PrincipalHeader = () => {
   };
 
   /** AUTH EN NAVBAR (derecha, desktop) */
-  const renderAuthDesktop = () => {
 
-    return (
-      <>
-        <Link to="/register" onClick={closeMenu} className="nav-auth-link">
-          Register
-        </Link>
-        <Link to="/login" onClick={closeMenu} className="nav-auth-link">
-          Login
-        </Link>
-      </>
-    );
+  const renderAuthDesktop = (onClick) => {
+    if (!token) return null;
 
+    if (grados.grado1) {
+      return (
+        <>
+          <Link to="/dashboard" onClick={onClick}>
+            Dashboard
+          </Link>
+          <Link to="/validacion" onClick={onClick}>
+            Validacion
+          </Link>
+        </>
+      );
+    }
+
+    if (grados.grado2) {
+      return (
+        <>
+          <Link to="/dashboard" onClick={onClick}>
+            Dashboard
+          </Link>
+          <Link to="/validacion" onClick={onClick}>
+            Validacion
+          </Link>
+        </>
+      );
+    }
+
+    if (grados.grado3) {
+      return (
+        <>
+          <Link to="/secre" onClick={onClick}>
+            Secretaria
+          </Link>
+        </>
+      );
+    }
+
+    if (grados.grado4) {
+      return (
+        <>
+          <Link to="/validacion" onClick={onClick}>
+            Validacion
+          </Link>
+        </>
+      );
+    }
+
+    if (grados.grado5) {
+      return (
+        <>
+          <Link to="/secre" onClick={onClick}>
+            Secretaria
+          </Link>
+        </>
+      );
+    }
+
+    if (grados.grado6) {
+      return (
+        <Link to="/home" onClick={onClick}>
+          Otros
+        </Link>
+      );
+    }
+
+    return null;
   };
 
   /** AUTH EN MOBILE MENU */
@@ -329,14 +359,15 @@ const PrincipalHeader = () => {
 
         {/* AUTH DERECHA (desktop) */}
         <div className="navbar_links navbar_links-right">
-          {renderAuthDesktop()}
+          {renderAuthDesktop(closeMenu)}
         </div>
       </nav>
 
       {/* MENÚ MOBILE DESPLEGABLE */}
       <div
-        className={`navbar_mobile_menu ${menuOpen ? "navbar_mobile_menu--open" : ""
-          }`}
+        className={`navbar_mobile_menu ${
+          menuOpen ? "navbar_mobile_menu--open" : ""
+        }`}
       >
         {renderRoleLinks(closeMenu)}
         <hr className="navbar_mobile_divider" />

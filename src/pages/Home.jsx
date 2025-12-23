@@ -26,8 +26,6 @@ const Home = () => {
     checkToken();
   }, [token]);
 
-  console.log(user)
-
   // Cerrar menú si clic fuera de menú y fuera del botón hamburguesa
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -74,354 +72,381 @@ const Home = () => {
   };
 
   return (
-    <div className="home-container">
-      {/* Botón hamburguesa para mobile */}
-      <button
-        ref={hamburgerRef}
-        className="hamburger-btn"
-        onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Abrir menú"
-        aria-expanded={menuOpen}
-      >
-        <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-        <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-        <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-      </button>
+    <div className="homePage">
+      <div className="homeShell">
+        {/* Botón hamburguesa para mobile */}
+        <button
+          ref={hamburgerRef}
+          className={`homeHamburger ${menuOpen ? "is-open" : ""}`}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Abrir menú"
+          aria-expanded={menuOpen}
+        >
+          <span className="homeHamburgerLine"></span>
+          <span className="homeHamburgerLine"></span>
+          <span className="homeHamburgerLine"></span>
+        </button>
 
-      {/* Menú lateral */}
-      <nav
-        className={`home-menu ${menuOpen ? "open" : ""}`}
-        ref={menuRef}
-        aria-hidden={!menuOpen && window.innerWidth <= 768}
-      >
-        <button
-          className={`menu-btn ${
-            activeSection === "datos-personales" ? "active" : ""
-          }`}
-          onClick={() => handleSelect("datos-personales")}
-        >
-          📄 Datos Personales
-        </button>
-        <button
-          className={`menu-btn ${activeSection === "cursos" ? "active" : ""}`}
-          onClick={() => handleSelect("cursos")}
-        >
-          📚 Cursos y Certificados
-        </button>
-        <button
-          className={`menu-btn ${
-            activeSection === "calificaciones" ? "active" : ""
-          }`}
-          onClick={() => handleSelect("calificaciones")}
-        >
-          📝 Calificaciones
-        </button>
-        <button
-          className={`menu-btn ${activeSection === "pagos" ? "active" : ""}`}
-          onClick={() => handleSelect("pagos")}
-        >
-          💳 Pagos
-        </button>
-        <button
-          className={`menu-btn ${
-            activeSection === "advertencia" ? "active" : ""
-          }`}
-          onClick={() => handleSelect("advertencia")}
-        >
-          ⚠️ Importante
-        </button>
-      </nav>
+        {/* Overlay mobile */}
+        <div
+          className={`homeOverlay ${menuOpen ? "open" : ""}`}
+          onClick={() => setMenuOpen(false)}
+          aria-hidden={!menuOpen}
+        />
 
-      <main className="home-content" tabIndex="-1">
-        {activeSection === "datos-personales" && (
-          <section className="section datos-personales">
-            <h2>📄 Datos personales</h2>
-            {user ? (
-              <ul className="data-list">
-                <li>
-                  <strong>Nombre:</strong>{" "}
-                  {user.firstName && user.lastName ? (
-                    `${user.firstName} ${user.lastName}`
-                  ) : (
-                    <span style={{ color: "red" }}>Complete información</span>
-                  )}
-                </li>
-                <li>
-                  <strong>Cédula:</strong>{" "}
-                  {user.cI || (
-                    <span style={{ color: "red" }}>Complete información</span>
-                  )}
-                </li>
-                <li>
-                  <strong>Email:</strong>{" "}
-                  {user.email || (
-                    <span style={{ color: "red" }}>Complete información</span>
-                  )}
-                </li>
-                <li>
-                  <strong>Celular:</strong>{" "}
-                  {user.cellular || (
-                    <span style={{ color: "red" }}>Complete información</span>
-                  )}
-                </li>
-                <li>
-                  <strong>Edad:</strong>{" "}
-                  {user.dateBirth ? (
-                    calcularEdad(user.dateBirth)
-                  ) : (
-                    <span style={{ color: "red" }}>Complete información</span>
-                  )}
-                </li>
-                <li>
-                  <strong>Provincia:</strong>{" "}
-                  {user.province || (
-                    <span style={{ color: "red" }}>Complete información</span>
-                  )}
-                </li>
-                <li>
-                  <strong>Ciudad:</strong>{" "}
-                  {user.city || (
-                    <span style={{ color: "red" }}>Complete información</span>
-                  )}
-                </li>
-                <li>
-                  <strong>Grado:</strong>{" "}
-                  {user.grado || (
-                    <span style={{ color: "red" }}>Complete información</span>
-                  )}
-                </li>
-                <li>
-                  <strong>Eje Policial:</strong>{" "}
-                  {user.subsistema || (
-                    <span style={{ color: "red" }}>Complete información</span>
-                  )}
-                </li>
-              </ul>
-            ) : (
-              <IsLoading />
-            )}
-          </section>
-        )}
+        {/* Menú lateral */}
+        <nav
+          className={`homeMenu ${menuOpen ? "open" : ""}`}
+          ref={menuRef}
+          aria-hidden={!menuOpen && window.innerWidth <= 768}
+        >
+          <div className="homeMenuHeader">
+            <img
+              src="/images/eduka_sf.png"
+              alt="Eduka"
+              className="homeMenuLogo"
+            />
+            <p className="homeMenuSubtitle">Panel del estudiante</p>
+          </div>
 
-        {activeSection === "cursos" && (
-          <section className="section cursos">
-            <h2>📚 Cursos y Certificados</h2>
-            {user?.courses?.length > 0 ? (
-              <ul className="curso-list">
-                {user.courses.map((curso, i) => (
-                  <li key={i} className="curso-item">
-                    <span className="curso-icon">🔹</span>{" "}
-                    <a
-                      href={`https://acadexeduc.com/course/view.php?name=${curso.curso}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        textDecoration: "none",
-                        color: "#007bff",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {curso.fullname}
-                    </a>
-                    <div style={{ marginTop: "0.5rem", marginLeft: "1.5rem" }}>
-                      {curso.certificado?.url ? (
+          <button
+            className={`homeMenuBtn ${
+              activeSection === "datos-personales" ? "active" : ""
+            }`}
+            onClick={() => handleSelect("datos-personales")}
+          >
+            📄 Datos Personales
+          </button>
+
+          <button
+            className={`homeMenuBtn ${activeSection === "cursos" ? "active" : ""}`}
+            onClick={() => handleSelect("cursos")}
+          >
+            📚 Cursos y Certificados
+          </button>
+
+          <button
+            className={`homeMenuBtn ${
+              activeSection === "calificaciones" ? "active" : ""
+            }`}
+            onClick={() => handleSelect("calificaciones")}
+          >
+            📝 Calificaciones
+          </button>
+
+          <button
+            className={`homeMenuBtn ${activeSection === "pagos" ? "active" : ""}`}
+            onClick={() => handleSelect("pagos")}
+          >
+            💳 Pagos
+          </button>
+
+          <button
+            className={`homeMenuBtn ${
+              activeSection === "advertencia" ? "active" : ""
+            }`}
+            onClick={() => handleSelect("advertencia")}
+          >
+            ⚠️ Importante
+          </button>
+        </nav>
+
+        <main className="homeContent" tabIndex="-1">
+          {/* ===== Datos personales ===== */}
+          {activeSection === "datos-personales" && (
+            <section className="homeCard">
+              <div className="homeCardHeader">
+                <h2 className="homeTitle">📄 Datos personales</h2>
+              </div>
+
+              {user ? (
+                <ul className="homeDataGrid">
+                  <li className="homeDataItem">
+                    <span className="homeDataLabel">Nombre</span>
+                    <span className="homeDataValue">
+                      {user.firstName && user.lastName ? (
+                        `${user.firstName} ${user.lastName}`
+                      ) : (
+                        <span className="homeWarn">Complete información</span>
+                      )}
+                    </span>
+                  </li>
+
+                  <li className="homeDataItem">
+                    <span className="homeDataLabel">Cédula</span>
+                    <span className="homeDataValue">
+                      {user.cI || <span className="homeWarn">Complete información</span>}
+                    </span>
+                  </li>
+
+                  <li className="homeDataItem">
+                    <span className="homeDataLabel">Email</span>
+                    <span className="homeDataValue">
+                      {user.email || <span className="homeWarn">Complete información</span>}
+                    </span>
+                  </li>
+
+                  <li className="homeDataItem">
+                    <span className="homeDataLabel">Celular</span>
+                    <span className="homeDataValue">
+                      {user.cellular || <span className="homeWarn">Complete información</span>}
+                    </span>
+                  </li>
+
+                  <li className="homeDataItem">
+                    <span className="homeDataLabel">Edad</span>
+                    <span className="homeDataValue">
+                      {user.dateBirth ? (
+                        calcularEdad(user.dateBirth)
+                      ) : (
+                        <span className="homeWarn">Complete información</span>
+                      )}
+                    </span>
+                  </li>
+
+                  <li className="homeDataItem">
+                    <span className="homeDataLabel">Provincia</span>
+                    <span className="homeDataValue">
+                      {user.province || <span className="homeWarn">Complete información</span>}
+                    </span>
+                  </li>
+
+                  <li className="homeDataItem">
+                    <span className="homeDataLabel">Ciudad</span>
+                    <span className="homeDataValue">
+                      {user.city || <span className="homeWarn">Complete información</span>}
+                    </span>
+                  </li>
+
+                  <li className="homeDataItem">
+                    <span className="homeDataLabel">Grado</span>
+                    <span className="homeDataValue">
+                      {user.grado || <span className="homeWarn">Complete información</span>}
+                    </span>
+                  </li>
+
+                  <li className="homeDataItem">
+                    <span className="homeDataLabel">Eje Policial</span>
+                    <span className="homeDataValue">
+                      {user.subsistema || (
+                        <span className="homeWarn">Complete información</span>
+                      )}
+                    </span>
+                  </li>
+                </ul>
+              ) : (
+                <IsLoading />
+              )}
+            </section>
+          )}
+
+          {/* ===== Cursos ===== */}
+          {activeSection === "cursos" && (
+            <section className="homeCard">
+              <div className="homeCardHeader">
+                <h2 className="homeTitle">📚 Cursos y Certificados</h2>
+              </div>
+
+              {user?.courses?.length > 0 ? (
+                <ul className="homeList">
+                  {user.courses.map((curso, i) => (
+                    <li key={i} className="homeListItem">
+                      <div className="homeListTop">
+                        <span className="homeDot">•</span>
                         <a
-                          href={curso.certificado.url}
+                          className="homeLink"
+                          href={`https://acadexeduc.com/course/view.php?name=${curso.curso}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{
-                            color: "green",
-                            textDecoration: "underline",
-                            fontWeight: "500",
-                          }}
                         >
-                          Ver certificado
+                          {curso.fullname}
                         </a>
-                      ) : (
-                        <span style={{ color: "#888", fontStyle: "italic" }}>
-                          No hay certificado disponible
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No hay cursos registrados.</p>
-            )}
-          </section>
-        )}
+                      </div>
 
-        {activeSection === "calificaciones" && (
-          <section className="section calificaciones">
-            <h2>📝 Calificaciones</h2>
-            {user?.courses?.length > 0 ? (
-              <ul className="curso-list">
-                {user.courses.map((curso, index) => {
-                  const calificaciones = curso.grades || {};
-                  const estaAbierto = cursoAbiertoIndex === index;
+                      <div className="homeListBottom">
+                        {curso.certificado?.url ? (
+                          <a
+                            className="homeLinkCert"
+                            href={curso.certificado.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Ver certificado
+                          </a>
+                        ) : (
+                          <span className="homeMuted">No hay certificado disponible</span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="homeMuted">No hay cursos registrados.</p>
+              )}
+            </section>
+          )}
 
-                  return (
-                    <li key={index} className="curso-item">
-                      <button
-                        onClick={() =>
-                          setCursoAbiertoIndex(estaAbierto ? null : index)
-                        }
-                        className="curso-toggle"
-                        style={{
-                          background: "none",
-                          border: "none",
-                          fontSize: "1rem",
-                          fontWeight: "bold",
-                          color: "#0053a0",
-                          cursor: "pointer",
-                          marginBottom: "0.5rem",
-                        }}
-                      >
-                        {estaAbierto ? "▼" : "▶"} {curso.fullname}
-                      </button>
+          {/* ===== Calificaciones ===== */}
+          {activeSection === "calificaciones" && (
+            <section className="homeCard">
+              <div className="homeCardHeader">
+                <h2 className="homeTitle">📝 Calificaciones</h2>
+              </div>
 
-                      {estaAbierto && !curso.inscripcion && (
-                        <p style={{ marginLeft: "1rem", color: "red" }}>
-                          ❌ No tiene inscripción en este curso.
-                        </p>
-                      )}
+              {user?.courses?.length > 0 ? (
+                <ul className="homeList">
+                  {user.courses.map((curso, index) => {
+                    const calificaciones = curso.grades || {};
+                    const estaAbierto = cursoAbiertoIndex === index;
 
-                      {estaAbierto &&
-                        curso.inscripcion &&
-                        !curso.matriculado && (
-                          <p style={{ marginLeft: "1rem", color: "orange" }}>
-                            ⚠️ Está inscrito pero no matriculado. Solicite a
-                            soporte su matriculación.
+                    return (
+                      <li key={index} className="homeListItem">
+                        <button
+                          onClick={() => setCursoAbiertoIndex(estaAbierto ? null : index)}
+                          className="homeToggle"
+                        >
+                          <span className="homeToggleArrow">{estaAbierto ? "▼" : "▶"}</span>
+                          <span className="homeToggleText">{curso.fullname}</span>
+                        </button>
+
+                        {estaAbierto && !curso.inscripcion && (
+                          <p className="homeStatus danger">
+                            ❌ No tiene inscripción en este curso.
                           </p>
                         )}
 
-                      {estaAbierto &&
-                        curso.inscripcion &&
-                        curso.matriculado && (
+                        {estaAbierto && curso.inscripcion && !curso.matriculado && (
+                          <p className="homeStatus warn">
+                            ⚠️ Está inscrito pero no matriculado. Solicite a soporte su
+                            matriculación.
+                          </p>
+                        )}
+
+                        {estaAbierto && curso.inscripcion && curso.matriculado && (
                           <>
                             {Object.keys(calificaciones).length > 0 ? (
-                              <ul
-                                className="nota-list"
-                                style={{ marginLeft: "1rem" }}
-                              >
-                                {Object.entries(calificaciones).map(
-                                  ([actividad, nota]) => (
-                                    <li key={actividad}>
-                                      <strong>{actividad}:</strong> {nota}
-                                    </li>
-                                  )
-                                )}
+                              <ul className="homeNotes">
+                                {Object.entries(calificaciones).map(([actividad, nota]) => (
+                                  <li key={actividad} className="homeNoteItem">
+                                    <strong>{actividad}:</strong> {nota}
+                                  </li>
+                                ))}
                               </ul>
                             ) : (
-                              <p style={{ marginLeft: "1rem", color: "gray" }}>
-                                No hay calificaciones registradas.
-                              </p>
+                              <p className="homeMuted">No hay calificaciones registradas.</p>
                             )}
                           </>
                         )}
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p>No hay cursos registrados.</p>
-            )}
-          </section>
-        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="homeMuted">No hay cursos registrados.</p>
+              )}
+            </section>
+          )}
 
-        {activeSection === "pagos" && (
-          <section className="section pagos">
-            <h2>💳 Pagos</h2>
-            {user?.courses?.some((c) => c.pagos?.length > 0) ? (
-              user.courses.map((curso, i) => {
-                if (!curso.pagos || curso.pagos.length === 0) return null;
-                return (
-                  <div
-                    key={i}
-                    className="pago_item"
-                    style={{ marginBottom: "1.5rem" }}
-                  >
-                    <p>
-                      <strong>Curso:</strong> {curso.fullname}
-                    </p>
-                    {curso.pagos.map((pago, j) => {
-                      const extras = [];
-                      if (pago.moneda) extras.push("moneda");
-                      if (pago.distintivo) extras.push("distintivo");
-                      return (
-                        <div key={j} style={{ marginBottom: "1rem" }}>
-                          <p>
-                            <strong>Pago #{j + 1}</strong>{" "}
-                            {j === 0
-                              ? `por el certificado${
-                                  extras.length > 0
-                                    ? ", incluyendo " + extras.join(" y ")
-                                    : ""
-                                }`
-                              : extras.length > 0
-                              ? `por ${extras.join(" y ")}`
-                              : ""}
-                            .
-                          </p>
-                          <p>
-                            <strong>Estado:</strong>{" "}
-                            {pago.verificado
-                              ? "✅ Verificado"
-                              : "⏳ Por verificar"}
-                          </p>
-                          <p>
-                            <strong>Monto:</strong> ${pago.valorDepositado}
-                          </p>
-                          <a
-                            href={pago.pagoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: "inline-block",
-                              padding: "10px 20px",
-                              backgroundColor: "#007bff",
-                              color: "#fff",
-                              fontWeight: "bold",
-                              borderRadius: "8px",
-                              textDecoration: "none",
-                              textAlign: "center",
-                              marginTop: "10px",
-                            }}
-                          >
-                            Ver comprobante de pago
-                          </a>
-                          <hr />
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })
-            ) : (
-              <p>No se encontraron pagos registrados.</p>
-            )}
-          </section>
-        )}
+          {/* ===== Pagos ===== */}
+          {activeSection === "pagos" && (
+            <section className="homeCard">
+              <div className="homeCardHeader">
+                <h2 className="homeTitle">💳 Pagos</h2>
+              </div>
 
-        {activeSection === "advertencia" && (
-          <section className="section advertencia">
-            <h2>⚠️ Importante</h2>
-            <p>
-              Verifica que tus datos personales estén correctos, ya que los
-              nombres y la información que ingreses aquí se reflejarán en tus
-              certificados. Puedes modificar tu información desde tu perfil,
-              asegurándote de usar tildes y caracteres especiales correctamente.{" "}
-              <br />
-              <br />
-              Si detectas que tu correo registrado en Moodle es diferente al de
-              tu perfil, es posible que no veas tu información de cursos y
-              calificaciones. En ese caso, solicita al administrador la
-              corrección correspondiente.
-            </p>
-          </section>
-        )}
-      </main>
+              {user?.courses?.some((c) => c.pagos?.length > 0) ? (
+                <div className="homePayments">
+                  {user.courses.map((curso, i) => {
+                    if (!curso.pagos || curso.pagos.length === 0) return null;
+
+                    return (
+                      <div key={i} className="homePaymentCourse">
+                        <p className="homePaymentCourseTitle">
+                          <strong>Curso:</strong> {curso.fullname}
+                        </p>
+
+                        {curso.pagos.map((pago, j) => {
+                          const extras = [];
+                          if (pago.moneda) extras.push("moneda");
+                          if (pago.distintivo) extras.push("distintivo");
+
+                          return (
+                            <div key={j} className="homePaymentItem">
+                              <p>
+                                <strong>Pago #{j + 1}</strong>{" "}
+                                {j === 0
+                                  ? `por el certificado${
+                                      extras.length > 0
+                                        ? ", incluyendo " + extras.join(" y ")
+                                        : ""
+                                    }`
+                                  : extras.length > 0
+                                  ? `por ${extras.join(" y ")}`
+                                  : ""}
+                                .
+                              </p>
+
+                              <p>
+                                <strong>Estado:</strong>{" "}
+                                {pago.verificado ? (
+                                  <span className="homeStatus ok">✅ Verificado</span>
+                                ) : (
+                                  <span className="homeStatus pending">⏳ Por verificar</span>
+                                )}
+                              </p>
+
+                              <p>
+                                <strong>Monto:</strong> ${pago.valorDepositado}
+                              </p>
+
+                              <a
+                                href={pago.pagoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="homeBtnLink"
+                              >
+                                Ver comprobante de pago <span>➜</span>
+                              </a>
+
+                              <hr className="homeDivider" />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="homeMuted">No se encontraron pagos registrados.</p>
+              )}
+            </section>
+          )}
+
+          {/* ===== Advertencia ===== */}
+          {activeSection === "advertencia" && (
+            <section className="homeCard">
+              <div className="homeCardHeader">
+                <h2 className="homeTitle">⚠️ Importante</h2>
+              </div>
+
+              <div className="homeNotice">
+                <p>
+                  Verifica que tus datos personales estén correctos, ya que los
+                  nombres y la información que ingreses aquí se reflejarán en tus
+                  certificados. Puedes modificar tu información desde tu perfil,
+                  asegurándote de usar tildes y caracteres especiales correctamente.
+                </p>
+                <p>
+                  Si detectas que tu correo registrado en Moodle es diferente al de
+                  tu perfil, es posible que no veas tu información de cursos y
+                  calificaciones. En ese caso, solicita al administrador la
+                  corrección correspondiente.
+                </p>
+              </div>
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
 };

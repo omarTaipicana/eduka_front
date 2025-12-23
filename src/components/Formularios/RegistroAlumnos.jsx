@@ -27,6 +27,8 @@ const RegistroAlumnos = () => {
   const [userValidacion, setUserValidacion] = useState(null);
   const [userRegister, setUserRegister] = useState(null);
 
+
+
   const {
     register,
     handleSubmit,
@@ -71,7 +73,7 @@ const RegistroAlumnos = () => {
 
   const validarCedula = (cedula) => {
     // Eliminar todos los caracteres que no sean dígitos
-    cedula = cedula.replace(/\D/g, ""); // \D = todo lo que NO sea dígito
+    cedula = cedula?.replace(/\D/g, ""); // \D = todo lo que NO sea dígito
 
     // Verificar que tenga exactamente 10 dígitos
     if (!/^\d{10}$/.test(cedula)) return false;
@@ -114,14 +116,13 @@ const RegistroAlumnos = () => {
   }, [validate]);
 
   useEffect(() => {
-    // Si está inscrito
     if (validate?.enrolled) {
       setInscripcionExistente(validate.user);
       setUserValidacion(null);
       dispatch(
         showAlert({
           message: "⚠️ Ya estás inscrito en este curso.",
-          alertType: 1,
+          alertType: 2,
         })
       );
     }
@@ -135,17 +136,17 @@ const RegistroAlumnos = () => {
       : "";
 
     // Ajustar email a minúsculas y quitar espacios al inicio/final
-    const emailFormateado = data.email ? data.email.trim().toLowerCase() : "";
+    const emailFormateado = data.email ? data.email?.trim().toLowerCase() : "";
     const confirmEmailFormateado = data.confirmEmail
       ? data.confirmEmail.trim().toLowerCase()
       : "";
 
     // Validaciones con datos formateados
 
-    const cedulaLimpia = data.cedula.trim().replace(/\D/g, "");
+    const cedulaLimpia = data.cedula?.trim().replace(/\D/g, "");
     const isValidCedula = validarCedula(cedulaLimpia);
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailFormateado);
-    const celularLimpio = data.celular.replace(/\D/g, ""); // Elimina todo lo que no sea dígito
+    const celularLimpio = data.celular?.replace(/\D/g, ""); // Elimina todo lo que no sea dígito
     const isValidCellular = /^09\d{8}$/.test(celularLimpio);
 
     if (!isValidCedula)
@@ -198,7 +199,6 @@ const RegistroAlumnos = () => {
       curso: code,
       courseId: idCourse,
     };
-
     postInscripcion(PATH_INSCRIPCIONES, body);
     setUserValidacion();
     reset();
@@ -206,293 +206,380 @@ const RegistroAlumnos = () => {
 
   const cursoActivo = course.find((c) => c.sigla === code);
 
-  if (!cursoActivo) {
-    return (
-      <div className="registro_container curso_no_encontrado">
-        {isLoading && <IsLoading />}
+// 1) No existe curso
+if (!cursoActivo) {
+  return (
+    <div className="registro_container curso_no_encontrado">
+      {isLoading && <IsLoading />}
 
-        <div className="mensaje_curso_caja">
-          <h2>❌ Curso no disponible</h2>
-          <p>
-            El curso con el código <strong>{code}</strong> no se encuentra
-            disponible o no existe en nuestra base de datos.
-          </p>
-          <p>Por favor verifica el enlace o contacta con el administrador.</p>
-        </div>
+      <div className="mensaje_curso_caja">
+        <h2>❌ Curso no disponible</h2>
+        <p>
+          El curso con el código <strong>{code}</strong> no se encuentra
+          disponible o no existe en nuestra base de datos.
+        </p>
+        <p>Por favor verifica el enlace o contacta con el administrador.</p>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-return (
-  <div className="registro_container">
-    {isLoading2 && <IsLoading />}
+// 2) Existe pero NO está vigente
+if (cursoActivo?.vigente === false) {
+  return (
+    <div className="registro_container curso_no_encontrado">
+      {isLoading && <IsLoading />}
 
-    {/* ========= VISTA 1: VERIFICAR INSCRIPCIÓN ========= */}
-    {!userValidacion ? (
-      <div className="registro_wrapper registro_wrapper--verifica">
-        {/* Marca de agua + texto principal */}
-        <div className="registro_intro">
-          <img
-            src="/verifica.png"
-            alt="Verifica tu inscripción"
-            className="registro_intro_icon"
-          />
-          <h2 className="registro_intro_title">Verifica tu inscripción</h2>
+      <div className="mensaje_curso_caja mensaje_curso_caja--finalizado">
+        <h2>⏳ Oferta académica finalizada</h2>
+        <p>
+          La oferta académica del <strong>{cursoActivo?.nombre}</strong>{" "}
+          ha finalizado.
+        </p>
+        <p>
+          Si necesitas información, por favor contacta con el administrador o
+          revisa nuestros cursos disponibles.
+        </p>
 
-          <p className="registro_intro_text">
-            Ingresa tu correo electrónico para comprobar si ya te encuentras inscrito
-            en este curso o si deseas registrarte para iniciar tu formación.
-          </p>
-
-          <ul className="registro_intro_list">
-            <li>
-              Si ya tienes una inscripción, te mostraremos tus datos y el estado de tu
-              participación.
-            </li>
-            <li>
-              Si aún no te has inscrito, podrás hacerlo fácilmente y comenzar tu
-              aprendizaje con nosotros.
-            </li>
-          </ul>
-
-          <p className="registro_intro_highlight">
-            ¡El primer paso para avanzar en tu capacitación está aquí!
-          </p>
-        </div>
-
-        {/* Formulario de verificación */}
-        <form
-          className="formulario_registro_val"
-          onSubmit={handleSubmit(submitVal)}
-        >
-          <div className="registro_val_field">
-            <label htmlFor="email" className="registro_label">
-              E mail
-            </label>
-
-            <div className="registro_val_row">
-              <input
-                id="email"
-                type="email"
-                required
-                {...register("email")}
-              />
-              <button className="btn_inscripcion" type="submit">
-                Verificar <span>➜</span>
-              </button>
-            </div>
-          </div>
-        </form>
-
-        {/* Mensaje cuando ya está inscrito */}
-        {inscripcionExistente && (
-          <div className="usuario_existente">
-            <h3>Ya estás registrado en este curso:</h3>
-            <p>
-              <strong>Nombres:</strong> {inscripcionExistente.firstName}{" "}
-              {inscripcionExistente.lastName}
-            </p>
-            <p>
-              <strong>Email:</strong> {inscripcionExistente.email}
-            </p>
-
-            <button
-              className="btn_cerrar_existente"
-              onClick={() => {
-                setInscripcionExistente(null);
-                setUserValidacion(null);
-                setUserRegister(null);
-              }}
-            >
-              Cerrar
-            </button>
-          </div>
-        )}
-      </div>
-    ) : (
-      /* ========= VISTA 2: FORMULARIO DE INSCRIPCIÓN ========= */
-      <div className="registro_wrapper registro_wrapper--form">
-        {/* Columna izquierda: formulario */}
-        <div className="registro_left animate_slide_left">
-          <form
-            className="formulario_registro"
-            onSubmit={handleSubmit(submit)}
+        <div className="mensaje_acciones">
+          <a className="mensaje_btn" href="/#/" >
+            Ir al inicio
+          </a>
+          <a
+            className="mensaje_btn mensaje_btn--whatsapp"
+            href="https://wa.me/593980773229"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            {/* Columna 1 del formulario */}
-            <div className="form_column">
-              {userRegister && (
-                <div className="incripcion_existente">
-                  <h3>✅ Usuario existente</h3>
-                  <p>
-                    <strong>Nombres:</strong> {userRegister.firstName}
-                  </p>
-                  <p>
-                    <strong>Apellidos:</strong> {userRegister.lastName}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {userRegister.email}
-                  </p>
-                </div>
-              )}
+            WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-              {!userRegister && (
-                <>
-                  <label className="registro_label">
-                    Confirmar Email
-                    <input
-                      type="email"
-                      required
-                      {...register("confirmEmail")}
-                    />
-                  </label>
+// 3) Existe y está vigente -> sigue normal
 
-                  <label className="registro_label">
-                    Nombres
-                    <input
-                      placeholder="Nombres completos (tildes y ñ si aplica)"
-                      required
-                      {...register("nombres")}
-                    />
-                  </label>
 
-                  <label className="registro_label">
-                    Apellidos
-                    <input
-                      placeholder="Apellidos completos (tildes y ñ si aplica)"
-                      required
-                      {...register("apellidos")}
-                    />
-                  </label>
-                </>
-              )}
+  return (
+    <div className="registro_container">
+      {isLoading2 && <IsLoading />}
 
-              <label className="registro_label">
-                Grado
-                {userRegister?.grado ? (
-                  <input
-                    type="text"
-                    value={userRegister.grado}
-                    readOnly
-                    className="form_input"
-                  />
-                ) : (
-                  <select
-                    required
-                    {...register("grado")}
-                    className="form_input"
-                  >
-                    <option value="">Seleccione una opción</option>
-                    {[...new Set(variables.map((v) => v.grado).filter(Boolean))].map(
-                      (grado, i) => (
-                        <option key={i} value={grado}>
-                          {grado}
-                        </option>
-                      )
-                    )}
-                  </select>
-                )}
+      {/* ========= VISTA 1: VERIFICAR INSCRIPCIÓN ========= */}
+      {!userValidacion ? (
+        <div className="registro_wrapper registro_wrapper--verifica">
+          {/* Marca de agua + texto principal */}
+          <div className="registro_intro">
+            <img
+              src="/verifica.png"
+              alt="Verifica tu inscripción"
+              className="registro_intro_icon"
+            />
+            <h2 className="registro_intro_title">Verifica tu inscripción</h2>
+
+            <p className="registro_intro_text">
+              Ingresa tu correo electrónico para comprobar si ya te encuentras
+              inscrito en este curso o si deseas registrarte para iniciar tu
+              formación.
+            </p>
+
+            <ul className="registro_intro_list">
+              <li>
+                Si ya tienes una inscripción, te mostraremos tus datos y el
+                estado de tu participación.
+              </li>
+              <li>
+                Si aún no te has inscrito, podrás hacerlo fácilmente y comenzar
+                tu aprendizaje con nosotros.
+              </li>
+            </ul>
+
+            <p className="registro_intro_highlight">
+              ¡El primer paso para avanzar en tu capacitación está aquí!
+            </p>
+          </div>
+
+          {/* Formulario de verificación */}
+          <form
+            className="formulario_registro_val"
+            onSubmit={handleSubmit(submitVal)}
+          >
+            <div className="registro_val_field">
+              <label htmlFor="email" className="registro_label">
+                Email
               </label>
 
-              <label className="registro_label">
-                Cédula
+              <div className="registro_val_row">
                 <input
+                  id="email"
+                  type="email"
                   required
-                  {...register("cedula")}
-                  defaultValue={userRegister?.cI || ""}
-                  readOnly={!!userRegister?.cI}
+                  {...register("email")}
                 />
-              </label>
-
-              <label className="registro_label">
-                Celular
-                <input
-                  required
-                  {...register("celular")}
-                  defaultValue={userRegister?.cellular || ""}
-                  readOnly={!!userRegister?.cellular}
-                />
-              </label>
-            </div>
-
-            {/* Columna 2 del formulario */}
-            <div className="form_column">
-              <label className="registro_label">
-                Eje Policial
-                {userRegister?.subsistema ? (
-                  <input
-                    type="text"
-                    value={userRegister.subsistema}
-                    readOnly
-                    className="form_input"
-                  />
-                ) : (
-                  <select
-                    required
-                    {...register("subsistema")}
-                    className="form_input"
-                  >
-                    <option value="">Seleccione una opción</option>
-                    {[...new Set(
-                      variables.map((v) => v.subsistema).filter(Boolean)
-                    )].map((subsistema, i) => (
-                      <option key={i} value={subsistema}>
-                        {subsistema}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </label>
-
-              <div className="form_check_container">
-                <label className="form_check_label">
-                  Acepto recibir correos electrónicos con información sobre los
-                  cursos y otros contenidos relacionados. Entiendo que mis datos
-                  serán tratados de acuerdo con la política de privacidad y que
-                  puedo dejar de recibirlos en cualquier momento.
-                  <input
-                    type="checkbox"
-                    {...register("aceptacion", {
-                      validate: (value) =>
-                        value === true ||
-                        "Debes aceptar la política para continuar.",
-                    })}
-                  />
-                </label>
-                {errors.aceptacion && (
-                  <p className="form_error">{errors.aceptacion.message}</p>
-                )}
-              </div>
-
-              <div className="form_button_inscripcion">
                 <button className="btn_inscripcion" type="submit">
-                  Inscribirme <span>➜</span>
+                  Verificar <span>➜</span>
                 </button>
               </div>
             </div>
           </form>
-        </div>
 
-        {/* Columna derecha: info del curso con imagen de fondo */}
-        <div className="registro_right animate_slide_right">
-          {cursoActivo && (
-            <div className="curso_fondo">
-              <div className="curso_overlay">
-                <h2>{cursoActivo.nombre}</h2>
-                <p>{cursoActivo.objetivo}</p>
-              </div>
-              <div
-                className="curso_imagen"
-                style={{
-                  backgroundImage: `url(/images/${code}.jpg)`,
+          {/* Mensaje cuando ya está inscrito */}
+          {inscripcionExistente && (
+            <div className="usuario_existente">
+              <h3>Ya estás registrado en este curso:</h3>
+              <p>
+                <strong>Nombres:</strong> {inscripcionExistente.firstName}{" "}
+                {inscripcionExistente.lastName}
+              </p>
+              <p>
+                <strong>Email:</strong> {inscripcionExistente.email}
+              </p>
+
+              <button
+                className="btn_cerrar_existente"
+                onClick={() => {
+                  setInscripcionExistente(null);
+                  setUserValidacion(null);
+                  setUserRegister(null);
                 }}
-              />
+              >
+                Cerrar
+              </button>
             </div>
           )}
         </div>
-      </div>
-    )}
-  </div>
-);
+      ) : (
+        /* ========= VISTA 2: FORMULARIO DE INSCRIPCIÓN ========= */
+        <div className="registro_wrapper registro_wrapper--form">
+          {/* Columna izquierda: formulario */}
+          <div className="registro_left animate_slide_left">
+            <form
+              className="formulario_registro"
+              onSubmit={handleSubmit(submit)}
+            >
+              {/* Columna 1 del formulario */}
+              <div className="form_column">
+                {userRegister && (
+                  <div className="incripcion_existente">
+                    <h3>✅ Usuario existente</h3>
+                    <p>
+                      <strong>Grado:</strong> {userRegister.grado}
+                    </p>
+                    <p>
+                      <strong>Nombres:</strong> {userRegister.firstName}
+                    </p>
+                    <p>
+                      <strong>Apellidos:</strong> {userRegister.lastName}
+                    </p>
+                    <p>
+                      <strong>Cédula:</strong> {userRegister.cI}
+                    </p>
 
+                    <p>
+                      <strong>Eje Policial:</strong> {userRegister.subsistema}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {userRegister.email}
+                    </p>
+                    <p className="mensaje_inscripcion">
+                      Si requiere modificar su información persona, puede
+                      crearse una cuenta con notoros usando su correo
+                      electrónicao y editar la información, o comuniquese con
+                      soporte en la sección contactanos.
+                    </p>
+                  </div>
+                )}
+
+                {!userRegister && (
+                  <>
+                    <label className="registro_label">
+                      Confirmar Email
+                      <input
+                        type="email"
+                        required
+                        {...register("confirmEmail")}
+                      />
+                    </label>
+
+                    <label className="registro_label">
+                      Nombres
+                      <input
+                        placeholder="Nombres completos (tildes y ñ si aplica)"
+                        required
+                        {...register("nombres")}
+                      />
+                    </label>
+
+                    <label className="registro_label">
+                      Apellidos
+                      <input
+                        placeholder="Apellidos completos (tildes y ñ si aplica)"
+                        required
+                        {...register("apellidos")}
+                      />
+                    </label>
+                    <label className="registro_label">
+                      Grado
+                      <select
+                        required
+                        {...register("grado")}
+                        className="form_input"
+                      >
+                        <option value="">Seleccione una opción</option>
+                        {[
+                          ...new Set(
+                            variables.map((v) => v.grado).filter(Boolean)
+                          ),
+                        ].map((grado, i) => (
+                          <option key={i} value={grado}>
+                            {grado}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="registro_label">
+                      Cédula
+                      <input
+                        required
+                        {...register("cedula")}
+                        defaultValue={userRegister?.cI || ""}
+                      />
+                    </label>
+                  </>
+                )}
+
+                {userRegister && (
+                  <>
+                    <input
+                      type="hidden"
+                      value={userRegister.cI}
+                      {...register("cedula")}
+                    />
+                    <input
+                      type="hidden"
+                      value={userRegister.firstName}
+                      {...register("nombres")}
+                    />
+                    <input
+                      type="hidden"
+                      value={userRegister.lastName}
+                      {...register("apellidos")}
+                    />
+                    <input
+                      type="hidden"
+                      value={userRegister.email}
+                      {...register("email")}
+                    />
+                    <input
+                      type="hidden"
+                      value={userRegister.cellular}
+                      {...register("celular")}
+                    />
+                    <input
+                      type="hidden"
+                      value={userRegister.grado}
+                      {...register("grado")}
+                    />
+                    <input
+                      type="hidden"
+                      value={userRegister.subsistema}
+                      {...register("subsistema")}
+                    />
+                    <input
+                      type="hidden"
+                      value={userRegister.email}
+                      {...register("confirmEmail")}
+                    />
+                  </>
+                )}
+              </div>
+
+              {/* Columna 2 del formulario */}
+
+              <div className="form_column">
+                {!userRegister && (
+                  <div>
+                    <label className="registro_label">
+                      Celular
+                      <input
+                        required
+                        {...register("celular")}
+                        defaultValue={userRegister?.cellular || ""}
+                      />
+                    </label>
+                    <label className="registro_label">
+                      Eje Policial
+                      <select
+                        required
+                        {...register("subsistema")}
+                        className="form_input"
+                      >
+                        <option value="">Seleccione una opción</option>
+                        {[
+                          ...new Set(
+                            variables.map((v) => v.subsistema).filter(Boolean)
+                          ),
+                        ].map((subsistema, i) => (
+                          <option key={i} value={subsistema}>
+                            {subsistema}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                )}
+                <div className="form_check_container">
+                  <label className="form_check_label">
+                    Acepto recibir correos electrónicos con información sobre
+                    los cursos y otros contenidos relacionados. Entiendo que mis
+                    datos serán tratados de acuerdo con la política de
+                    privacidad y que puedo dejar de recibirlos en cualquier
+                    momento.
+                    <input
+                      type="checkbox"
+                      {...register("aceptacion", {
+                        validate: (value) =>
+                          value === true ||
+                          "Debes aceptar la política para continuar.",
+                      })}
+                    />
+                  </label>
+                  {errors.aceptacion && (
+                    <p className="form_error">{errors.aceptacion.message}</p>
+                  )}
+                </div>
+
+                <div className="form_button_inscripcion">
+                  <button className="btn_inscripcion" type="submit">
+                    Inscribirme <span>➜</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Columna derecha: info del curso con imagen de fondo */}
+          <div className="registro_right animate_slide_right">
+            {cursoActivo && (
+              <div className="curso_fondo">
+                <div className="curso_overlay">
+                  <h2>{cursoActivo.nombre}</h2>
+                  <p>{cursoActivo.objetivo}</p>
+                </div>
+                <div
+                  className="curso_imagen"
+                  style={{
+                    backgroundImage: `url(/images/${code}.jpg)`,
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 export default RegistroAlumnos;

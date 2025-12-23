@@ -32,6 +32,19 @@ const ChangePassword = () => {
   }, [code]);
 
   const submit = (data) => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/;
+
+    if (!passwordRegex.test(data.password)) {
+      return dispatch(
+        showAlert({
+          message:
+            "⚠️ La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.",
+          alertType: 1,
+        })
+      );
+    }
+
     if (data.password === data.confirmPassword) {
       const body = {
         password: data.password,
@@ -69,65 +82,62 @@ const ChangePassword = () => {
   }, [error]);
 
   return (
-    <div>
+    <div className="changePage">
       {isLoading && <IsLoading />}
-      <div className="contenedor">
-        <section className="reset_password_form__content">
-          <h2 className="title__user__change__password">
-            Cambie su Contraseña
-          </h2>
-          <form className="form__login" onSubmit={handleSubmit(submit)}>
-            <label className="label__form__login">
-              <span className="span__form__change__password">
-                Escriba su nueva Contraseña
-              </span>
 
-              <div className="input__form__login__password">
+      <div className="changeContainer">
+        <section className="changeCard">
+          <div className="changeHeader">
+            <h2 className="changeTitle">Cambia tu contraseña</h2>
+            <p className="changeSubtitle">
+              Crea una contraseña segura y confírmala para continuar.
+            </p>
+          </div>
+
+          <form className="changeForm" onSubmit={handleSubmit(submit)}>
+            <label className="changeLabel">
+              <span>Nueva contraseña</span>
+
+              <div className="changePasswordWrap">
                 <input
-                  className="input__form__reset__password"
+                  className="changeInput"
                   type={hidePassword_1 ? "password" : "text"}
                   required
                   {...register("password")}
+                  placeholder="Ingresa tu nueva contraseña"
                 />
-                <div>
-                  <img
-                    className="img__show"
-                    onClick={() => setHidePassword_1(!hidePassword_1)}
-                    src={`../../../${
-                      hidePassword_1 ? "show" : "hide"
-                    }.png`}
-                    alt=""
-                  />
-                </div>
+                <img
+                  className="changeEye"
+                  onClick={() => setHidePassword_1(!hidePassword_1)}
+                  src={`../../../${hidePassword_1 ? "show" : "hide"}.png`}
+                  alt=""
+                />
               </div>
             </label>
 
-            <label className="label__form__login">
-              <span className="span__form__change__password">
-                Valide su Contraseña
-              </span>
+            <label className="changeLabel">
+              <span>Confirmar contraseña</span>
 
-              <div className="input__form__login__password">
+              <div className="changePasswordWrap">
                 <input
-                  className="input__form__reset__password"
+                  className="changeInput"
                   type={hidePassword_2 ? "password" : "text"}
                   required
                   {...register("confirmPassword")}
+                  placeholder="Confirma tu contraseña"
                 />
-                <div>
-                  <img
-                    className="img__show"
-                    onClick={() => setHidePassword_2(!hidePassword_2)}
-                    src={`../../../${
-                      hidePassword_2 ? "show" : "hide"
-                    }.png`}
-                    alt=""
-                  />
-                </div>
+                <img
+                  className="changeEye"
+                  onClick={() => setHidePassword_2(!hidePassword_2)}
+                  src={`../../../${hidePassword_2 ? "show" : "hide"}.png`}
+                  alt=""
+                />
               </div>
             </label>
 
-            <button className="btn__form__login">Enviar</button>
+            <button className="changeBtn" type="submit">
+              Guardar <span className="arrow">➜</span>
+            </button>
           </form>
         </section>
       </div>

@@ -12,40 +12,23 @@ const Register = () => {
   const dispatch = useDispatch();
   const [hidePassword, setHidePassword] = useState(true);
   const [hidePasswordVerify, setHidePasswordVerify] = useState(true);
+
   const [
     registerUser,
-    updateUser,
-    loginUser,
-    loggedUser,
-    verifyUser,
+    ,
+    ,
+    ,
+    ,
     userRegister,
     isLoading,
     error,
-    verified,
-    sendEmail,
-    userResetPassword,
-    changePassword,
-    userUpdate,
-    userLogged,
-    setUserLogged,
   ] = useAuth();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    value,
-    setValue,
-    watch,
-    setError,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit, reset } = useForm();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/login");
-    }
+    if (token) navigate("/login");
   }, [navigate]);
 
   useEffect(() => {
@@ -57,7 +40,7 @@ const Register = () => {
         })
       );
     }
-  }, [error]);
+  }, [error, dispatch]);
 
   useEffect(() => {
     if (userRegister) {
@@ -69,15 +52,14 @@ const Register = () => {
       );
       navigate("/login");
     }
-  }, [userRegister]);
+  }, [userRegister, dispatch, navigate]);
 
-  const capitalizeWords = (str) => {
-    return str
-      .trim() // elimina espacios al inicio y fin
-      .split(/\s+/) // separa por uno o más espacios
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+  const capitalizeWords = (str) =>
+    str
+      .trim()
+      .split(/\s+/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
       .join(" ");
-  };
 
   const submit = (data) => {
     const frontBaseUrl = `${location.protocol}//${location.host}/#/verify`;
@@ -117,6 +99,7 @@ const Register = () => {
     };
 
     registerUser(body);
+
     reset({
       email: "",
       firstName: "",
@@ -127,79 +110,104 @@ const Register = () => {
   };
 
   return (
-    <div>
+    <div className="registerPage">
       {isLoading && <IsLoading />}
-      <div className="contenedor_register">
-        <form className="form__register" onSubmit={handleSubmit(submit)}>
-          <h2 className="register__title">REGISTRATE</h2>
-          <label className="label__form__register">
-            <span className="span__form__register">Nombres: </span>
+
+      <div className="registerContainer">
+        <form className="registerCard" onSubmit={handleSubmit(submit)}>
+          <div className="registerHeader">
+            <h2 className="registerTitle">Regístrate</h2>
+            <p className="registerSubtitle">
+              Crea tu cuenta para acceder a EDUKA.
+            </p>
+          </div>
+
+          <label className="registerLabel">
+            <span>Nombres</span>
             <input
               required
               {...register("firstName")}
-              className="input__form__register"
+              className="registerInput"
               type="text"
+              placeholder="Ingresa tus nombres"
             />
           </label>
-          <label className="label__form__register">
-            <span className="span__form__register">Apellidos: </span>
+
+          <label className="registerLabel">
+            <span>Apellidos</span>
             <input
               required
               {...register("lastName")}
-              className="input__form__register"
+              className="registerInput"
               type="text"
+              placeholder="Ingresa tus apellidos"
             />
           </label>
-          <label className="label__form__register">
-            <span className="span__form__register">Email: </span>
+
+          <label className="registerLabel">
+            <span>Email</span>
             <input
               required
               {...register("email")}
-              className="input__form__register"
+              className="registerInput"
               type="text"
+              placeholder="Ingresa tu email"
             />
           </label>
 
-          <label className="label__form__register">
-            <span className="span__form__register">Contraseña: </span>
-            <div className="input__form__register">
+          <label className="registerLabel">
+            <span>Contraseña</span>
+            <div className="registerPassword">
               <input
-                className="input__password"
+                className="registerPasswordInput"
                 required
                 {...register("password")}
                 type={hidePassword ? "password" : "text"}
-              />{" "}
-              <img
-                className="img__show"
-                onClick={() => setHidePassword(!hidePassword)}
-                src={`../../../${hidePassword ? "show" : "hide"}.png`}
-                alt=""
+                placeholder="Crea una contraseña segura"
               />
+              <button
+                type="button"
+                className="eyeBtn"
+                onClick={() => setHidePassword(!hidePassword)}
+                aria-label="Mostrar/ocultar contraseña"
+              >
+                <img
+                  className="eyeIcon"
+                  src={`../../../${hidePassword ? "show" : "hide"}.png`}
+                  alt=""
+                />
+              </button>
             </div>
           </label>
 
-          <label className="label__form__register">
-            <span className="span__form__register">
-              {" "}
-              Verifica tu Contraseña:{" "}
-            </span>
-            <div className="input__form__register">
+          <label className="registerLabel">
+            <span>Confirmar contraseña</span>
+            <div className="registerPassword">
               <input
-                className="input__password"
+                className="registerPasswordInput"
                 required
                 {...register("confirmPassword")}
                 type={hidePasswordVerify ? "password" : "text"}
-              />{" "}
-              <img
-                className="img__show"
-                onClick={() => setHidePasswordVerify(!hidePasswordVerify)}
-                src={`../../../${hidePasswordVerify ? "show" : "hide"}.png`}
-                alt=""
+                placeholder="Repite la contraseña"
               />
+              <button
+                type="button"
+                className="eyeBtn"
+                onClick={() => setHidePasswordVerify(!hidePasswordVerify)}
+                aria-label="Mostrar/ocultar confirmación"
+              >
+                <img
+                  className="eyeIcon"
+                  src={`../../../${hidePasswordVerify ? "show" : "hide"}.png`}
+                  alt=""
+                />
+              </button>
             </div>
           </label>
 
-          <button className="btn__form__register">Registrarse</button>
+          <button className="registerBtn" type="submit">
+            Registrarse <span className="arrow">➜</span>
+          </button>
         </form>
       </div>
     </div>

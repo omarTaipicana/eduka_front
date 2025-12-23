@@ -1,171 +1,203 @@
-.contenedor_register {
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0.5em;
+/* Página */
+.registerPage {
+  width: 100%;
+}
+
+/* Contenedor centrado */
+.registerContainer {
+  min-height: calc(100dvh - 9rem); /* tu header fijo suele ocupar aprox esto */
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem 3rem;
+}
+
+/* Tarjeta */
+.registerCard {
+  width: min(520px, 92%);
+  padding: 2.2rem 2rem;
+  border-radius: 1.4rem;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 1rem 2.4rem rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  position: relative;
   overflow: hidden;
-  width: 100%;
-  height: calc(100dvh - 120px); /* Ajustado por header y footer */
-}
-
-.form__register {
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
-  width: 100%;
-  max-width: 35%;
-  padding: 0.5em 2em;
-  margin: 0 auto;
-  background-color: #ffffff7c;
-  border: 0.1em solid #ccc;
-  border-radius: 0.8em;
-  box-shadow: 0 0.3em 0.5em rgba(0, 0, 0, 0.1);
+  gap: 1.05rem;
 }
 
-.register__title {
+/* Marca de agua */
+.registerCard::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  background-image: url("/images/eduka_sf.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 60%;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.registerHeader {
+  z-index: 1;
   text-align: center;
-  color: rgb(243, 192, 61);
-  font-size: 1.3em;
-  margin-bottom: 0.2em;
+  margin-bottom: 0.4rem;
 }
 
-.label__form__register {
+.registerTitle {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 900;
+  color: #1b326b;
+}
+
+.registerSubtitle {
+  margin: 0.35rem 0 0;
+  color: #4d4d4d;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Labels */
+.registerLabel {
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  font-size: 0.95em;
-  font-weight: 700;
-  color: #000000;
+  gap: 0.35rem;
+  font-weight: 800;
+  color: #1b326b;
+  font-size: 0.95rem;
 }
 
-.span__form__register {
-  margin-bottom: 0em;
+.registerInput {
+  width: 100%;
+  border: none;
+  border-radius: 0.9rem;
+  background-color: #e8eaef;
+  padding: 1rem 1.2rem;
+  font-size: 1rem;
+  color: #333333;
+  outline: none;
 }
 
-.input__form__register {
-  background-color: white;
+.registerInput::placeholder {
+  color: #818698;
+  font-weight: 600;
+}
+
+.registerInput:focus {
+  outline: 0.16rem solid rgba(27, 50, 107, 0.35);
+}
+
+/* Password group */
+.registerPassword {
+  width: 100%;
   display: flex;
   align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 0.4em;
-  padding: 0.3em;
-  font-size: 0.9em;
-  text-align: center;
+  gap: 0.55rem;
+  border-radius: 0.9rem;
+  background-color: #e8eaef;
+  padding: 0.35rem 0.55rem;
 }
 
-.input__form__register input {
+.registerPasswordInput {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 0.85em;
+  background: transparent;
+  padding: 0.7rem 0.65rem;
+  font-size: 1rem;
+  color: #333;
 }
 
-.input__password {
-  text-align: center;
-  font-size: 0.85em;
+.registerPasswordInput::placeholder {
+  color: #818698;
+  font-weight: 600;
 }
 
-.input__form__register img {
-  cursor: pointer;
-  width: 1.3em;
-  height: 1.3em;
-  margin-left: 0.4em;
-}
-
-.btn__form__register {
-  background-color: var(--blue2-color);
-  color: white;
-  font-size: 0.95rem;
-  font-weight: bold;
+.eyeBtn {
   border: none;
-  border-radius: 0.25em;
-  padding: 0.6em;
+  background: transparent;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 50%;
-  margin: 0.5em auto 0 auto;
+  padding: 0.45rem;
+  border-radius: 0.6rem;
+  display: grid;
+  place-items: center;
 }
 
-.btn__form__register:hover {
-  background-color: var(--blue-color);
+.eyeBtn:hover {
+  background: rgba(27, 50, 107, 0.08);
 }
 
-.img__show {
+.eyeIcon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Botón */
+.registerBtn {
+  z-index: 1;
+  margin-top: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.4rem;
+  border-radius: 0.9rem;
+  border: none;
+  background-color: #0f2a63;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 800;
   cursor: pointer;
-  width: 18px;
-  height: 18px;
+  box-shadow: 0 0.7rem 1.6rem rgba(0, 0, 0, 0.30);
+  transition: background-color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-/* Tablets */
-@media (max-width: 1024px) {
-  .form__register {
-    max-width: 70%;
-    padding: 1em 1.2em;
-  }
-
-  .btn__form__register {
-    width: 60%;
-  }
+.registerBtn .arrow {
+  font-size: 1.15rem;
 }
 
-/* Móviles medianos */
+.registerBtn:hover {
+  background-color: #081a3f;
+  transform: translateY(-2px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.35);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .contenedor_register {
-    padding: 1em;
-    height: calc(100dvh - 100px);
+  .registerContainer {
+    min-height: calc(100dvh - 8.5rem);
+    padding: 1.7rem 1rem 2.5rem;
   }
 
-  .form__register {
-    max-width: 90%;
-    gap: 0.4em;
-    padding: 0.8em 1em;
+  .registerCard {
+    padding: 1.6rem 1.2rem;
+    border-radius: 1.1rem;
+    gap: 0.95rem;
   }
 
-  .btn__form__register {
-    width: 70%;
+  .registerTitle {
+    font-size: 1.6rem;
   }
 
-  .register__title {
-    font-size: 1.2em;
+  .registerSubtitle {
+    font-size: 0.95rem;
   }
 
-  .input__form__register {
-    font-size: 0.9em;
+  .registerInput {
+    padding: 0.95rem 1rem;
+    font-size: 0.98rem;
   }
 
-  .input__password {
+  .registerPasswordInput {
+    font-size: 0.98rem;
+  }
+
+  .registerBtn {
     width: 100%;
-    text-align: left;
-  }
-}
-
-/* Móviles pequeños */
-@media (max-width: 480px) {
-  .contenedor_register {
-    padding: 0.5em;
-  }
-
-  .form__register {
-    width: 100%;
-    padding: 0.6em 0.8em;
-    gap: 0.3em;
-  }
-
-  .btn__form__register {
-    width: 100%;
-  }
-
-  .register__title {
-    font-size: 1.1em;
-  }
-
-  .input__form__register {
-    font-size: 0.85em;
-  }
-
-  .input__form__register img {
-    width: 1em;
-    height: 1em;
   }
 }

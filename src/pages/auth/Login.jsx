@@ -304,51 +304,56 @@ const Login = () => {
     }
   }, [firstChargeVar]);
 
-  return (
-    <div className="contenedor">
-      {isLoading && <IsLoading />}
+ return (
+  <div className="login_page">
+    {isLoading && <IsLoading />}
 
-      <section className="content_background">
+    <section className="login_shell">
+      <div className="login_card">
         {userLogged ? (
-          <section className="user__info__content">
+          <section className="profile_wrap">
+            <div className="profile_header">
+              <h2 className="profile_title">Mi perfil</h2>
+              <p className="profile_subtitle">
+                Completa o actualiza tu información para continuar.
+              </p>
+            </div>
+
             <form
               onSubmit={handleSubmit(submitUpdate)}
               className="form__user__info"
             >
+              {/* ===== tu mismo contenido (NO CAMBIA) ===== */}
               <article className="form__user__seccion">
                 <label className="label__user__info">
                   <span className="span__user__info">Nombres: </span>
                   <input
                     readOnly={!userEdit}
-                    style={{
-                      border: "none",
-                    }}
+                    style={{ border: "none" }}
                     required
                     {...register("firstName")}
                     className="input__form__info"
                     type="text"
                   />
                 </label>
+
                 <label className="label__user__info">
                   <span className="span__user__info">Apellidos: </span>
                   <input
                     readOnly={!userEdit}
-                    style={{
-                      border: "none",
-                    }}
+                    style={{ border: "none" }}
                     required
                     {...register("lastName")}
                     className="input__form__info"
                     type="text"
                   />
                 </label>
+
                 <label className="label__user__info">
                   <span className="span__user__info">Email: </span>
                   <input
                     readOnly
-                    style={{
-                      border: "none",
-                    }}
+                    style={{ border: "none" }}
                     required
                     {...register("email")}
                     className="input__form__info"
@@ -362,9 +367,7 @@ const Login = () => {
                   </span>
                   <input
                     readOnly={!userEdit}
-                    style={{
-                      border: userEdit ? "2px solid #ccc" : "none",
-                    }}
+                    style={{ border: userEdit ? "2px solid #cfd5e6" : "none" }}
                     required
                     {...register("dateBirth", {
                       setValueAs: (value) => (value === "" ? null : value),
@@ -380,22 +383,19 @@ const Login = () => {
                   <span className="span__user__info">Número de Cédula: </span>
                   <input
                     readOnly={!userEdit}
-                    style={{
-                      border: userEdit ? "2px solid #ccc" : "none",
-                    }}
+                    style={{ border: userEdit ? "2px solid #cfd5e6" : "none" }}
                     required
                     {...register("cI")}
                     className="input__form__info"
                     type="text"
                   />
                 </label>
+
                 <label className="label__user__info">
                   <span className="span__user__info">Número de Celular: </span>
                   <input
                     readOnly={!userEdit}
-                    style={{
-                      border: userEdit ? "2px solid #ccc" : "none",
-                    }}
+                    style={{ border: userEdit ? "2px solid #cfd5e6" : "none" }}
                     required
                     {...register("cellular")}
                     className="input__form__info"
@@ -410,15 +410,11 @@ const Login = () => {
                       className="input__form__info"
                       readOnly={!userEdit}
                       {...register("genre")}
-                      style={{
-                        border: "none",
-                      }}
+                      style={{ border: "none" }}
                     />
                   ) : (
                     <select
-                      style={{
-                        border: "2px solid #ccc",
-                      }}
+                      style={{ border: "2px solid #cfd5e6" }}
                       {...register("genre")}
                       className="input__form__info"
                       value={selectedGenero}
@@ -439,19 +435,17 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    if (!userEdit) {
-                      setUserEdit(true);
-                    } else {
-                      handleSubmit(submitUpdate)();
-                    }
+                    if (!userEdit) setUserEdit(true);
+                    else handleSubmit(submitUpdate)();
                   }}
-                  className="btn__logout__user"
+                  className="btn_primary"
                 >
                   {userEdit
                     ? "Actualizar"
                     : isInfoComplete
                     ? "Editar perfil"
-                    : "Completar Perfil"}
+                    : "Completar Perfil"}{" "}
+                  <span className="btn_arrow">➜</span>
                 </button>
               </article>
 
@@ -463,15 +457,11 @@ const Login = () => {
                       className="input__form__info"
                       readOnly={!userEdit}
                       {...register("province")}
-                      style={{
-                        border: "none",
-                      }}
+                      style={{ border: "none" }}
                     />
                   ) : (
                     <select
-                      style={{
-                        border: "2px solid #ccc",
-                      }}
+                      style={{ border: "2px solid #cfd5e6" }}
                       {...register("province")}
                       className="input__form__info"
                       value={selectedProvincia}
@@ -496,15 +486,11 @@ const Login = () => {
                       className="input__form__info"
                       readOnly={!userEdit}
                       {...register("city")}
-                      style={{
-                        border: "none",
-                      }}
+                      style={{ border: "none" }}
                     />
                   ) : (
                     <select
-                      style={{
-                        border: "2px solid #ccc",
-                      }}
+                      style={{ border: "2px solid #cfd5e6" }}
                       {...register("city")}
                       className="input__form__info"
                       value={selectedCanton}
@@ -529,15 +515,11 @@ const Login = () => {
                       className="input__form__info"
                       readOnly={!userEdit}
                       {...register("subsistema")}
-                      style={{
-                        border: "none",
-                      }}
+                      style={{ border: "none" }}
                     />
                   ) : (
                     <select
-                      style={{
-                        border: "2px solid #ccc",
-                      }}
+                      style={{ border: "2px solid #cfd5e6" }}
                       {...register("subsistema")}
                       className="input__form__info"
                       value={selectedSubsistema}
@@ -565,15 +547,11 @@ const Login = () => {
                       className="input__form__info"
                       readOnly={!userEdit}
                       {...register("grado")}
-                      style={{
-                        border: "none",
-                      }}
+                      style={{ border: "none" }}
                     />
                   ) : (
                     <select
-                      style={{
-                        border: "2px solid #ccc",
-                      }}
+                      style={{ border: "2px solid #cfd5e6" }}
                       {...register("grado")}
                       className="input__form__info"
                       value={selectedGrado}
@@ -593,58 +571,66 @@ const Login = () => {
               </article>
             </form>
 
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="btn__logout__user__cerrar__sesion"
-            >
-              Cerrar la sesión
-            </button>
           </section>
         ) : (
-          <div>
-            <section className="user__login__content">
+          <section className="login_wrap">
+            <div className="login_header">
               <h2 className="login__title">Iniciar Sesión</h2>
-              <form className="form__login" onSubmit={handleSubmit(submit)}>
-                <label className="label__form__login">
-                  <span className="span__form__login">Email: </span>
+              <p className="login_subtitle">
+                Ingresa con tu correo y contraseña para acceder a la plataforma.
+              </p>
+            </div>
+
+            <form className="form__login" onSubmit={handleSubmit(submit)}>
+              <label className="label__form__login">
+                <span className="span__form__login">Email</span>
+                <input
+                  required
+                  {...register("email")}
+                  className="input__form__login"
+                  type="text"
+                />
+              </label>
+
+              <label className="label__form__login">
+                <span className="span__form__login">Contraseña</span>
+                <div className="password_row">
                   <input
+                    className="input__form__login input__form__login--password"
                     required
-                    {...register("email")}
-                    className="input__form__login"
-                    type="text"
+                    {...register("password")}
+                    type={hidePassword ? "password" : "text"}
                   />
-                </label>
+                  <button
+                    type="button"
+                    className="toggle_pass"
+                    onClick={() => setHidePassword(!hidePassword)}
+                    aria-label="Mostrar/Ocultar contraseña"
+                  >
+                    <img
+                      className="img__show"
+                      src={`../../../${hidePassword ? "show" : "hide"}.png`}
+                      alt=""
+                    />
+                  </button>
+                </div>
+              </label>
 
-                <label className="label__form__login">
-                  <span className="span__form__login">Contraseña: </span>
-                  <div className="input__form__login__password">
-                    <input
-                      className="input__form__login__password"
-                      required
-                      {...register("password")}
-                      type={hidePassword ? "password" : "text"}
-                    />{" "}
-                    <div>
-                      <img
-                        className="img__show"
-                        onClick={() => setHidePassword(!hidePassword)}
-                        src={`../../../${hidePassword ? "show" : "hide"}.png`}
-                        alt=""
-                      />
-                    </div>
-                  </div>
-                </label>
-                <Link to="/reset_password">Olvido su contraseña</Link>
+              <Link className="login_link" to="/reset_password">
+                ¿Olvidaste tu contraseña?
+              </Link>
 
-                <button className="btn__form__login">INICIAR</button>
-              </form>
-            </section>
-          </div>
+              <button className="btn_primary_full" type="submit">
+                Iniciar <span className="btn_arrow">➜</span>
+              </button>
+            </form>
+          </section>
         )}
-      </section>
-    </div>
-  );
+      </div>
+    </section>
+  </div>
+);
+
 };
 
 export default Login;

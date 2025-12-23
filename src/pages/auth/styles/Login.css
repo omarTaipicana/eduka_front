@@ -1,310 +1,327 @@
-.contenedor {
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 2em;
-}
-
-.content_background {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #000;
-  border-radius: 1.25rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+/* ====== PAGE WRAP (respeta header fijo) ====== */
+.login_page {
   width: 100%;
-  height: 65vh;
+  display: flex;
+  justify-content: center;
 }
 
-.title__user__info {
+/* shell con marca de agua estilo landing */
+.login_shell {
+  width: 92%;
+  position: relative;
+  border-radius: 1.6rem;
+  overflow: hidden;
+  background: #ffffff;
+  padding: 2.2rem;
+}
+
+/* marca de agua */
+.login_shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/eduka_sf.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 45%;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+/* tarjeta interna */
+.login_card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  backdrop-filter: blur(4px);
+  border-radius: 1.4rem;
+}
+
+/* ===== HEADERS ===== */
+.login_header,
+.profile_header {
   text-align: center;
-  font-size: 1.5em;
+  margin-bottom: 1.6rem;
 }
 
-.user__info__content {
-  padding: 1em;
-  background: rgba(255, 255, 255, 0.582);
-  color: #000;
-  border-radius: 1.25rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  width: 60%;
+.login__title,
+.profile_title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1b326b;
+  margin: 0;
 }
 
-.user__login__content {
-  padding: 1em 2em;
-  background: rgba(255, 255, 255, 0.582);
-  color: #000;
-  border-radius: 1.25rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+.login_subtitle,
+.profile_subtitle {
+  margin: 0.8rem auto 0;
+  max-width: 44rem;
+  color: #3e4352;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+/* ====== LOGIN FORM ====== */
+.login_wrap {
+  max-width: 520px;
+  margin: 0 auto;
 }
 
 .form__login {
   display: flex;
   flex-direction: column;
-  gap: 1em;
+  gap: 1rem;
+}
+
+.label__form__login {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.span__form__login {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #3a4156;
+}
+
+.input__form__login {
   width: 100%;
-  padding: 1.5em;
-  border-radius: 0.5em;
+  border: none;
+  border-radius: 0.9rem;
+  background-color: #e8eaef;
+  padding: 1rem 1.2rem;
+  font-size: 1rem;
+  color: #333333;
+  outline: none;
+  text-align: center;
+}
+
+.input__form__login:focus {
+  outline: 0.15rem solid rgba(27, 50, 107, 0.25);
+}
+
+.password_row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: #e8eaef;
+  border-radius: 0.9rem;
+  padding: 0.25rem 0.4rem;
+}
+
+.input__form__login--password {
+  background: transparent;
+  padding: 0.85rem 0.9rem;
+  border-radius: 0.8rem;
+}
+
+.toggle_pass {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.7rem;
+}
+
+.toggle_pass:hover {
+  background: rgba(27, 50, 107, 0.08);
+}
+
+.img__show {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.login_link {
+  text-align: center;
+  color: #1b326b;
+  font-weight: 700;
+  text-decoration: none;
+  margin-top: 0.3rem;
+}
+
+.login_link:hover {
+  text-decoration: underline;
+}
+
+/* ===== BUTTONS (mismo estilo landing) ===== */
+.btn_primary_full {
+  width: 100%;
+  margin-top: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.2rem;
+  border-radius: 0.9rem;
+  border: none;
+  background-color: #0f2a63;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 0.7rem 1.6rem rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.btn_primary_full:hover {
+  background-color: #081a3f;
+  transform: translateY(-2px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.3);
+}
+
+.btn_primary {
+  margin-top: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.4rem;
+  border-radius: 0.9rem;
+  border: none;
+  background-color: #0f2a63;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 0.7rem 1.6rem rgba(0, 0, 0, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.btn_primary:hover {
+  background-color: #081a3f;
+  transform: translateY(-2px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.28);
+}
+
+.btn_secondary {
+  margin: 1.6rem auto 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.2rem;
+  border-radius: 0.9rem;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: #3a4156;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn_secondary:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+.btn_arrow {
+  font-size: 1.2rem;
+}
+
+/* ====== PROFILE FORM (cuando ya está logueado) ====== */
+.profile_wrap {
+  width: 100%;
 }
 
 .form__user__info {
-  display: flex;
-  gap: 1em;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
   width: 100%;
-  padding: 1em;
-  border-radius: 0.5em;
+  margin-top: 1.2rem;
 }
 
 .form__user__seccion {
   display: flex;
   flex-direction: column;
-  gap: 0.2em;
-  width: 100%;
-  max-width: 50em;
-}
-
-label {
-  display: flex;
-  flex-direction: column;
-  font-size: 0.8em;
-}
-.input__form__info {
-  padding: 0.625em;
-  font-size: 0.8em;
-  border: none;
-  border-radius: 0.25em;
-  background-color: #ffffff;
-  color: #003366;
-  margin-top: 0.3125em;
-}
-
-.input__form__login {
-  padding: 0.625em;
-  font-size: 1em;
-  border: none;
-  border-radius: 0.25em;
-  background-color: #ffffff;
-  color: #003366;
-  margin-top: 0.3125em;
-}
-
-.input__form__login__password {
-  display: flex;
-  width: 100%;
-  justify-content: center;
-  align-items: center;
-  padding: 0.3em;
-  font-size: 1em;
-  border: none;
-  border-radius: 0.25em;
-  background-color: #ffffff;
-  color: #003366;
-  margin-top: 0.3125em;
-}
-
-.input__form__login__password:focus {
-  border: none;
-  outline: none;
-}
-
-input:focus,
-select:focus {
-  outline: 0.125em solid #00509e;
-}
-
-.btn__form__login {
-  background-color: #cc7a00;
-  color: #ffffff;
-  padding: 0.625em;
-  border: none;
-  border-radius: 0.3125em;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.btn__logout__user {
-  background-color: #05116e;
-  margin-top: 1.5em;
-  color: #ffffff;
-  padding: 0.5em;
-  border: none;
-  border-radius: 0.3125em;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.btn__logout__user:hover {
-  background-color: #263988;
-}
-
-.btn__form__login:hover,
-.btn__logout__user__cerrar__sesion:hover:hover {
-  background-color: #ff9900;
-}
-
-.btn__logout__user__cerrar__sesion {
-  margin: 0em auto;
-  background-color: #cc7a00;
-  color: #ffffff;
-  padding: 0.625em;
-  border: none;
-  border-radius: 0.3125em;
-  font-size: 0.8em;
-  cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  gap: 0.9rem;
 }
 
 .label__user__info {
-  margin-bottom: 0.3em;
-  font-weight: bold;
-  font-size: 0.8em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
 }
 
 .span__user__info {
-  font-size: 1.1em;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #3a4156;
 }
 
-a {
-  color: #1039bf;
-  text-decoration: none;
-  font-size: 0.9em;
-  text-align: center;
+.input__form__info {
+  width: 100%;
+  border: none;
+  border-radius: 0.9rem;
+  background-color: #e8eaef;
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
+  color: #333333;
+  outline: none;
 }
 
-a:hover {
-  text-decoration: underline;
+.input__form__info:focus {
+  outline: 0.15rem solid rgba(27, 50, 107, 0.25);
 }
 
-.img__show {
-  width: 1.25em;
-  height: 1.25em;
-  margin-left: 0.3125em;
-  cursor: pointer;
+/* select para que se vea igual */
+select.input__form__info {
+  appearance: none;
 }
 
-.isLoading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* --- RESPONSIVE DESIGN --- */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
-  .contenedor {
-    margin-bottom: 5em;
-    margin-top: 2em;
+  .login_shell {
+    padding: 1.6rem;
   }
-  .user__info__content,
-  .user__login__content {
-    width: 70%;
-    padding: 1em;
+  .login_card {
+    padding: 1.6rem;
   }
-
   .form__user__info {
-    flex-direction: column;
-    padding: 1em;
-  }
-
-  .form__user__seccion {
-    max-width: 100%;
-    padding: 0 1em;
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .content_background {
-    flex-direction: column;
-    padding: 1em;
+  .login_page {
+    padding: 1.2rem 0 3rem;
   }
 
-  .user__info__content,
-  .user__login__content {
-    width: 90%;
-    margin-top: 2em;
+  .login_shell {
+    width: 94%;
+    padding: 1.2rem;
+    border-radius: 1.2rem;
   }
 
-  .form__user__info {
-    flex-direction: column;
-    gap: 1em;
+  .login_shell::before {
+    background-size: 85%;
   }
 
-  .form__login {
-    padding: 1em;
+  .login_card {
+    padding: 1.2rem;
+    border-radius: 1.1rem;
   }
 
-  .form__user__seccion {
-    padding: 0 1em;
+  .login__title,
+  .profile_title {
+    font-size: 1.8rem;
   }
 
-  .input__form__login,
-  .input__form__info,
-  .input__form__login__password {
-    font-size: 0.95em;
-  }
-
-  .btn__form__login,
-  .btn__logout__user,
-  .btn__logout__user__cerrar__sesion {
-    width: 100%;
-  }
-
-  .title__user__info {
-    font-size: 1.2em;
-  }
-
-  .span__user__info {
-    font-size: 1em;
-  }
-}
-
-@media (max-width: 480px) {
-  .user__info__content,
-  .user__login__content {
-    width: 95%;
-  }
-
-  .form__login,
-  .form__user__info {
-    padding: 0.5em;
+  .login_subtitle,
+  .profile_subtitle {
+    font-size: 0.95rem;
   }
 
   .input__form__login,
-  .input__form__info,
-  .input__form__login__password {
-    padding: 0.5em;
+  .input__form__info {
+    font-size: 0.95rem;
+    padding: 0.95rem 1rem;
   }
 
-  .btn__form__login,
-  .btn__logout__user,
-  .btn__logout__user__cerrar__sesion {
-    font-size: 0.9em;
-  }
-
-  .img__show {
-    width: 1em;
-    height: 1em;
-  }
-
-  label {
-    font-size: 0.8em;
-  }
-
-  .title__user__info {
-    font-size: 1em;
-  }
-
-  .span__user__info {
-    font-size: 0.9em;
+  .btn_primary_full {
+    font-size: 1.05rem;
   }
 }

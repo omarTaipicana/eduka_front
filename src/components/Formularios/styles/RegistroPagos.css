@@ -1,334 +1,380 @@
-/* BASE - Desktop */
+/* ===============================
+   REGISTRO PAGOS (AISLADO)
+   No usa .registro_* para evitar
+   conflictos con RegistroAlumnos.css
+================================= */
 
-.formulario_registro {
-  width: 100%;
+.pagos_container {
+  width: 95%;
+  margin: 0 auto;
+  position: relative;
+  background-size: cover;
+  background-position: center;
 }
 
-.felicitacion_mensaje {
-  background: rgba(255, 255, 255, 0.15);
-  color: #e0f2ff;
-  padding: 1.2em;
-  border-left: 5px solid #00cfff;
-  border-radius: 10px;
+/* Marca de agua SOLO pagos */
+.pagos_container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/eduka_sf.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 30%;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== Layout 2 columnas ===== */
+.pagos_wrapper {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.pagos_medio_alto {
+  min-height: 520px;
+}
+
+/* ===== Cards ===== */
+.pagos_left {
+  border-radius: 1.5rem;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pagos_right {
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 1.2rem 2.4rem rgba(0, 0, 0, 0.14);
+}
+
+/* ===== Felicitación ===== */
+.pagos_felicitacion {
+  margin: 1rem 2rem;
   text-align: center;
+  background: #f5f7fb;
+  border-left: 4px solid #0f2a63;
+  border-radius: 1rem;
+  padding: 1.2rem 1.3rem;
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 0, 0, 0.08);
+  margin-bottom: 1rem;
 }
 
-.label_cedula {
-  width: 50%;
+.pagos_felicitacion h2 {
+  margin: 0 0 0.6rem;
+  color: #0f2a63;
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.pagos_felicitacion p {
+  margin: 0 0 0.55rem;
+  color: #3e4352;
+  line-height: 1.65;
+  font-size: 0.9rem;
+}
+
+/* ===== Form ===== */
+
+.pagos_label_cedula {
+  width: 80%;
   margin: 0 auto;
 }
 
-.label_cedula > span {
+.pagos_label {
+  width: 80%;
+  margin: 0 auto;
+}
+.pagos_label span {
+  display: block;
+  font-weight: 800;
+  color: #333743;
+  margin: 0 auto;
+}
+
+.pagos_input_cedula {
   width: 50%;
-  margin: 0.5em auto;
-}
-
-.input_cedula {
+  margin: 1rem auto;
+  border: none;
+  border-radius: 0.9rem;
+  background-color: #e8eaef;
+  padding: 0.95rem 1.1rem;
+  font-size: 1rem;
+  color: #333;
+  outline: none;
+  box-sizing: border-box;
   text-align: center;
-  font-size: 1.5em !important;
 }
 
-.felicitacion_mensaje h2 {
-  font-size: 1.5em;
-  color: #ffffff;
-  margin-bottom: 0.5em;
-}
-
-.felicitacion_mensaje p {
-  font-size: 0.8em;
-}
-
-/* FORMULARIO CON DOS COLUMNAS */
-.doble_columna {
-  display: flex;
-  gap: 2em;
+.pagos_input,
+.pagos_left input[type="file"],
+.pagos_left input[type="number"] {
   width: 100%;
-  flex-wrap: nowrap;
+  border: none;
+  border-radius: 0.9rem;
+  background-color: #e8eaef;
+  padding: 0.95rem 1.1rem;
+  font-size: 1rem;
+  color: #333;
+  outline: none;
+  box-sizing: border-box;
+  text-align: center;
 }
 
-/* Columna de datos del usuario */
-.datos_usuario {
+.pagos_btn_row {
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  flex: 1;
-  height: 90%;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 1em;
-  box-shadow: 0 0 8px rgba(0, 96, 192, 0.4);
-  margin: auto 0;
+  align-items: center;
+  margin-top: 0.9rem;
 }
 
-.datos_usuario h2 {
-  font-size: 1.2em;
-  margin-bottom: 1em;
+.pagos_btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.4rem;
+  border-radius: 0.9rem;
+  border: none;
+  background-color: #0f2a63;
   color: #ffffff;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 0.7rem 1.6rem rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, background-color 0.2s ease,
+    box-shadow 0.2s ease;
+  white-space: nowrap;
 }
 
-.datos_usuario p {
-  color: #c9ddeb;
-  margin-bottom: 0.5em;
-  font-size: 0.9em;
+.pagos_btn:hover {
+  background-color: #081a3f;
+  transform: translateY(-2px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.4);
 }
 
-.datos_usuario p > strong {
-  color: #c9ddeb;
-  margin-bottom: 0.5em;
-  font-size: 0.9em;
+.pagos_error {
+  font-size: 0.85rem;
+  color: #c0392b;
+  margin-top: 0.2rem;
 }
 
-.total_pagar {
-  font-size: 1.2em !important;
-  font-weight: 600;
-  width: 100%;
+/* ===== Vista 2 columnas internas ===== */
+.pagos_form_dos {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.8fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.pagos_datos_usuario {
   text-align: center;
-  margin-bottom: 1em;
-  color: #deed07 !important;
+  background: #f5f7fb;
+  border-radius: 1rem;
+  padding: 1.2rem 1.3rem;
+  border-left: 4px solid #0f2a63;
 }
 
-/* Columna de opciones de pago */
-.inputs_pago {
-  flex: 2;
+.pagos_datos_usuario h2 {
+  margin: 0 0 0.8rem;
+  color: #0f2a63;
+  font-size: 1.15rem;
+  font-weight: 900;
 }
 
-.inputs_pago label {
+.pagos_datos_usuario p {
+  margin: 0.35rem 0;
+  color: #333743;
+  font-size: 0.95rem;
+}
+
+/* Box extras */
+.pagos_box {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(15, 42, 99, 0.12);
+  margin-bottom: 0.9rem;
+}
+
+.pagos_check_row {
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  margin-bottom: 0.7em;
-  color: #e3f5ff;
-  font-size: 0.8em;
+  gap: 0.5rem;
+  padding: 0.45rem 0;
+  color: #333743;
+  font-weight: 800;
+  font-size: 0.95rem;
 }
 
-.inputs_pago span {
-  width: 80%;
-  font-size: 1em;
-  text-align: right;
-  margin-right: 1.5em;
-}
-
-.inputs_pago input[type="file"] {
-  width: 35%;
-  font-size: 0.7em;
-  padding: 0.4em;
-  background-color: #eaf2fb;
-  color: #003366;
-  border-radius: 6px;
-  border: none;
+.pagos_check_row input[type="checkbox"] {
+  transform: scale(1.1);
   cursor: pointer;
-  display: block;
-  white-space: normal;
-  word-break: break-word;
-  text-align: center;
-  text-align-last: center;
 }
 
-.inputs_pago input[type="number"] {
-  background-color: #eaf2fb;
-  border-radius: 6px;
-  padding: 0.5em 0.6em;
-  width: 30%;
-  margin-top: 0.3em;
-  margin-bottom: 1em;
-  border: none;
-  color: #003366;
-  font-size: 1em;
+.pagos_total {
+  margin: 0.8rem 0 0.3rem;
+  font-weight: 900;
+  color: #0f2a63;
+  background: #f1f3fb;
+  border-radius: 0.8rem;
+  padding: 0.7rem 0.9rem;
   text-align: center;
 }
 
-.inputs_pago p {
-  font-size: 1em;
-  color: #ffffff;
-  margin-top: 1em;
+/* Confirmación legal */
+.pagos_check_container {
+  margin-top: 1rem;
 }
 
-.inputs_pago span {
-  width: 70%;
-}
-
-/* Checkbox inputs */
-.inputs_pago input[type="checkbox"] {
-  height: 1em;
-  margin-left: 0.6em;
-  transform: scale(1.2);
-  accent-color: #00cfff;
-  width: 30%;
-  outline: none;
-  display: flex;
-}
-
-.form_button {
-  display: flex;
-  justify-content: center;
-}
-
-/* Botón */
-.form_button button {
-  width: 40%;
-  margin-top: 1em;
-  padding: 0.7em 2em;
-  background: #00aaff;
-  border: none;
-  color: white;
-  font-weight: bold;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1em;
-
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.form_button button:hover {
-  background: #008fcc;
-}
-
-/* Ajuste para fondo derecho */
-.registro_right {
-  width: 50%;
-  height: 90%;
+.pagos_check_legal {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
   justify-content: center;
   align-items: center;
-}
-
-.registro_right h3 {
+  font-size: 0.92rem;
+  color: #444a5a;
+  background: #f5f7fb;
+  border-left: 4px solid #0f2a63;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
   text-align: center;
-  margin: 0.5em;
 }
 
-.curso_fondo_pago {
+.pagos_check_legal input[type="checkbox"] {
+  margin-top: 0.25rem;
+  transform: scale(1.1);
+  cursor: pointer;
+}
+
+/* ===== Panel derecho tipo overlay ===== */
+.pagos_panel {
   position: relative;
-  width: 100%;
+  min-height: 520px;
   height: 100%;
-  border-radius: 15px;
+  border-radius: 1.5rem;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(0, 140, 255, 0.4);
+  background: #0f2a63;
+  display: flex;
+  align-items: stretch;
 }
 
-.curso_imagen {
+/* ===== Panel derecho solo imagen ===== */
+.pagos_panel.solo_imagen {
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Imagen responsive */
+.pagos_img_full {
   width: 100%;
-  height: 100%;
-  background-size: cover; /* Cubre todo el contenedor */
-  background-position: center; /* Centra la imagen */
-  background-repeat: no-repeat; /* Evita que se repita */
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 1rem;
+  box-shadow: 0 0.8rem 1.6rem rgba(0, 0, 0, 0.15);
 }
 
-.form_error {
-  color: red !important;
-  font-size: 0.9rem;
-  margin-top: 4px;
+.pagos_panel_overlay {
+  position: relative;
+  z-index: 1;
+  padding: 2rem 2.2rem;
+  color: #ffffff;
 }
 
+.pagos_panel_overlay h3 {
+  margin: 0 0 0.8rem;
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
 
-/* ------------------- */
-/* RESPONSIVE */
-/* ------------------- */
+.pagos_panel_overlay p {
+  margin: 0 0 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.95;
+}
 
-/* Pantallas medianas (tablets) */
-@media (max-width: 992px) {
-  .doble_columna {
-    flex-direction: column;
-    gap: 1.5em;
+.pagos_panel_overlay ul {
+  margin: 0.6rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.pagos_panel_overlay li {
+  margin: 0.35rem 0;
+  font-size: 0.92rem;
+  opacity: 0.92;
+}
+
+/* ===== Animaciones ===== */
+.pagos_animate_left {
+  animation: pagosSlideLeft 0.5s ease-out;
+}
+
+.pagos_animate_right {
+  animation: pagosSlideRight 0.5s ease-out;
+}
+
+@keyframes pagosSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
   }
-
-  /* Cambiar el orden: imagen primero */
-  .registro_right {
-    order: -1;
-    width: 100%;
-    height: auto;
-    margin-top: 0;
-    margin-bottom: 2em;
-  }
-
-  .datos_usuario,
-  .inputs_pago {
-    width: 100%;
-    flex: none;
-    height: auto;
-  }
-
-  .inputs_pago label {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .inputs_pago span {
-    width: 100%;
-    margin-right: 0;
-    margin-bottom: 0.3em;
-    text-align: center;
-  }
-
-  .inputs_pago input[type="file"],
-  .inputs_pago input[type="number"] {
-    width: 50% !important;
-    font-size: 0.9em !important;
-  }
-
-  .form_button button {
-    width: 80%;
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
-/* Pantallas pequeñas (móviles) */
-@media (max-width: 600px) {
-  .label_cedula {
-    width: 90%;
+@keyframes pagosSlideRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1000px) {
+  .pagos_wrapper {
+    grid-template-columns: 1fr;
   }
 
-  .label_cedula > span {
+  .pagos_panel {
+    min-height: 260px;
+  }
+
+  .pagos_left {
+    padding: 1.6rem 1.4rem;
+  }
+
+  .pagos_form_dos {
+    grid-template-columns: 1fr;
+  }
+
+  .pagos_btn_row {
+    justify-content: center;
+  }
+
+  .pagos_btn {
     width: 100%;
-    margin: 0.5em 0;
-  }
-
-  .input_cedula {
-    font-size: 1.3em !important;
-  }
-
-  .doble_columna {
-    flex-direction: column;
-  }
-
-  .datos_usuario,
-  .inputs_pago {
-    width: 100%;
-    height: auto;
-    margin: 0;
-  }
-
-  .inputs_pago label {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .inputs_pago span {
-    width: 100%;
-    margin-right: 0;
-    margin-bottom: 0.3em;
-    text-align: center;
-  }
-
-  .inputs_pago input[type="file"],
-  .inputs_pago input[type="number"] {
-    width: 50% !important;
-    font-size: 0.9em !important;
-  }
-
-  .form_button button {
-    width: 90%;
-  }
-
-  .registro_right {
-    width: 100%;
-    height: auto;
-    margin-top: 1.5em;
   }
 }

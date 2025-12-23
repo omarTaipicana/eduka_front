@@ -11,28 +11,14 @@ const ResetPasswordSendEmail = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { register, handleSubmit, reset } = useForm();
-  const [
-    registerUser,
-    updateUser,
-    loginUser,
-    loggedUser,
-    verifyUser,
-    userRegister,
-    isLoading,
-    error,
-    verified,
-    sendEmail,
-    userResetPassword,
-  ] = useAuth();
+
+  const [, , , , , , isLoading, error, , sendEmail, userResetPassword] =
+    useAuth();
 
   const submit = (data) => {
     const frontBaseUrl = `${location.protocol}//${location.host}/#/reset_password`;
-    const body = { ...data, frontBaseUrl };
-    sendEmail(body);
-    console.log(frontBaseUrl);
-    reset({
-      email: "",
-    });
+    sendEmail({ ...data, frontBaseUrl });
+    reset({ email: "" });
   };
 
   useEffect(() => {
@@ -44,36 +30,49 @@ const ResetPasswordSendEmail = () => {
         })
       );
     }
-  }, [error]);
+  }, [error, dispatch]);
 
   useEffect(() => {
     if (userResetPassword) {
       dispatch(
         showAlert({
-          message: `⚠️ Estimado ${userResetPassword?.firstName} ${userResetPassword?.lastName}, revisa tu correo ${userResetPassword?.email} para reestablecer tu contraseña`,
+          message: `⚠️ Estimado ${userResetPassword.firstName} ${userResetPassword.lastName}, revisa tu correo ${userResetPassword.email} para reestablecer tu contraseña`,
           alertType: 2,
         })
       );
       navigate("/login");
     }
-  }, [userResetPassword]);
+  }, [userResetPassword, dispatch, navigate]);
 
   return (
-    <div>
+    <div className="resetPage">
       {isLoading && <IsLoading />}
-      <div className="contenedor">
-        <section className="reset_password_form__content">
-          <h2 className="reset__title">Resetea tu Contraseña</h2>
-          <form className="form__login" onSubmit={handleSubmit(submit)}>
-            <label className="label__form__reset">
-              <span className="span__form__reset">Email</span>
+
+      <div className="resetContainer">
+        <section className="resetCard">
+          <div className="resetHeader">
+            <h2 className="resetTitle">¿Olvidaste tu contraseña?</h2>
+            <p className="resetSubtitle">
+              Ingresa tu correo electrónico y te enviaremos un enlace para
+              restablecerla.
+            </p>
+          </div>
+
+          <form className="resetForm" onSubmit={handleSubmit(submit)}>
+            <label className="resetLabel">
+              <span>Email</span>
               <input
-                className="input__form__reset"
+                className="resetInput"
                 {...register("email")}
                 type="email"
+                placeholder="Ingresa tu correo electrónico"
+                required
               />
             </label>
-            <button className="btn__form__login">Enviar</button>
+
+            <button className="resetBtn" type="submit">
+              Enviar enlace <span className="arrow">➜</span>
+            </button>
           </form>
         </section>
       </div>

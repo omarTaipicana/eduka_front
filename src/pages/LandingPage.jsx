@@ -99,7 +99,7 @@ const LandingPage = () => {
   };
 
   const scrollToSection = (ref) => {
-    const offset = 144; // 9rem ≈ 144px
+    const offset = 120; // 9rem ≈ 144px
     const element = ref.current;
 
     if (!element) return;

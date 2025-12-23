@@ -351,43 +351,59 @@ const Secretaria = () => {
     setCertificadosFiltrados([sug]);
   };
 
-  return (
-    <div>
+ return (
+    <div className="secPage">
       {(isLoadingI || (isLoading && busquedaRealizada)) && <IsLoading />}
 
-      <div className="secretaria_container">
+      {/* Overlay para mobile */}
+      <div
+        className={`secOverlay ${menuOpen ? "open" : ""}`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden={!menuOpen}
+      />
+
+      <div className="secretaria_container secShell">
         <button
           ref={hamburgerRef}
-          className="secretaria_hamburger"
+          className={`secretaria_hamburger secHamburger ${
+            menuOpen ? "is-open" : ""
+          }`}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
           aria-expanded={menuOpen}
         >
-          <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-          <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
-          <span className={`hamburger-line ${menuOpen ? "open" : ""}`}></span>
+          <span className="secHamburgerLine"></span>
+          <span className="secHamburgerLine"></span>
+          <span className="secHamburgerLine"></span>
         </button>
 
         <nav
-          className={`secretaria_menu ${menuOpen ? "open" : ""}`}
+          className={`secretaria_menu secMenu ${menuOpen ? "open" : ""}`}
           ref={menuRef}
         >
+          <div className="secMenuHeader">
+            <img src="/images/eduka_sf.png" alt="Eduka" className="secMenuLogo" />
+            <p className="secMenuSubtitle">Panel Secretaría</p>
+          </div>
+
           <button
-            className={`menu-btn ${
+            className={`menu-btn secMenuBtn ${
               activeSection === "inscripciones" ? "active" : ""
             }`}
             onClick={() => handleSelect("inscripciones")}
           >
             🔎 Buscador
           </button>
+
           <button
-            className={`menu-btn ${activeSection === "pagos" ? "active" : ""}`}
+            className={`menu-btn secMenuBtn ${activeSection === "pagos" ? "active" : ""}`}
             onClick={() => handleSelect("pagos")}
           >
-            📄 listado
+            📄 Listado
           </button>
+
           <button
-            className={`menu-btn ${
+            className={`menu-btn secMenuBtn ${
               activeSection === "certificados" ? "active" : ""
             }`}
             onClick={() => handleSelect("certificados")}
@@ -396,27 +412,29 @@ const Secretaria = () => {
           </button>
         </nav>
 
-        <main className="secretaria_content">
-          {/* Inscripciones ------------------------------------------------------------------------- */}
-
+        <main className="secretaria_content secContent">
+          {/* ===================== INSCRIPCIONES ===================== */}
           {activeSection === "inscripciones" && (
-            <>
-              {/* Buscadores */}
-              <div className="inputs_busqueda">
-                <div className="input_group">
+            <section className="secCard">
+              <div className="secCardHeader">
+                <h2 className="secTitle">🔎 Buscador</h2>
+              </div>
+
+              <div className="inputs_busqueda secFilters">
+                <div className="input_group secInputGroup">
                   <input
                     type="text"
-                    className="buscador_input"
+                    className="buscador_input secInput"
                     placeholder="🔍 Buscar por cédula"
                     value={inputCedula}
                     onChange={(e) => setInputCedula(e.target.value)}
                   />
                 </div>
 
-                <div className="input_group">
+                <div className="input_group secInputGroup">
                   <input
                     type="text"
-                    className="buscador_input"
+                    className="buscador_input secInput"
                     placeholder="🔍 Buscar por nombres y apellidos"
                     value={inputNombre}
                     onChange={(e) => setInputNombre(e.target.value)}
@@ -424,12 +442,12 @@ const Secretaria = () => {
                   />
 
                   {sugerencias.length > 0 && (
-                    <ul className="sugerencias_lista" role="listbox">
+                    <ul className="sugerencias_lista secSuggest" role="listbox">
                       {sugerencias.map((sug) => (
                         <li
                           key={sug.id}
                           onClick={() => seleccionarSugerencia(sug)}
-                          className="sugerencia_item"
+                          className="sugerencia_item secSuggestItem"
                           role="option"
                         >
                           {sug.nombres} {sug.apellidos} — {sug.cedula}
@@ -439,14 +457,11 @@ const Secretaria = () => {
                   )}
                 </div>
 
-                <button className="btn_buscar" onClick={handleBuscar}>
+                <button className="btn_buscar secBtnPrimary" onClick={handleBuscar}>
                   🔍 Buscar
                 </button>
 
-                <button
-                  className="btn_limpiar_filtros"
-                  onClick={limpiarFiltros}
-                >
+                <button className="btn_limpiar_filtros secBtnDanger" onClick={limpiarFiltros}>
                   ❌ Borrar filtros
                 </button>
               </div>
@@ -454,178 +469,165 @@ const Secretaria = () => {
               {/* Resultados */}
               {busquedaRealizada && !isLoading ? (
                 users.total > 0 ? (
-                  users?.data?.map((i) => {
-                    return (
-                      <div key={i.id} className="grid_dos_columnas">
-                        <div className="card_inscripcion">
-                          <h3>
-                            {i.firstName} {i.lastName}
-                          </h3>
-                          <p>
-                            <strong>Cédula:</strong> {i.cI}
-                          </p>
-                          <p>
-                            <strong>Celular:</strong> {i.cellular}
-                          </p>
-                          <p>
-                            <strong>Subsistema:</strong> {i.subsistema}
-                          </p>
-                          <p>
-                            <strong>Grado:</strong> {i.grado}
-                          </p>
-                          <p>
-                            <strong>Email:</strong> {i.email}
-                          </p>
-                          <article>
-                            <strong>Cursos Inscrito:</strong> <br />
-                            {i.courses && i.courses.length > 0
-                              ? i.courses.map((curso) => (
-                                  <div
-                                    key={curso.id}
-                                    style={{ marginBottom: "8px" }}
-                                  >
-                                    <hr />
-                                    <span>✅ {curso.fullname}</span>
-                                    <br />
-                                    <span>
-                                      <strong>Fecha de inscripción:</strong>{" "}
-                                      {curso.createdAt
-                                        ? new Date(curso.createdAt)
-                                            .toLocaleString("es-EC", {
-                                              year: "numeric",
-                                              month: "2-digit",
-                                              day: "2-digit",
-                                              hour: "2-digit",
-                                              minute: "2-digit",
-                                              second: "2-digit",
-                                              hour12: false,
-                                              timeZone: "America/Guayaquil",
-                                            })
-                                            .replace(",", "")
-                                        : "No encontrado"}
-                                    </span>
-                                    <br />
-                                    <span>
-                                      {" "}
-                                      <strong>Matricula:</strong>{" "}
-                                      {curso.matriculado
-                                        ? "Matriculado en Acadex"
-                                        : "Aun no registra matricula"}
-                                    </span>{" "}
-                                    <br />
-                                    <span>
-                                      {" "}
-                                      <strong>Calificación:</strong>{" "}
-                                      {curso.grades["Nota Final"]}
-                                    </span>
-                                    <br />
-                                    <span></span>
-                                    <hr />
-                                  </div>
-                                ))
-                              : "No encontrado"}
-                          </article>
-                        </div>
+                  users?.data?.map((i) => (
+                    <div key={i.id} className="grid_dos_columnas secGrid2">
+                      <div className="card_inscripcion secCardInner">
+                        <h3>
+                          {i.firstName} {i.lastName}
+                        </h3>
+                        <p>
+                          <strong>Cédula:</strong> {i.cI}
+                        </p>
+                        <p>
+                          <strong>Celular:</strong> {i.cellular}
+                        </p>
+                        <p>
+                          <strong>Subsistema:</strong> {i.subsistema}
+                        </p>
+                        <p>
+                          <strong>Grado:</strong> {i.grado}
+                        </p>
+                        <p>
+                          <strong>Email:</strong> {i.email}
+                        </p>
 
-                        <div className="card_cursos_inscripcion">
-                          {i.courses && i.courses.length > 0 ? (
-                            i.courses.map((curso) => (
-                              <div key={curso.id} className="curso_detalle">
-                                <h4>📚 {curso.fullname}</h4>
-
-                                <div className="card_pagos_inscripcion">
-                                  <h4>💳 Pagos relacionados</h4>
-                                  {curso.pagos && curso.pagos.length > 0 ? (
-                                    curso.pagos.map((pago, idx) => (
-                                      <div
-                                        key={pago.id}
-                                        className="pago_detalle"
-                                      >
-                                        <p>
-                                          <strong>Pago #{idx + 1}</strong>
-                                        </p>
-                                        <p>Monto: ${pago.valorDepositado}</p>
-                                        {pago.moneda && (
-                                          <p>💰 Incluye moneda</p>
-                                        )}
-                                        {pago.distintivo && (
-                                          <p>🎖️ Incluye distintivo</p>
-                                        )}
-                                        <p>
-                                          Estado:{" "}
-                                          {pago.verificado
-                                            ? "✅ Verificado"
-                                            : "⏳ Por verificar"}
-                                        </p>
-                                        {pago.pagoUrl && (
-                                          <a
-                                            className="btn_ver_comprobante"
-                                            href={pago.pagoUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                          >
-                                            Ver comprobante
-                                          </a>
-                                        )}
-                                        <hr />
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <p>Sin pagos registrados.</p>
-                                  )}
+                        <article>
+                          <strong>Cursos Inscrito:</strong> <br />
+                          {i.courses && i.courses.length > 0
+                            ? i.courses.map((curso) => (
+                                <div key={curso.id} style={{ marginBottom: "8px" }}>
+                                  <hr />
+                                  <span>✅ {curso.fullname}</span>
+                                  <br />
+                                  <span>
+                                    <strong>Fecha de inscripción:</strong>{" "}
+                                    {curso.createdAt
+                                      ? new Date(curso.createdAt)
+                                          .toLocaleString("es-EC", {
+                                            year: "numeric",
+                                            month: "2-digit",
+                                            day: "2-digit",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: false,
+                                            timeZone: "America/Guayaquil",
+                                          })
+                                          .replace(",", "")
+                                      : "No encontrado"}
+                                  </span>
+                                  <br />
+                                  <span>
+                                    <strong>Matricula:</strong>{" "}
+                                    {curso.matriculado
+                                      ? "Matriculado en Acadex"
+                                      : "Aun no registra matricula"}
+                                  </span>
+                                  <br />
+                                  <span>
+                                    <strong>Calificación:</strong>{" "}
+                                    {curso.grades["Nota Final"]}
+                                  </span>
+                                  <hr />
                                 </div>
-                              </div>
-                            ))
-                          ) : (
-                            <p>No hay cursos registrados.</p>
-                          )}
-                        </div>
+                              ))
+                            : "No encontrado"}
+                        </article>
                       </div>
-                    );
-                  })
+
+                      <div className="card_cursos_inscripcion secCardInner">
+                        {i.courses && i.courses.length > 0 ? (
+                          i.courses.map((curso) => (
+                            <div key={curso.id} className="curso_detalle">
+                              <h4>📚 {curso.fullname}</h4>
+
+                              <div className="card_pagos_inscripcion secPaymentsCard">
+                                <h4>💳 Pagos relacionados</h4>
+                                {curso.pagos && curso.pagos.length > 0 ? (
+                                  curso.pagos.map((pago, idx) => (
+                                    <div key={pago.id} className="pago_detalle">
+                                      <p>
+                                        <strong>Pago #{idx + 1}</strong>
+                                      </p>
+                                      <p>Monto: ${pago.valorDepositado}</p>
+                                      {pago.moneda && <p>💰 Incluye moneda</p>}
+                                      {pago.distintivo && <p>🎖️ Incluye distintivo</p>}
+                                      <p>
+                                        Estado:{" "}
+                                        {pago.verificado ? "✅ Verificado" : "⏳ Por verificar"}
+                                      </p>
+
+                                      {pago.pagoUrl && (
+                                        <a
+                                          className="btn_ver_comprobante secBtnLink"
+                                          href={pago.pagoUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          Ver comprobante <span>➜</span>
+                                        </a>
+                                      )}
+                                      <hr />
+                                    </div>
+                                  ))
+                                ) : (
+                                  <p className="secMuted">Sin pagos registrados.</p>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="secMuted">No hay cursos registrados.</p>
+                        )}
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <p className="mensaje_sin_resultados">
+                  <p className="mensaje_sin_resultados secEmpty">
                     🔍 No se encontraron resultados para esta búsqueda.
                   </p>
                 )
               ) : (
-                <p className="mensaje_sin_resultados">
+                <p className="mensaje_sin_resultados secEmpty">
                   ✍️ Por favor, ingrese un criterio de búsqueda para comenzar.
                 </p>
               )}
-            </>
+            </section>
           )}
 
-          {/* Pagos------------------------------------------------------------------------- */}
-
+          {/* ===================== PAGOS ===================== */}
           {activeSection === "pagos" && (
-            <div>
-              {/* Filtros */}
-              <div className="inputs_busqueda">
-                <div className="input_group">
+            <section className="secCard">
+              <div className="secCardHeader">
+                <h2 className="secTitle">📄 Listado</h2>
+              </div>
+
+              <div className="inputs_busqueda secFilters">
+                <div className="input_group secInputGroup">
                   <input
                     type="text"
                     placeholder="Buscar por cédula..."
                     value={cedulaTemporal}
                     onChange={(e) => setCedulaTemporal(e.target.value)}
-                    className="buscador_input"
+                    className="buscador_input secInput"
                   />
                 </div>
-                <div className="input_group">
+
+                <div className="input_group secInputGroup">
                   <input
                     type="text"
                     placeholder="Buscar por nombre..."
                     value={busquedaTemporal}
                     onChange={(e) => setBusquedaTemporal(e.target.value)}
-                    className="buscador_input"
+                    className="buscador_input secInput"
                   />
                 </div>
 
-                <div className="input_group">
+                <div className="input_group secInputGroup">
                   <select
                     value={filtroDetalle}
                     onChange={(e) => setFiltroDetalle(e.target.value)}
-                    className="buscador_input"
+                    className="buscador_input secInput"
                   >
                     <option value="">Aprobación</option>
                     <option value="true">Aprobado</option>
@@ -633,11 +635,11 @@ const Secretaria = () => {
                   </select>
                 </div>
 
-                <div className="input_group">
+                <div className="input_group secInputGroup">
                   <select
                     value={filtroUltimoAcceso}
                     onChange={(e) => setFiltroUltimoAcceso(e.target.value)}
-                    className="buscador_input"
+                    className="buscador_input secInput"
                   >
                     <option value="">Acceso a Acadex</option>
                     <option value="true">Accede</option>
@@ -645,22 +647,23 @@ const Secretaria = () => {
                   </select>
                 </div>
 
-                <div className="input_group">
+                <div className="input_group secInputGroup">
                   <select
                     value={filtroPago}
                     onChange={(e) => setFiltroPago(e.target.value)}
-                    className="buscador_input"
+                    className="buscador_input secInput"
                   >
                     <option value="">Pagos</option>
                     <option value="true">Con pago</option>
                     <option value="false">Sin pago</option>
                   </select>
                 </div>
-                <div className="input_group">
+
+                <div className="input_group secInputGroup">
                   <select
                     value={filtroCertificado}
                     onChange={(e) => setFiltroCertificado(e.target.value)}
-                    className="buscador_input"
+                    className="buscador_input secInput"
                   >
                     <option value="">Certificados</option>
                     <option value="true">Con certificado</option>
@@ -668,11 +671,11 @@ const Secretaria = () => {
                   </select>
                 </div>
 
-                <div className="input_group">
+                <div className="input_group secInputGroup">
                   <select
                     value={filtroCurso}
                     onChange={(e) => setFiltroCurso(e.target.value)}
-                    className="buscador_input"
+                    className="buscador_input secInput"
                   >
                     <option value="">Todos los cursos</option>
                     {courses?.map((c) => (
@@ -683,9 +686,9 @@ const Secretaria = () => {
                   </select>
                 </div>
 
-                <div className="input_group">
+                <div className="input_group secInputGroup">
                   <button
-                    className="btn_buscar"
+                    className="btn_buscar secBtnPrimary"
                     onClick={() => {
                       setNombreBuscado(busquedaTemporal);
                       setCedulaBuscada(cedulaTemporal);
@@ -695,9 +698,9 @@ const Secretaria = () => {
                   </button>
                 </div>
 
-                <div className="input_group">
+                <div className="input_group secInputGroup">
                   <button
-                    className="btn_limpiar_filtros"
+                    className="btn_limpiar_filtros secBtnDanger"
                     onClick={() => {
                       setBusquedaTemporal("");
                       setCedulaTemporal("");
@@ -715,7 +718,7 @@ const Secretaria = () => {
                 </div>
               </div>
 
-              <div className="paginacion">
+              <div className="paginacion secPagination">
                 <div className="paginacion-flechas izquierda">
                   <button
                     onClick={() => {
@@ -787,13 +790,13 @@ const Secretaria = () => {
                 </div>
               </div>
 
-              <div className="numero-registros">
+              <div className="numero-registros secCount">
                 Número de registros: {users?.total} / Página {paginaActual} de{" "}
                 {totalPaginas}
               </div>
 
-              <div className="contenedor-tabla-pagos">
-                <table className="tabla-pagos">
+              <div className="contenedor-tabla-pagos secTableWrap">
+                <table className="tabla-pagos secTable">
                   <thead>
                     <tr>
                       <th>Cédula</th>
@@ -801,7 +804,6 @@ const Secretaria = () => {
                       <th className="col-curso">Nombre</th>
                       <th className="col-curso">Celular</th>
                       <th className="col-curso">Curso</th>
-
                       <th>Calificacion</th>
                       <th className="col-curso">Matriculado</th>
                       <th>Ingresa a Acadex</th>
@@ -816,7 +818,6 @@ const Secretaria = () => {
                     {users?.data?.map((usuario) => {
                       const cursos = usuario.courses || [];
 
-                      // Si no tiene cursos, renderizamos una fila vacía para mostrar datos del usuario
                       if (cursos.length === 0) {
                         return (
                           <tr key={usuario.id}>
@@ -833,7 +834,6 @@ const Secretaria = () => {
                         );
                       }
 
-                      // Si tiene cursos, iteramos normalmente
                       return cursos.map((curso, idx) => (
                         <tr key={`${usuario.id}-${curso.id}`}>
                           {idx === 0 && (
@@ -843,45 +843,37 @@ const Secretaria = () => {
                               <td className="col-curso" rowSpan={cursos.length}>
                                 {usuario.firstName} {usuario.lastName}
                               </td>
-                              <td rowSpan={cursos.length}>
-                                {usuario.cellular}
-                              </td>
+                              <td rowSpan={cursos.length}>{usuario.cellular}</td>
                             </>
                           )}
+
                           <td className="col-curso">{curso.fullname}</td>
-                          <td>
-                            {curso.grades?.["Nota Final"] ?? "Sin calificación"}
-                          </td>
+                          <td>{curso.grades?.["Nota Final"] ?? "Sin calificación"}</td>
                           <td>{curso.matriculado ? "✅" : "❌"}</td>
                           <td>{curso.acces ? "✅" : "❌"}</td>
+
                           <td>
                             {curso.pagos?.length
                               ? curso.pagos.map((pago, i) => (
                                   <div key={pago.id}>
-                                    <a
-                                      href={pago.pagoUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
+                                    <a href={pago.pagoUrl} target="_blank" rel="noopener noreferrer">
                                       Pago {i + 1}
                                     </a>
                                   </div>
                                 ))
                               : "----"}
                           </td>
+
                           <td>
                             {curso.certificado?.url ? (
-                              <a
-                                href={curso.certificado.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
+                              <a href={curso.certificado.url} target="_blank" rel="noopener noreferrer">
                                 Ver
                               </a>
                             ) : (
                               "----"
                             )}
                           </td>
+
                           <td className="celda-observacion">
                             {editInscripcionId === curso.id ? (
                               <input
@@ -896,6 +888,7 @@ const Secretaria = () => {
                               "👍"
                             )}
                           </td>
+
                           <td>
                             {editInscripcionId === curso.id ? (
                               <>
@@ -905,10 +898,7 @@ const Secretaria = () => {
                                 >
                                   Guardar
                                 </button>
-                                <button
-                                  onClick={cancelarEdicion}
-                                  className="vp-btn-cancel"
-                                >
+                                <button onClick={cancelarEdicion} className="vp-btn-cancel">
                                   Cancelar
                                 </button>
                               </>
@@ -927,19 +917,21 @@ const Secretaria = () => {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </section>
           )}
 
+          {/* ===================== CERTIFICADOS ===================== */}
           {activeSection === "certificados" && (
-            <section className="secretaria_section">
-              <h2>🎓 Certificados</h2>
+            <section className="secCard">
+              <div className="secCardHeader">
+                <h2 className="secTitle">🎓 Certificados</h2>
+              </div>
 
-              {/* Buscadores */}
-              <div className="inputs_busqueda">
-                <div className="input_group">
+              <div className="inputs_busqueda secFilters">
+                <div className="input_group secInputGroup">
                   <input
                     type="text"
-                    className="buscador_input"
+                    className="buscador_input secInput"
                     placeholder="🔍 Buscar por cédula"
                     value={cedulaCertificado}
                     onChange={(e) => setCedulaCertificado(e.target.value)}
@@ -947,10 +939,10 @@ const Secretaria = () => {
                   />
                 </div>
 
-                <div className="input_group">
+                <div className="input_group secInputGroup">
                   <input
                     type="text"
-                    className="buscador_input"
+                    className="buscador_input secInput"
                     placeholder="🔍 Buscar por nombres y apellidos"
                     value={nombreCertificado}
                     onChange={(e) => setNombreCertificado(e.target.value)}
@@ -958,12 +950,12 @@ const Secretaria = () => {
                   />
 
                   {sugerenciasCertificados.length > 0 && (
-                    <ul className="sugerencias_lista" role="listbox">
+                    <ul className="sugerencias_lista secSuggest" role="listbox">
                       {sugerenciasCertificados.map((sug) => (
                         <li
                           key={sug.id}
                           onClick={() => seleccionarSugerenciaCertificado(sug)}
-                          className="sugerencia_item"
+                          className="sugerencia_item secSuggestItem"
                           role="option"
                         >
                           {sug.nombres} {sug.apellidos} — {sug.cedula}
@@ -973,97 +965,88 @@ const Secretaria = () => {
                   )}
                 </div>
 
-                <button
-                  className="btn_buscar"
-                  onClick={handleBuscarCertificados}
-                >
+                <button className="btn_buscar secBtnPrimary" onClick={handleBuscarCertificados}>
                   🔍 Buscar
                 </button>
 
-                <button
-                  className="btn_limpiar_filtros"
-                  onClick={limpiarFiltrosCertificados}
-                >
+                <button className="btn_limpiar_filtros secBtnDanger" onClick={limpiarFiltrosCertificados}>
                   ❌ Borrar filtros
                 </button>
               </div>
 
-              {/* Resultados */}
               {certificadosFiltrados.length === 0 ? (
-                nombreCertificado.trim() === "" &&
-                cedulaCertificado.trim() === "" ? (
-                  <p className="mensaje_sin_resultados">
+                nombreCertificado.trim() === "" && cedulaCertificado.trim() === "" ? (
+                  <p className="mensaje_sin_resultados secEmpty">
                     ✍️ Por favor, ingrese un criterio de búsqueda para comenzar.
                   </p>
                 ) : (
-                  <p className="mensaje_sin_resultados">
+                  <p className="mensaje_sin_resultados secEmpty">
                     🔍 No se encontraron certificados para esta búsqueda.
                   </p>
                 )
               ) : (
-                certificadosFiltrados.map((c) => (
-                  <div key={c.id} className="card_inscripcion">
-                    <h3>
-                      {c.nombres} {c.apellidos}
-                    </h3>
-                    <p>
-                      <strong>Cédula:</strong> {c.cedula}
-                    </p>
-                    <p>
-                      <strong>Grado:</strong> {c.grado}
-                    </p>
-                    <p>
-                      <strong>Curso:</strong>{" "}
-                      {(() => {
-                        const cursoEncontrado = courses.find(
-                          (course) =>
-                            course.sigla.toLowerCase() === c.curso.toLowerCase()
-                        );
-                        return cursoEncontrado
-                          ? cursoEncontrado.nombre
-                          : c.curso;
-                      })()}
-                    </p>
-
-                    <p>
-                      <strong>Depósito:</strong> ${c.deposito}
-                    </p>
-                    <p>
-                      <strong>Fecha:</strong> {c.fecha}
-                    </p>
-                    <p>
-                      <strong>Grupo:</strong> {c.verificado}
-                    </p>
-                    {c.urlDeposito === "EXTERNO" ? (
-                      <p className="pendiente_certificado">
-                        🌐 Comprobante externo
+                <div className="secResults">
+                  {certificadosFiltrados.map((c) => (
+                    <div key={c.id} className="card_inscripcion secCardInner">
+                      <h3>
+                        {c.nombres} {c.apellidos}
+                      </h3>
+                      <p>
+                        <strong>Cédula:</strong> {c.cedula}
                       </p>
-                    ) : (
-                      <a
-                        className="btn_ver_comprobante"
-                        href={c.urlDeposito}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        📄 Ver comprobante
-                      </a>
-                    )}
+                      <p>
+                        <strong>Grado:</strong> {c.grado}
+                      </p>
+                      <p>
+                        <strong>Curso:</strong>{" "}
+                        {(() => {
+                          const cursoEncontrado = courses.find(
+                            (course) => course.sigla.toLowerCase() === c.curso.toLowerCase()
+                          );
+                          return cursoEncontrado ? cursoEncontrado.nombre : c.curso;
+                        })()}
+                      </p>
 
-                    <br />
-                    {c.url ? (
-                      <a
-                        className="btn_certificado"
-                        href={c.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        🎓 Ver certificado
-                      </a>
-                    ) : (
-                      <p className="pendiente_certificado">📌 Por certificar</p>
-                    )}
-                  </div>
-                ))
+                      <p>
+                        <strong>Depósito:</strong> ${c.deposito}
+                      </p>
+                      <p>
+                        <strong>Fecha:</strong> {c.fecha}
+                      </p>
+                      <p>
+                        <strong>Grupo:</strong> {c.verificado}
+                      </p>
+
+                      {c.urlDeposito === "EXTERNO" ? (
+                        <p className="pendiente_certificado">🌐 Comprobante externo</p>
+                      ) : (
+                        <a
+                          className="btn_ver_comprobante secBtnLink"
+                          href={c.urlDeposito}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          📄 Ver comprobante <span>➜</span>
+                        </a>
+                      )}
+
+                      <br />
+
+                      {c.url ? (
+                        <a
+                          className="btn_certificado"
+                          href={c.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          🎓 Ver certificado
+                        </a>
+                      ) : (
+                        <p className="pendiente_certificado">📌 Por certificar</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </section>
           )}

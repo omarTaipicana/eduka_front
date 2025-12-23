@@ -14,24 +14,18 @@ const SUPERADMIN = import.meta.env.VITE_CI_SUPERADMIN;
 const PATH_PAGOS = "/pagos";
 const PATH_VARIABLES = "/variables";
 
-
 const ValidacionPago = () => {
   const [activeSection, setActiveSection] = useState("resumen");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
   const hamburgerRef = useRef();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-  } = useForm();
+  const { register, handleSubmit, reset } = useForm();
 
   const [, , , loggedUser, , , , , , , , , , user] = useAuth();
   const [pagoDashboard, getPagoDashboard] = useCrud();
   const [inscripcion, getInscripcion] = useCrud();
   const [variables, getVariables] = useCrud();
-
 
   const [showDelete, setShowDelete] = useState(false);
   const [pagoIdDelete, setPagoIdDelete] = useState(null);
@@ -41,20 +35,7 @@ const ValidacionPago = () => {
 
   const [papelera, setPapelera] = useState(false);
 
-  const [
-    pago,
-    getPago,
-    ,
-    ,
-    updatePago,
-    ,
-    isLoading,
-    ,
-    ,
-    ,
-    PagoPdf,
-    ,
-  ] = useCrud();
+  const [pago, getPago, , , updatePago, , isLoading] = useCrud();
 
   const [editPagoId, setEditPagoId] = useState(null);
   const [observacion, setObservacion] = useState("");
@@ -78,25 +59,19 @@ const ValidacionPago = () => {
   const [ordenFechaDesc, setOrdenFechaDesc] = useState(true);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setFiltroGrado(inputValue);
-    }, 2000);
-
+    const handler = setTimeout(() => setFiltroGrado(inputValue), 2000);
     return () => clearTimeout(handler);
-  }, [inputValue, setFiltroGrado]);
+  }, [inputValue]);
 
   useEffect(() => {
     getPago(
       `/pagos?curso=${filtroCurso}&verificado=${filtroVerificado}&moneda=${filtroMoneda}&distintivo=${filtroDistintivo}&entregado=${filtroEntregado}&certificado=${filtroCertificado}&busqueda=${filtroGrado}&fechaInicio=${filtroFechaInicio}&fechaFin=${filtroFechaFin}`
     );
-    const socket = io(BASEURL);
 
-    socket.on("pagoActualizado", (pagoActualizado) => {
-      getPago(PATH_PAGOS);
-    });
-    return () => {
-      socket.disconnect();
-    };
+    const socket = io(BASEURL);
+    socket.on("pagoActualizado", () => getPago(PATH_PAGOS));
+
+    return () => socket.disconnect();
   }, [
     filtroCurso,
     filtroVerificado,
@@ -114,11 +89,9 @@ const ValidacionPago = () => {
   const pagosDistintivos = [];
 
   for (const pagoItem of pago) {
-    if (pagoItem.confirmacion) {
-      pagosActivos.push(pagoItem);
-    } else {
-      pagosEliminados.push(pagoItem);
-    }
+    if (pagoItem.confirmacion) pagosActivos.push(pagoItem);
+    else pagosEliminados.push(pagoItem);
+
     if (pagoItem.confirmacion && (pagoItem.distintivo || pagoItem.moneda)) {
       pagosDistintivos.push(pagoItem);
     }
@@ -129,20 +102,19 @@ const ValidacionPago = () => {
     getVariables(PATH_VARIABLES);
     getInscripcion("/inscripcion");
     loggedUser();
-
     getPagoDashboard(`/pagos_dashboard`);
   }, []);
 
-  const iniciarEdicion = (pago) => {
-    setEditPagoId(pago.id);
+  const iniciarEdicion = (p) => {
+    setEditPagoId(p.id);
     reset({
-      valorDepositado: pago.valorDepositado || "",
-      entidad: pago.entidad || "",
-      idDeposito: pago.idDeposito || "",
-      verificado: pago.verificado || false,
-      moneda: pago.moneda || false,
-      distintivo: pago.distintivo || false,
-      observacion: pago.observacion || "",
+      valorDepositado: p.valorDepositado || "",
+      entidad: p.entidad || "",
+      idDeposito: p.idDeposito || "",
+      verificado: p.verificado || false,
+      moneda: p.moneda || false,
+      distintivo: p.distintivo || false,
+      observacion: p.observacion || "",
     });
   };
 
@@ -163,45 +135,37 @@ const ValidacionPago = () => {
       cancelarEdicion();
     } catch (error) {
       alert("Error al guardar los cambios.");
-    } finally {
     }
   };
 
-  const deletePagoPr = async (pagoIdDelete) => {
+  const deletePagoPr = async (id) => {
     try {
-      await updatePago(PATH_PAGOS, pagoIdDelete, {
-        confirmacion: false,
-      });
+      await updatePago(PATH_PAGOS, id, { confirmacion: false });
       await getPago(PATH_PAGOS);
       cancelarEdicion();
       setShowDelete(false);
     } catch (error) {
       alert("Error al guardar los cambios.");
-    } finally {
     }
   };
 
-  const restaurarPagoPr = async (pagoIdRestaurar) => {
+  const restaurarPagoPr = async (id) => {
     try {
-      await updatePago(PATH_PAGOS, pagoIdRestaurar, {
-        confirmacion: true,
-      });
+      await updatePago(PATH_PAGOS, id, { confirmacion: true });
       await getPago(PATH_PAGOS);
       cancelarEdicion();
       setShowRestaurar(false);
     } catch (error) {
       alert("Error al guardar los cambios.");
-    } finally {
     }
   };
 
-  const getListaCursos = (pago) => {
+  const getListaCursos = (arr) => {
     const cursosSet = new Set();
-    pago.forEach((pago) => {
-      if (pago.curso) cursosSet.add(pago.curso);
-    });
+    arr.forEach((p) => p.curso && cursosSet.add(p.curso));
     return Array.from(cursosSet);
   };
+
   const listaCursos = getListaCursos(pago);
 
   useEffect(() => {
@@ -217,15 +181,8 @@ const ValidacionPago = () => {
       }
     };
 
-    if (menuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
   const ordenarPorFecha = (array) => {
@@ -235,179 +192,145 @@ const ValidacionPago = () => {
       return ordenFechaDesc ? dateB - dateA : dateA - dateB;
     });
   };
+
   const pagosOrdenados = ordenarPorFecha(pagosActivos);
 
   const descargarExcel = () => {
-    const pagos = pagosActivos;
+    const datosExcel = pagosActivos.map((p) => ({
+      Grado: p?.inscripcion?.user?.grado || "",
+      Nombres: p?.inscripcion?.user?.firstName || "",
+      Apellidos: p?.inscripcion?.user?.lastName || "",
+      Cedula: p?.inscripcion?.user?.cI || "",
+      Curso: p.curso || "",
+      "Valor Depositado": p.valorDepositado?.toFixed(2) || "0.00",
+      Comprobante: p.pagoUrl || "",
+      Verificado: p.verificado ? "Sí" : "No",
+      Fecha: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "",
+    }));
 
-    // Preparar datos para Excel
-    const datosExcel = pagos.map((p) => {
-      return {
-        Grado: p?.inscripcion?.user?.grado || "",
-        Nombres: p?.inscripcion?.user?.firstName || "",
-        Apellidos: p?.inscripcion?.user?.lastName || "",
-        Cedula: p?.inscripcion?.user?.cI || "",
-        Curso: p.curso || "",
-        "Valor Depositado": p.valorDepositado?.toFixed(2) || "0.00",
-        Comprobante: p.pagoUrl || "",
-        Verificado: p.verificado ? "Sí" : "No",
-        Fecha: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "",
-      };
-    });
-
-    // Crear libro y hoja
     const ws = XLSX.utils.json_to_sheet(datosExcel);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Pagos");
-
-    // Generar archivo excel en formato blob
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const blob = new Blob([wbout], { type: "application/octet-stream" });
-
-    // Descargar archivo con nombre
     saveAs(blob, "pagos_filtrados.xlsx");
   };
 
   const descargarExcelInscripcion = () => {
-    // Preparar datos para Excel
-    const datosExcel = [...inscripcion] // clonamos para no alterar el original
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)) // orden ascendente
-      // .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // orden descendente
-      .map((i) => {
-        return {
-          id: i?.id || "",
-          grado: i?.user?.grado || "",
-          nombres: i?.user?.firstName || "",
-          apellidos: i?.user?.lastName || "",
-          cedula: i?.user?.cI || "",
-          email: i?.user?.email || "",
-          aceptacion: i?.aceptacion || "",
-          curso: i?.curso || "",
-          userId: i?.userId || "",
-          createdAt: i?.createdAt || "",
-          updatedAt: i?.updatedAt || "",
-          courseId: i?.courseId || "",
-          observacion: i?.observacion || "",
-          usuarioEdicion: i?.usuarioEdicion || "",
-        };
-      });
+    const datosExcel = [...inscripcion]
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .map((i) => ({
+        id: i?.id || "",
+        grado: i?.user?.grado || "",
+        nombres: i?.user?.firstName || "",
+        apellidos: i?.user?.lastName || "",
+        cedula: i?.user?.cI || "",
+        email: i?.user?.email || "",
+        aceptacion: i?.aceptacion || "",
+        curso: i?.curso || "",
+        userId: i?.userId || "",
+        createdAt: i?.createdAt || "",
+        updatedAt: i?.updatedAt || "",
+        courseId: i?.courseId || "",
+        observacion: i?.observacion || "",
+        usuarioEdicion: i?.usuarioEdicion || "",
+      }));
 
-
-    // Crear libro y hoja
     const ws = XLSX.utils.json_to_sheet(datosExcel);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "inscripcion");
-
-    // Generar archivo excel en formato blob
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const blob = new Blob([wbout], { type: "application/octet-stream" });
-
-    // Descargar archivo con nombre
     saveAs(blob, "inscripciones.xlsx");
+  };
+
+  const limpiarFiltrosBase = () => {
+    setFiltroCurso("");
+    setFiltroVerificado("");
+    setFiltroMoneda("");
+    setFiltroDistintivo("");
+    setFiltroGrado("");
+    setInputValue("");
+    setFiltroEntregado("");
+    setFiltroFechaInicio("");
+    setFiltroFechaFin("");
+    setFiltroCertificado("");
   };
 
   const renderContent = () => {
     switch (activeSection) {
       case "resumen":
-        if (!pagoDashboard) return <p>Cargando resumen...</p>;
-
         return (
-          <div className="vp-resumen-container">
-            <h2>📋 Resumen General</h2>
-
-            {/* Total Pagos vs Total Verificados */}
-            <div className="vp-resumen-item">
-              <div className="vp-resumen-label">
-                Total Pagos vs Total Validados
-              </div>
-              <div className="vp-resumen-values">
-                <span className="vp-total">{pagoDashboard.totalPagosNum}</span>
-                <span className="vp-separator">/</span>
-                <span className="vp-validated">
-                  {pagoDashboard.totalPagosVerificados}
-                </span>
-              </div>
+          <section className="secCard">
+            <div className="secCardHeader">
+              <h2 className="secTitle">📋 Resumen General</h2>
             </div>
 
-            {/* Total Monedas vs Entregadas */}
-            <div className="vp-resumen-item">
-              <div className="vp-resumen-label">
-                Total Monedas vs Entregadas
-              </div>
-              <div className="vp-resumen-values">
-                <span className="vp-total">
-                  {pagoDashboard.conteoDistMoneda?.find(
-                    (c) => c.name === "Moneda"
-                  )?.value || 0}
-                </span>
-                <span className="vp-separator">/</span>
-                <span className="vp-validated">
-                  {pagoDashboard.conteoDistMoneda?.find(
-                    (c) => c.name === "Moneda"
-                  )?.entregado || 0}
-                </span>
-              </div>
-            </div>
+            {!pagoDashboard ? (
+              <p className="secEmpty">Cargando resumen...</p>
+            ) : (
+              <div className="vpResumenGrid">
+                <div className="vpStatCard">
+                  <div className="vpStatLabel">Total Pagos / Validados</div>
+                  <div className="vpStatValue">
+                    <span className="vpStatMain">{pagoDashboard.totalPagosNum}</span>
+                    <span className="vpStatSep">/</span>
+                    <span className="vpStatOk">{pagoDashboard.totalPagosVerificados}</span>
+                  </div>
+                </div>
 
-            {/* Total Distintivos vs Entregados */}
-            <div className="vp-resumen-item">
-              <div className="vp-resumen-label">
-                Total Distintivos vs Entregados
-              </div>
-              <div className="vp-resumen-values">
-                <span className="vp-total">
-                  {pagoDashboard.conteoDistMoneda?.find(
-                    (c) => c.name === "Distintivo"
-                  )?.value || 0}
-                </span>
-                <span className="vp-separator">/</span>
-                <span className="vp-validated">
-                  {pagoDashboard.conteoDistMoneda?.find(
-                    (c) => c.name === "Distintivo"
-                  )?.entregado || 0}
-                </span>
-              </div>
-            </div>
+                <div className="vpStatCard">
+                  <div className="vpStatLabel">Monedas / Entregadas</div>
+                  <div className="vpStatValue">
+                    <span className="vpStatMain">
+                      {pagoDashboard.conteoDistMoneda?.find((c) => c.name === "Moneda")?.value || 0}
+                    </span>
+                    <span className="vpStatSep">/</span>
+                    <span className="vpStatOk">
+                      {pagoDashboard.conteoDistMoneda?.find((c) => c.name === "Moneda")?.entregado || 0}
+                    </span>
+                  </div>
+                </div>
 
-            {/* Total Pagos con Distintivo */}
-            <div className="vp-resumen-item">
-              <div className="vp-resumen-label">Certificados Pagados</div>
-              <div className="vp-resumen-values">
-                <span className="vp-total">
-                  {pagoDashboard.totalPagosDinstint}
-                </span>
+                <div className="vpStatCard">
+                  <div className="vpStatLabel">Distintivos / Entregados</div>
+                  <div className="vpStatValue">
+                    <span className="vpStatMain">
+                      {pagoDashboard.conteoDistMoneda?.find((c) => c.name === "Distintivo")?.value || 0}
+                    </span>
+                    <span className="vpStatSep">/</span>
+                    <span className="vpStatOk">
+                      {pagoDashboard.conteoDistMoneda?.find((c) => c.name === "Distintivo")?.entregado || 0}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="vpStatCard">
+                  <div className="vpStatLabel">Certificados pagados</div>
+                  <div className="vpStatValue">
+                    <span className="vpStatMain">{pagoDashboard.totalPagosDinstint}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            )}
+          </section>
         );
 
       case "validarPagos":
         return (
-          <div className="vp-validar-pagos-container">
-            <div className="vp-filtros">
-              <button
-                className="vp-btn-clear"
-                onClick={() => {
-                  setFiltroCurso("");
-                  setFiltroVerificado("");
-                  setFiltroMoneda("");
-                  setFiltroDistintivo("");
-                  setFiltroGrado("");
-                  setInputValue("");
-                  setFiltroFechaInicio("");
-                  setFiltroFechaFin("");
-                }}
-              >
-                Eliminar Filtros
+          <section className="secCard">
+            <div className="secCardHeader">
+              <h2 className="secTitle">✅ Validar Pagos</h2>
+            </div>
+
+            <div className="secFilters vpFiltersRow">
+              <button className="secBtnDanger" onClick={limpiarFiltrosBase} type="button">
+                ❌ Eliminar filtros
               </button>
 
-              {/* Filtro Curso */}
-              <div className="vp-filtro">
-                <label>Curso:</label>
-                <select
-                  value={filtroCurso}
-                  onChange={(e) => setFiltroCurso(e.target.value)}
-                >
+              <div className="secInputGroup">
+                <label className="vpLbl">Curso</label>
+                <select className="secInput" value={filtroCurso} onChange={(e) => setFiltroCurso(e.target.value)}>
                   <option value="">Todos</option>
                   {listaCursos.map((c) => (
                     <option key={c} value={c}>
@@ -417,49 +340,37 @@ const ValidacionPago = () => {
                 </select>
               </div>
 
-              {/* Filtro Verificado */}
-              <div className="vp-filtro">
-                <label>Verificado:</label>
-                <select
-                  value={filtroVerificado}
-                  onChange={(e) => setFiltroVerificado(e.target.value)}
-                >
+              <div className="secInputGroup">
+                <label className="vpLbl">Verificado</label>
+                <select className="secInput" value={filtroVerificado} onChange={(e) => setFiltroVerificado(e.target.value)}>
                   <option value="">Todos</option>
                   <option value="true">Verificados</option>
                   <option value="false">No Verificados</option>
                 </select>
               </div>
 
-              {/* Filtro Moneda */}
-              <div className="vp-filtro">
-                <label>Moneda:</label>
-                <select
-                  value={filtroMoneda}
-                  onChange={(e) => setFiltroMoneda(e.target.value)}
-                >
+              <div className="secInputGroup">
+                <label className="vpLbl">Moneda</label>
+                <select className="secInput" value={filtroMoneda} onChange={(e) => setFiltroMoneda(e.target.value)}>
                   <option value="">Todos</option>
                   <option value="true">Sí</option>
                   <option value="false">No</option>
                 </select>
               </div>
 
-              {/* Filtro Distintivo */}
-              <div className="vp-filtro">
-                <label>Distintivo:</label>
-                <select
-                  value={filtroDistintivo}
-                  onChange={(e) => setFiltroDistintivo(e.target.value)}
-                >
+              <div className="secInputGroup">
+                <label className="vpLbl">Distintivo</label>
+                <select className="secInput" value={filtroDistintivo} onChange={(e) => setFiltroDistintivo(e.target.value)}>
                   <option value="">Todos</option>
                   <option value="true">Sí</option>
                   <option value="false">No</option>
                 </select>
               </div>
 
-              {/* Filtro Grado / Nombres / Apellidos / Cédula */}
-              <div className="vp-filtro">
-                <label>Grado / Nombres / Apellidos / Cédula:</label>
+              <div className="secInputGroup">
+                <label className="vpLbl">Grado / Nombres / Apellidos / Cédula</label>
                 <input
+                  className="secInput"
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
@@ -467,87 +378,43 @@ const ValidacionPago = () => {
                 />
               </div>
 
-              {/* Filtro Fecha Inicio */}
-              <div className="vp-filtro">
-                <label>Fecha Inicio:</label>
-                <input
-                  type="date"
-                  value={filtroFechaInicio}
-                  onChange={(e) => setFiltroFechaInicio(e.target.value)}
-                />
+              <div className="secInputGroup">
+                <label className="vpLbl">Fecha inicio</label>
+                <input className="secInput" type="date" value={filtroFechaInicio} onChange={(e) => setFiltroFechaInicio(e.target.value)} />
               </div>
 
-              {/* Filtro Fecha Fin */}
-              <div className="vp-filtro">
-                <label>Fecha Fin:</label>
-                <input
-                  type="date"
-                  value={filtroFechaFin}
-                  onChange={(e) => setFiltroFechaFin(e.target.value)}
-                />
+              <div className="secInputGroup">
+                <label className="vpLbl">Fecha fin</label>
+                <input className="secInput" type="date" value={filtroFechaFin} onChange={(e) => setFiltroFechaFin(e.target.value)} />
               </div>
 
-              <img
-                className="papelera_btn"
-                src={`../../../${papelera ? "atras" : "papelera"}.png`}
-                alt="Eliminar"
+              <button
+                className="secBtnPrimary vpTrashBtn"
+                type="button"
                 onClick={() => setPapelera(!papelera)}
-              />
+                title={papelera ? "Volver a activos" : "Ver eliminados"}
+              >
+                {papelera ? "↩️ Activos" : "🗑️ Papelera"}
+              </button>
             </div>
 
             {papelera ? (
-              <div
-                style={{
-                  marginBottom: "10px",
-                  color: "#0053a0",
-                  fontWeight: 600,
-                }}
-              >
-                <p
-                  style={{
-                    marginBottom: "10px",
-                    color: "#f91118ff",
-                    fontWeight: 600,
-                  }}
-                >
-                  Mostrando {pagosEliminados.length} registros eliminados
-                </p>
-              </div>
+              <p className="vpInfoDanger">Mostrando {pagosEliminados.length} registros eliminados</p>
             ) : (
-              <div
-                style={{
-                  marginBottom: "10px",
-                  color: "#0053a0",
-                  fontWeight: 600,
-                }}
-              >
-                <p
-                  style={{
-                    marginBottom: "10px",
-                    color: "#0053a0",
-                    fontWeight: 600,
-                  }}
-                >
-                  Mostrando {pagosActivos?.length} resultados /{" "}
-                  <span style={{ color: "#198754", fontWeight: "bold" }}>
-                    {pagosActivos.filter((p) => p.verificado).length} pagos
-                    validados
-                  </span>
-                </p>
-              </div>
+              <p className="vpInfo">
+                Mostrando {pagosActivos.length} resultados /{" "}
+                <span className="vpInfoOk">{pagosActivos.filter((p) => p.verificado).length} pagos validados</span>
+              </p>
             )}
 
-            {pagosActivos && pagosActivos.length > 0 ? (
-              <div className="vp-tabla-scroll">
-                <table className="vp-pagos-table">
+            {(papelera ? pagosEliminados : pagosOrdenados)?.length ? (
+              <div className="secTableWrap">
+                <table className="secTable vpTable">
                   <thead>
                     <tr>
-                      <th>Discente (Grado, Nombres, Apellidos)</th>
+                      <th>Discente</th>
                       <th
-                        style={{
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                        }}
+                        className="vpThSortable"
                         onClick={() => setOrdenFechaDesc((prev) => !prev)}
                         title="Ordenar por fecha"
                       >
@@ -556,349 +423,191 @@ const ValidacionPago = () => {
                       <th>Curso</th>
                       <th>Distintivo</th>
                       <th>Moneda</th>
-                      <th>Valor Depositado</th>
+                      <th>Valor</th>
                       <th>Entidad</th>
                       <th>Id Pago</th>
-                      <th>Pago</th>
+                      <th>Comprobante</th>
                       <th>Verificado</th>
-                      <th>Observacion</th>
+                      <th>Observación</th>
                       <th>Editor</th>
-
-                      <th colSpan={papelera ? 1 : 2}>
-                        {papelera ? "Restaurar" : "Acción"}
-                      </th>
+                      <th colSpan={papelera ? 1 : 2}>{papelera ? "Restaurar" : "Acción"}</th>
                     </tr>
                   </thead>
-                  {papelera ? (
-                    <tbody>
-                      {pagosEliminados.map((p) => {
-                        const isEditing = editPagoId === p.id;
-                        return (
-                          <tr key={p.id}>
-                            <td>
-                              {p
-                                ? `${p?.inscripcion?.user?.grado} ${p?.inscripcion?.user?.firstName} ${p?.inscripcion?.user?.lastName}`
-                                : "Sin Inscripcion"}
-                            </td>
-                            <td>
-                              {p.createdAt
-                                ? new Date(p.createdAt).toLocaleDateString()
-                                : "-"}
-                            </td>
-                            <td>{p.curso}</td>
-                            <td style={{ textAlign: "center" }}>
-                              {p.distintivo ? (
-                                "✅"
-                              ) : (
-                                "❌"
-                              )}
-                            </td>
 
-                            <td style={{ textAlign: "center" }}>
-                              {p.moneda ? (
-                                "✅"
-                              ) : (
-                                "❌"
-                              )}
-                            </td>
+                  <tbody>
+                    {(papelera ? pagosEliminados : pagosOrdenados).map((p) => {
+                      const isEditing = editPagoId === p.id;
 
-                            <td>
-                              ${p.valorDepositado?.toFixed(2) || "0.00"}
-                            </td>
-                            <td>
-                              {p.entidad || "---"}
-                            </td>
-                            <td>
-                              {p.idDeposito || "---"}
-                            </td>
+                      return (
+                        <tr key={p.id}>
+                          <td className="vpTdWrap">
+                            {p
+                              ? `${p?.inscripcion?.user?.grado} ${p?.inscripcion?.user?.firstName} ${p?.inscripcion?.user?.lastName}`
+                              : "Sin Inscripción"}
+                          </td>
 
+                          <td>
+                            {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-"}
+                          </td>
 
+                          <td className="vpTdWrap">{p.curso}</td>
+
+                          <td style={{ textAlign: "center" }}>
+                            {papelera ? (p.distintivo ? "✅" : "❌") : isEditing ? <input type="checkbox" {...register("distintivo")} /> : (p.distintivo ? "✅" : "❌")}
+                          </td>
+
+                          <td style={{ textAlign: "center" }}>
+                            {papelera ? (p.moneda ? "✅" : "❌") : isEditing ? <input type="checkbox" {...register("moneda")} /> : (p.moneda ? "✅" : "❌")}
+                          </td>
+
+                          <td>
+                            {papelera ? (
+                              `$${p.valorDepositado?.toFixed(2) || "0.00"}`
+                            ) : isEditing ? (
+                              <input type="number" step="0.01" {...register("valorDepositado")} className="vpMiniInput" />
+                            ) : (
+                              `$${p.valorDepositado?.toFixed(2) || "0.00"}`
+                            )}
+                          </td>
+
+                          <td>
+                            {papelera ? (
+                              p.entidad || "---"
+                            ) : isEditing ? (
+                              <select {...register("entidad")} className="secInput vpMiniSelect" required>
+                                <option value="">Entidad</option>
+                                {[...new Set(variables.map((v) => v.entidad).filter(Boolean))].map((entidad, i) => (
+                                  <option key={i} value={entidad}>
+                                    {entidad}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              p.entidad || "---"
+                            )}
+                          </td>
+
+                          <td>
+                            {papelera ? (
+                              p.idDeposito || "---"
+                            ) : isEditing ? (
+                              <input type="text" {...register("idDeposito")} className="vpMiniInput" />
+                            ) : (
+                              p.idDeposito || "---"
+                            )}
+                          </td>
+
+                          <td>
+                            {p.pagoUrl ? (
+                              <a className="vpLink" href={p.pagoUrl} target="_blank" rel="noopener noreferrer">
+                                Ver
+                              </a>
+                            ) : (
+                              "No disponible"
+                            )}
+                          </td>
+
+                          <td style={{ textAlign: "center" }}>
+                            {papelera ? (
+                              p.verificado ? "✅" : "❌"
+                            ) : isEditing ? (
+                              <input type="checkbox" {...register("verificado")} />
+                            ) : p.verificado ? (
+                              "✅"
+                            ) : (
+                              "❌"
+                            )}
+                          </td>
+
+                          <td className="vpTdWrap">
+                            {papelera ? (
+                              p.observacion || "👍"
+                            ) : isEditing ? (
+                              <input type="text" {...register("observacion")} className="vpMiniInput" />
+                            ) : (
+                              p.observacion || "👍"
+                            )}
+                          </td>
+
+                          <td className="vpTdWrap">{p.usuarioEdicion ? p.usuarioEdicion : "Sin editar"}</td>
+
+                          {papelera ? (
                             <td>
-                              {p.pagoUrl ? (
-                                <a
-                                  href={p.pagoUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  Ver Comprobante
-                                </a>
-                              ) : (
-                                "No disponible"
-                              )}
-                            </td>
-                            <td style={{ textAlign: "center" }}>
-                              {isEditing ? (
-                                <input
-                                  type="checkbox"
-                                  checked={editVerificado}
-                                  onChange={(e) =>
-                                    setEditVerificado(e.target.checked)
-                                  }
-                                />
-                              ) : p.verificado ? (
-                                "✅"
-                              ) : (
-                                "❌"
-                              )}
-                            </td>
-                            <td>
-                              {" "}
-                              {isEditing ? (
-                                <input
-                                  value={observacion}
-                                  type="text"
-                                  onChange={(e) =>
-                                    setObservacion(e.target.value)
-                                  }
-                                />
-                              ) : p.observacion ? (
-                                p.observacion
-                              ) : (
-                                "👍"
-                              )}
-                            </td>
-                            <td>
-                              {p.usuarioEdicion
-                                ? p.usuarioEdicion
-                                : "Sin editar"}
-                            </td>
-                            <td>
-                              <img
-                                className="restaurar_btn"
-                                src="../../../restaurar.png"
-                                alt="Eliminar"
+                              <button
+                                className="secBtnPrimary vpBtnSmall"
+                                type="button"
                                 onClick={() => {
                                   setShowRestaurar(true);
                                   setPagoIdRestaurar(p.id);
                                 }}
-                              />
+                              >
+                                Restaurar
+                              </button>
                             </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  ) : (
-                    <tbody>
-                      {pagosOrdenados.map((p) => {
-                        const isEditing = editPagoId === p.id;
-                        return (
-                          <tr key={p.id}>
-                            <td>
-                              {p
-                                ? `${p?.inscripcion?.user?.grado} ${p?.inscripcion?.user?.firstName} ${p?.inscripcion?.user?.lastName}`
-                                : "Sin Inscripcion"}
-                            </td>
-                            <td>
-                              {p.createdAt
-                                ? new Date(p.createdAt).toLocaleDateString()
-                                : "-"}
-                            </td>
-                            <td>{p.curso}</td>
-                            <td style={{ textAlign: "center" }}>
-                              {isEditing ? (
-                                <input
-                                  type="checkbox"
-                                  {...register("distintivo")}
-                                />
-                              ) : p.distintivo ? (
-                                "✅"
-                              ) : (
-                                "❌"
-                              )}
-                            </td>
-
-                            <td style={{ textAlign: "center" }}>
-                              {isEditing ? (
-                                <input
-                                  type="checkbox"
-                                  {...register("moneda")}
-                                />
-                              ) : p.moneda ? (
-                                "✅"
-                              ) : (
-                                "❌"
-                              )}
-                            </td>
-
-                            <td>
-                              {isEditing ? (
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  {...register("valorDepositado")}
-                                />
-                              ) : (
-                                `$${p.valorDepositado?.toFixed(2) || "0.00"}`
-                              )}
-                            </td>
-
-                            <td>
-                              {isEditing ? (
-                                <select
-                                  required
-                                  {...register("entidad")}
-                                  className="slected_entidad"
-
-                                >
-                                  <option value="">Entidad</option>
-                                  {[
-                                    ...new Set(
-                                      variables.map((v) => v.entidad).filter(Boolean)
-                                    ),
-                                  ].map((entidad, i) => (
-                                    <option key={i} value={entidad}>
-                                      {entidad}
-                                    </option>
-                                  ))}
-                                </select>
-
-
-
-                              ) : (
-                                `${p.entidad || "---"}`
-                              )}
-                            </td>
-
-                            <td>
-                              {isEditing ? (
-                                <input
-                                  className="input_validacion"
-                                  type="text"
-                                  {...register("idDeposito")}
-                                />
-                              ) : (
-                                `${p.idDeposito || "---"}`
-                              )}
-                            </td>
-
-
-
-                            <td>
-                              {p.pagoUrl ? (
-                                <a
-                                  href={p.pagoUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  Ver Comprobante
-                                </a>
-                              ) : (
-                                "No disponible"
-                              )}
-                            </td>
-                            <td style={{ textAlign: "center" }}>
-                              {isEditing ? (
-                                <input
-                                  type="checkbox"
-                                  {...register("verificado")}
-                                />
-                              ) : p.verificado ? (
-                                "✅"
-                              ) : (
-                                "❌"
-                              )}
-                            </td>
-                            <td>
-                              {" "}
-                              {isEditing ? (
-                                <input
-                                  className="input_validacion"
-                                  type="text"
-                                  {...register("observacion")}
-                                />
-                              ) : p.observacion ? (
-                                p.observacion
-                              ) : (
-                                "👍"
-                              )}
-                            </td>
-                            <td>
-                              {p.usuarioEdicion
-                                ? p.usuarioEdicion
-                                : "Sin editar"}
-                            </td>
-
-                            <td>
-                              {isEditing ? (
-                                <>
-                                  <button
-                                    onClick={handleSubmit((data) =>
-                                      guardarEdicion(p.id, data)
-                                    )}
-                                    className="vp-btn-save"
-                                  >
-                                    Guardar
+                          ) : (
+                            <>
+                              <td>
+                                {isEditing ? (
+                                  <>
+                                    <button
+                                      onClick={handleSubmit((data) => guardarEdicion(p.id, data))}
+                                      className="vp-btn-save"
+                                      type="button"
+                                    >
+                                      Guardar
+                                    </button>
+                                    <button onClick={cancelarEdicion} className="vp-btn-cancel" type="button">
+                                      Cancelar
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button onClick={() => iniciarEdicion(p)} className="vp-btn-edit" type="button">
+                                    Registrar Validación
                                   </button>
+                                )}
+                              </td>
 
-                                  <button
-                                    onClick={cancelarEdicion}
-                                    className="vp-btn-cancel"
-                                  >
-                                    Cancelar
-                                  </button>
-                                </>
-                              ) : (
+                              <td>
                                 <button
-                                  onClick={() => iniciarEdicion(p)}
-                                  className="vp-btn-edit"
+                                  className="secBtnDanger vpBtnSmall"
+                                  type="button"
+                                  onClick={() => {
+                                    setShowDelete(true);
+                                    setPagoIdDelete(p.id);
+                                  }}
                                 >
-                                  Registrar Validación
+                                  Eliminar
                                 </button>
-                              )}
-                            </td>
-
-                            <td>
-                              <img
-                                className="user_icon_btn"
-                                src="../../../delete_3.png"
-                                alt="Eliminar"
-                                onClick={() => {
-                                  setShowDelete(true);
-                                  setPagoIdDelete(p.id);
-                                }}
-                              />
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  )}
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
                 </table>
               </div>
             ) : (
-              <p>No hay pagos para mostrar.</p>
+              <p className="secEmpty">No hay pagos para mostrar.</p>
             )}
-          </div>
+          </section>
         );
 
       case "registrarEntregas":
         return (
-          <div className="vp-validar-pagos-container">
-            {/* FILTROS */}
-            <div className="vp-filtros">
-              <button
-                className="vp-btn-clear"
-                onClick={() => {
-                  setFiltroCurso("");
-                  setFiltroVerificado("");
-                  setFiltroMoneda("");
-                  setFiltroDistintivo("");
-                  setFiltroGrado("");
-                  setInputValue("");
-                  setFiltroEntregado("");
-                  setFiltroFechaInicio("");
-                  setFiltroFechaFin("");
-                }}
-              >
-                Eliminar Filtros
+          <section className="secCard">
+            <div className="secCardHeader">
+              <h2 className="secTitle">🎁 Registrar Entregas</h2>
+            </div>
+
+            <div className="secFilters vpFiltersRow">
+              <button className="secBtnDanger" onClick={limpiarFiltrosBase} type="button">
+                ❌ Eliminar filtros
               </button>
-              {/* Filtro Curso */}
-              <div className="vp-filtro">
-                <label>Curso:</label>
-                <select
-                  value={filtroCurso}
-                  onChange={(e) => setFiltroCurso(e.target.value)}
-                >
+
+              <div className="secInputGroup">
+                <label className="vpLbl">Curso</label>
+                <select className="secInput" value={filtroCurso} onChange={(e) => setFiltroCurso(e.target.value)}>
                   <option value="">Todos</option>
                   {listaCursos.map((c) => (
                     <option key={c} value={c}>
@@ -908,109 +617,67 @@ const ValidacionPago = () => {
                 </select>
               </div>
 
-              {/* Filtro Verificado */}
-              <div className="vp-filtro">
-                <label>Verificado:</label>
-                <select
-                  value={filtroVerificado}
-                  onChange={(e) => setFiltroVerificado(e.target.value)}
-                >
+              <div className="secInputGroup">
+                <label className="vpLbl">Verificado</label>
+                <select className="secInput" value={filtroVerificado} onChange={(e) => setFiltroVerificado(e.target.value)}>
                   <option value="">Todos</option>
                   <option value="true">Verificados</option>
                   <option value="false">No Verificados</option>
                 </select>
               </div>
 
-              {/* Filtro Moneda */}
-              <div className="vp-filtro">
-                <label>Moneda:</label>
-                <select
-                  value={filtroMoneda}
-                  onChange={(e) => setFiltroMoneda(e.target.value)}
-                >
+              <div className="secInputGroup">
+                <label className="vpLbl">Moneda</label>
+                <select className="secInput" value={filtroMoneda} onChange={(e) => setFiltroMoneda(e.target.value)}>
                   <option value="">Todos</option>
                   <option value="true">Sí</option>
                   <option value="false">No</option>
                 </select>
               </div>
 
-              {/* Filtro Distintivo */}
-              <div className="vp-filtro">
-                <label>Distintivo:</label>
-                <select
-                  value={filtroDistintivo}
-                  onChange={(e) => setFiltroDistintivo(e.target.value)}
-                >
+              <div className="secInputGroup">
+                <label className="vpLbl">Distintivo</label>
+                <select className="secInput" value={filtroDistintivo} onChange={(e) => setFiltroDistintivo(e.target.value)}>
                   <option value="">Todos</option>
                   <option value="true">Sí</option>
                   <option value="false">No</option>
                 </select>
               </div>
 
-              {/* Filtro Entrega */}
-
-              <div className="vp-filtro">
-                <label>Entregado:</label>
-                <select
-                  value={filtroEntregado}
-                  onChange={(e) => setFiltroEntregado(e.target.value)}
-                >
+              <div className="secInputGroup">
+                <label className="vpLbl">Entregado</label>
+                <select className="secInput" value={filtroEntregado} onChange={(e) => setFiltroEntregado(e.target.value)}>
                   <option value="">Todos</option>
                   <option value="true">Sí</option>
                   <option value="false">No</option>
                 </select>
               </div>
 
-              {/* Filtro Grado / Nombres / Apellidos / Cédula */}
-              <div className="vp-filtro">
-                <label>Grado / Nombres / Apellidos / Cédula:</label>
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Buscar..."
-                />
+              <div className="secInputGroup">
+                <label className="vpLbl">Grado / Nombres / Apellidos / Cédula</label>
+                <input className="secInput" type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Buscar..." />
               </div>
 
-              {/* Filtro Fecha Inicio */}
-              <div className="vp-filtro">
-                <label>Fecha Inicio:</label>
-                <input
-                  type="date"
-                  value={filtroFechaInicio}
-                  onChange={(e) => setFiltroFechaInicio(e.target.value)}
-                />
+              <div className="secInputGroup">
+                <label className="vpLbl">Fecha inicio</label>
+                <input className="secInput" type="date" value={filtroFechaInicio} onChange={(e) => setFiltroFechaInicio(e.target.value)} />
               </div>
 
-              {/* Filtro Fecha Fin */}
-              <div className="vp-filtro">
-                <label>Fecha Fin:</label>
-                <input
-                  type="date"
-                  value={filtroFechaFin}
-                  onChange={(e) => setFiltroFechaFin(e.target.value)}
-                />
+              <div className="secInputGroup">
+                <label className="vpLbl">Fecha fin</label>
+                <input className="secInput" type="date" value={filtroFechaFin} onChange={(e) => setFiltroFechaFin(e.target.value)} />
               </div>
             </div>
 
-            {/* TABLA */}
-            <p
-              style={{
-                marginBottom: "10px",
-                color: "#0053a0",
-                fontWeight: 600,
-              }}
-            >
-              Mostrando {pagosDistintivos.length} resultados
-            </p>
+            <p className="vpInfo">Mostrando {pagosDistintivos.length} resultados</p>
 
-            <div className="vp-tabla-scroll">
-              <table className="vp-pagos-table">
+            <div className="secTableWrap">
+              <table className="secTable vpTable">
                 <thead>
                   <tr>
                     <th>Discente</th>
                     <th
-                      style={{ cursor: "pointer", textDecoration: "underline" }}
+                      className="vpThSortable"
                       onClick={() => setOrdenFechaDesc((prev) => !prev)}
                       title="Ordenar por fecha"
                     >
@@ -1019,26 +686,24 @@ const ValidacionPago = () => {
                     <th>Curso</th>
                     <th>Moneda</th>
                     <th>Distintivo</th>
-                    <th>Valor Pagado</th>
+                    <th>Valor</th>
                     <th>Verificado</th>
                     <th>Comprobante</th>
                     <th>Entregado</th>
                     <th>Acción</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {pagosDistintivos.map((p) => {
                     const startEditing = () => {
                       setEditingEntregaId(p.id);
-                      // Inicializa formulario con los valores actuales del pago
                       reset({ entregado: p.entregado });
                     };
 
                     const guardarEntrega = handleSubmit(async (data) => {
                       try {
-                        await updatePago(PATH_PAGOS, p.id, {
-                          entregado: data.entregado,
-                        });
+                        await updatePago(PATH_PAGOS, p.id, { entregado: data.entregado });
                         await getPago(PATH_PAGOS);
                         setEditingEntregaId(null);
                       } catch (error) {
@@ -1048,36 +713,21 @@ const ValidacionPago = () => {
 
                     return (
                       <tr key={p.id}>
-                        <td>
+                        <td className="vpTdWrap">
                           {p
                             ? `${p?.inscripcion?.user?.grado} ${p?.inscripcion?.user?.firstName} ${p?.inscripcion?.user?.lastName}`
-                            : "Sin Inscripcion"}
+                            : "Sin Inscripción"}
                         </td>
-                        <td>
-                          {p.createdAt
-                            ? new Date(p.createdAt).toLocaleDateString()
-                            : "-"}
-                        </td>
-                        <td>{p.curso}</td>
-                        <td style={{ textAlign: "center" }}>
-                          {p.moneda ? "✅" : "❌"}
-                        </td>
-                        <td style={{ textAlign: "center" }}>
-                          {p.distintivo ? "✅" : "❌"}
-                        </td>
+                        <td>{p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-"}</td>
+                        <td className="vpTdWrap">{p.curso}</td>
+                        <td style={{ textAlign: "center" }}>{p.moneda ? "✅" : "❌"}</td>
+                        <td style={{ textAlign: "center" }}>{p.distintivo ? "✅" : "❌"}</td>
                         <td>{`$${p.valorDepositado?.toFixed(2) || "0.00"}`}</td>
-                        <td style={{ textAlign: "center" }}>
-                          {p.verificado ? "✅" : "❌"}
-                        </td>
-
+                        <td style={{ textAlign: "center" }}>{p.verificado ? "✅" : "❌"}</td>
                         <td>
                           {p.pagoUrl ? (
-                            <a
-                              href={p.pagoUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Ver Comprobante
+                            <a className="vpLink" href={p.pagoUrl} target="_blank" rel="noopener noreferrer">
+                              Ver
                             </a>
                           ) : (
                             "No disponible"
@@ -1093,27 +743,19 @@ const ValidacionPago = () => {
                             "❌"
                           )}
                         </td>
+
                         <td>
                           {editingEntregaId === p.id ? (
                             <>
-                              <button
-                                onClick={guardarEntrega}
-                                className="vp-btn-save"
-                              >
+                              <button onClick={guardarEntrega} className="vp-btn-save" type="button">
                                 Guardar
                               </button>
-                              <button
-                                onClick={() => setEditingEntregaId(null)}
-                                className="vp-btn-cancel"
-                              >
+                              <button onClick={() => setEditingEntregaId(null)} className="vp-btn-cancel" type="button">
                                 Cancelar
                               </button>
                             </>
                           ) : (
-                            <button
-                              onClick={startEditing}
-                              className="vp-btn-edit"
-                            >
+                            <button onClick={startEditing} className="vp-btn-edit" type="button">
                               Registrar Entrega
                             </button>
                           )}
@@ -1124,109 +766,66 @@ const ValidacionPago = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+          </section>
         );
 
       case "listaPagos":
         return (
-          <div className="vp-validar-pagos-container">
-            <div
-              className="vp-filtros"
-              style={{
-                alignItems: "center",
-                gap: "1rem",
-                flexWrap: "wrap",
-                display: "flex",
-              }}
-            >
-              {/* Filtro Verificado */}
-              <div className="vp-filtro">
-                <label>Verificado:</label>
-                <select
-                  value={filtroVerificado}
-                  onChange={(e) => setFiltroVerificado(e.target.value)}
-                >
+          <section className="secCard">
+            <div className="secCardHeader">
+              <h2 className="secTitle">💳 Lista de Pagos</h2>
+            </div>
+
+            <div className="secFilters vpFiltersRow">
+              <div className="secInputGroup">
+                <label className="vpLbl">Verificado</label>
+                <select className="secInput" value={filtroVerificado} onChange={(e) => setFiltroVerificado(e.target.value)}>
                   <option value="">Todos</option>
                   <option value="true">Verificados</option>
                   <option value="false">No Verificados</option>
                 </select>
               </div>
 
-              <div className="vp-filtro" style={{ flex: "1 1 150px" }}>
-                <label>Certificado:</label>
-                <select
-                  value={filtroCertificado}
-                  onChange={(e) => setFiltroCertificado(e.target.value)}
-                >
+              <div className="secInputGroup">
+                <label className="vpLbl">Certificado</label>
+                <select className="secInput" value={filtroCertificado} onChange={(e) => setFiltroCertificado(e.target.value)}>
                   <option value="">Todos</option>
                   <option value="true">Con Certificado</option>
                   <option value="false">Sin Certificado</option>
                 </select>
               </div>
 
-              {/* Filtro Fecha Inicio */}
-              <div className="vp-filtro">
-                <label>Fecha Inicio:</label>
-                <input
-                  type="date"
-                  value={filtroFechaInicio}
-                  onChange={(e) => setFiltroFechaInicio(e.target.value)}
-                />
+              <div className="secInputGroup">
+                <label className="vpLbl">Fecha inicio</label>
+                <input className="secInput" type="date" value={filtroFechaInicio} onChange={(e) => setFiltroFechaInicio(e.target.value)} />
               </div>
 
-              {/* Filtro Fecha Fin */}
-              <div className="vp-filtro">
-                <label>Fecha Fin:</label>
-                <input
-                  type="date"
-                  value={filtroFechaFin}
-                  onChange={(e) => setFiltroFechaFin(e.target.value)}
-                />
+              <div className="secInputGroup">
+                <label className="vpLbl">Fecha fin</label>
+                <input className="secInput" type="date" value={filtroFechaFin} onChange={(e) => setFiltroFechaFin(e.target.value)} />
               </div>
 
-              <button
-                onClick={() => {
-                  setFiltroCurso("");
-                  setFiltroVerificado("");
-                  setFiltroCertificado("");
-                  setFiltroGrado("");
-                  setInputValue("");
-                  setFiltroFechaInicio("");
-                  setFiltroFechaFin("");
-                }}
-                className="vp-btn-clear"
-                style={{ height: "2.5rem", marginLeft: "auto" }}
-              >
-                Eliminar filtros
+              <button className="secBtnDanger" onClick={limpiarFiltrosBase} type="button">
+                ❌ Eliminar filtros
               </button>
 
               {SUPERADMIN === user?.cI && (
-                <button
-                  onClick={descargarExcel}
-                  className="vp-btn-clear"
-                  style={{ height: "2.5rem", marginLeft: "auto" }}
-                >
-                  Descragra Pagos
+                <button className="secBtnPrimary" onClick={descargarExcel} type="button">
+                  📥 Descargar Pagos
                 </button>
               )}
 
               {SUPERADMIN === user?.cI && (
-                <button
-                  onClick={descargarExcelInscripcion}
-                  className="vp-btn-clear"
-                  style={{ height: "2.5rem", marginLeft: "auto" }}
-                >
-                  Descragra Inscripciones
+                <button className="secBtnPrimary" onClick={descargarExcelInscripcion} type="button">
+                  📥 Descargar Inscripciones
                 </button>
               )}
             </div>
 
-            <div style={{ fontWeight: 600, margin: "10px 0" }}>
-              Total: {pagosActivos.length}
-            </div>
+            <div className="secCount">Total: {pagosActivos.length}</div>
 
-            <div className="vp-tabla-scroll">
-              <table className="vp-pagos-table">
+            <div className="secTableWrap">
+              <table className="secTable vpTable">
                 <thead>
                   <tr>
                     <th>Grado</th>
@@ -1234,75 +833,66 @@ const ValidacionPago = () => {
                     <th>Apellidos</th>
                     <th>Cédula</th>
                     <th
-                      style={{ cursor: "pointer", textDecoration: "underline" }}
+                      className="vpThSortable"
                       onClick={() => setOrdenFechaDesc((prev) => !prev)}
                       title="Ordenar por fecha"
                     >
                       Fecha {ordenFechaDesc ? "⬇️" : "⬆️"}
                     </th>
                     <th>Curso</th>
-                    <th>Valor Depositado</th>
+                    <th>Valor</th>
                     <th>Comprobante</th>
                     <th>Certificado</th>
                     <th>Verificado</th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  {pagosActivos.map((p) => {
-                    return (
-                      <tr key={p.id}>
-                        <td>{p?.inscripcion?.user?.grado || "-"}</td>
-                        <td>{p?.inscripcion?.user?.firstName || "-"}</td>
-                        <td>{p?.inscripcion?.user?.lastName || "-"}</td>
-                        <td>{p?.inscripcion?.user?.cI || "-"}</td>
-                        <td>
-                          {p.createdAt
-                            ? new Date(p.createdAt).toLocaleDateString()
-                            : "-"}
-                        </td>
-                        {/* Fecha */}
-                        <td>{p.curso}</td>
-                        <td>${p.valorDepositado?.toFixed(2) || "0.00"}</td>
-                        <td>
-                          {p.pagoUrl ? (
-                            <a
-                              href={p.pagoUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Ver Comprobante
-                            </a>
-                          ) : (
-                            "No disponible"
-                          )}
-                        </td>
-                        <td>
-                          {p?.urlCertificado ? (
-                            <a
-                              href={p?.urlCertificado}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Ver Certificado
-                            </a>
-                          ) : (
-                            "No disponible"
-                          )}
-                        </td>
-                        <td style={{ textAlign: "center" }}>
-                          {p.verificado ? "✅" : "❌"}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {pagosActivos.map((p) => (
+                    <tr key={p.id}>
+                      <td>{p?.inscripcion?.user?.grado || "-"}</td>
+                      <td>{p?.inscripcion?.user?.firstName || "-"}</td>
+                      <td>{p?.inscripcion?.user?.lastName || "-"}</td>
+                      <td>{p?.inscripcion?.user?.cI || "-"}</td>
+                      <td>{p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-"}</td>
+                      <td className="vpTdWrap">{p.curso}</td>
+                      <td>${p.valorDepositado?.toFixed(2) || "0.00"}</td>
+                      <td>
+                        {p.pagoUrl ? (
+                          <a className="vpLink" href={p.pagoUrl} target="_blank" rel="noopener noreferrer">
+                            Ver
+                          </a>
+                        ) : (
+                          "No disponible"
+                        )}
+                      </td>
+                      <td>
+                        {p?.urlCertificado ? (
+                          <a className="vpLink" href={p?.urlCertificado} target="_blank" rel="noopener noreferrer">
+                            Ver
+                          </a>
+                        ) : (
+                          "No disponible"
+                        )}
+                      </td>
+                      <td style={{ textAlign: "center" }}>{p.verificado ? "✅" : "❌"}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-          </div>
+          </section>
         );
 
       case "listaInscritos":
-        return <p>📋 Pronto tendrás la Lista de Inscritos.</p>;
+        return (
+          <section className="secCard">
+            <div className="secCardHeader">
+              <h2 className="secTitle">📋 Lista de Inscritos</h2>
+            </div>
+            <p className="secEmpty">📌 Próximamente…</p>
+          </section>
+        );
 
       default:
         return null;
@@ -1310,81 +900,95 @@ const ValidacionPago = () => {
   };
 
   return (
-    <div>
+    <div className="secPage">
       {isLoading && <IsLoading />}
 
-      <div className="vp-container">
+      {/* Overlay para mobile */}
+      <div
+        className={`secOverlay ${menuOpen ? "open" : ""}`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden={!menuOpen}
+      />
+
+      <div className="secShell vpShell">
         <button
           ref={hamburgerRef}
-          className="dashboard-hamburger-btn"
+          className={`secHamburger ${menuOpen ? "is-open" : ""}`}
           onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+          aria-expanded={menuOpen}
+          type="button"
         >
-          <div
-            className={`dashboard-hamburger-inner ${menuOpen ? "open" : ""}`}
-          >
-            <span className="dashboard-hamburger-line" />
-            <span className="dashboard-hamburger-line" />
-            <span className="dashboard-hamburger-line" />
-          </div>
+          <span className="secHamburgerLine"></span>
+          <span className="secHamburgerLine"></span>
+          <span className="secHamburgerLine"></span>
         </button>
 
-        <nav className={`vp-menu ${menuOpen ? "open" : ""}`} ref={menuRef}>
-          <h3>📊 Menú Principal</h3>
+        <nav className={`secMenu ${menuOpen ? "open" : ""}`} ref={menuRef}>
+          <div className="secMenuHeader">
+            <img src="/images/eduka_sf.png" alt="Eduka" className="secMenuLogo" />
+            <p className="secMenuSubtitle">Validación de Pagos</p>
+          </div>
+
           <button
-            className={`vp-menu-btn ${activeSection === "resumen" ? "active" : ""
-              }`}
+            className={`secMenuBtn ${activeSection === "resumen" ? "active" : ""}`}
             onClick={() => setActiveSection("resumen")}
+            type="button"
           >
-            📋 Resumen General
+            📋 Resumen
           </button>
+
           <button
-            className={`vp-menu-btn ${activeSection === "validarPagos" ? "active" : ""
-              }`}
+            className={`secMenuBtn ${activeSection === "validarPagos" ? "active" : ""}`}
             onClick={() => setActiveSection("validarPagos")}
+            type="button"
           >
             ✅ Validar Pagos
           </button>
+
           <button
-            className={`vp-menu-btn ${activeSection === "registrarEntregas" ? "active" : ""
-              }`}
+            className={`secMenuBtn ${activeSection === "registrarEntregas" ? "active" : ""}`}
             onClick={() => setActiveSection("registrarEntregas")}
+            type="button"
           >
-            🎁 Registrar Entregas de Distintivos
+            🎁 Entregas
           </button>
+
           <button
-            className={`vp-menu-btn ${activeSection === "listaPagos" ? "active" : ""
-              }`}
+            className={`secMenuBtn ${activeSection === "listaPagos" ? "active" : ""}`}
             onClick={() => setActiveSection("listaPagos")}
+            type="button"
           >
-            💳 Lista de Pagos
+            💳 Lista Pagos
           </button>
+
           <button
-            className={`vp-menu-btn ${activeSection === "listaInscritos" ? "active" : ""
-              }`}
+            className={`secMenuBtn ${activeSection === "listaInscritos" ? "active" : ""}`}
             onClick={() => setActiveSection("listaInscritos")}
+            type="button"
           >
-            📋 Lista de Inscritos
+            📋 Lista Inscritos
           </button>
         </nav>
 
-        <main className="vp-content">{renderContent()}</main>
+        <main className="secContent vpContent">{renderContent()}</main>
+
+        {/* MODALES */}
         {showDelete && (
           <div className="modal_overlay">
             <article className="user_delete_content">
               <span>¿Deseas eliminar el registro?</span>
               <section className="btn_content">
-                <button
-                  className="btn yes"
-                  onClick={() => deletePagoPr(pagoIdDelete)}
-                >
+                <button className="btn yes" onClick={() => deletePagoPr(pagoIdDelete)} type="button">
                   Sí
                 </button>
                 <button
                   className="btn no"
                   onClick={() => {
                     setShowDelete(false);
-                    setPagoIdDelete();
+                    setPagoIdDelete(null);
                   }}
+                  type="button"
                 >
                   No
                 </button>
@@ -1398,18 +1002,16 @@ const ValidacionPago = () => {
             <article className="user_delete_content">
               <span>¿Deseas restaurar registro?</span>
               <section className="btn_content">
-                <button
-                  className="btn yes"
-                  onClick={() => restaurarPagoPr(pagoIdRestaurar)}
-                >
+                <button className="btn yes" onClick={() => restaurarPagoPr(pagoIdRestaurar)} type="button">
                   Sí
                 </button>
                 <button
                   className="btn no"
                   onClick={() => {
                     setShowRestaurar(false);
-                    setPagoIdRestaurar();
+                    setPagoIdRestaurar(null);
                   }}
+                  type="button"
                 >
                   No
                 </button>
