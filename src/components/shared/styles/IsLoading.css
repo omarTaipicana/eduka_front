@@ -11,7 +11,7 @@
 
 /* Tarjeta estilo landing */
 .isLoadingCard {
-  width: min(520px, 92%);
+  width: min(720px, 92%);
   border-radius: 1.4rem;
   padding: 12rem 4rem;
   background: rgba(255, 255, 255, 0.75);
@@ -32,7 +32,7 @@
   background-image: url("/images/eduka_sf.png");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 60%;
+  background-size: 50%;
   opacity: 0.06;
   pointer-events: none;
 }

@@ -106,7 +106,7 @@ const useCrud = () => {
   };
 
 
-  
+
   const getApiById = (path) => {
     setIsLoading(true);
     const url = `${BASEURL}${path}`;
@@ -119,6 +119,68 @@ const useCrud = () => {
       })
       .finally(() => setIsLoading(false));
   };
+
+  const postApiDownloadZip = async (path, data, filenameFallback = "certificados.zip") => {
+    setIsLoading(true);
+    const url = `${BASEURL}${path}`;
+
+    try {
+      const res = await axios.post(url, data, {
+        ...getConfigToken(),
+        responseType: "blob", // 👈 CLAVE
+      });
+
+      // Intentar leer filename real desde Content-Disposition
+      const dispo = res.headers?.["content-disposition"] || "";
+      const match = dispo.match(/filename="?([^"]+)"?/i);
+      const filename = match?.[1] || filenameFallback;
+
+      // Crear descarga
+      const blob = new Blob([res.data], { type: "application/zip" });
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(link.href);
+
+      return true;
+    } catch (err) {
+      setError(err);
+      console.log(err);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const uploadCertificadosZip = (path, file) => {
+  setIsLoading(true);
+
+  const formData = new FormData();
+  formData.append("zip", file); // 👈 debe coincidir con .single("zip")
+
+  const url = `${BASEURL}${path}`;
+
+  axios
+    .post(url, formData, {
+      headers: {
+        ...getConfigToken().headers,
+      },
+    })
+    .then((res) => {
+      setResponse([...response, res.data]);
+      setNewUpload(res.data);
+    })
+    .catch((err) => {
+      setError(err);
+      console.log(err);
+    })
+    .finally(() => setIsLoading(false));
+};
+
+
 
   return [
     response,
@@ -133,7 +195,9 @@ const useCrud = () => {
     updateReg,
     uploadPdf,
     newUpload,
-    getApiById
+    getApiById,
+    postApiDownloadZip,
+    uploadCertificadosZip
   ];
 };
 

@@ -23,6 +23,7 @@ import Secretaria from "./pages/Secretaria";
 import SecretariaRoutes from "./routes/SecretariaRoutes";
 import Gkm from "./components/shared/Gkm";
 import Ciccenic from "./components/Cursos/Ciccenic";
+import Instituto from "./pages/Instituto";
 
 const App = () => {
   const location = useLocation();
@@ -60,6 +61,8 @@ const App = () => {
 
             <Route element={<SubAdminProtectedRoutes />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/instituto" element={<Instituto />} />
+
             </Route>
           </Route>
         </Route>

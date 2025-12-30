@@ -95,6 +95,9 @@ const PrincipalHeader = () => {
           <Link to="/home" onClick={onClick}>
             Home
           </Link>
+          <Link to="/instituto" onClick={onClick}>
+            Instituto
+          </Link>
           <Link to="/secre" onClick={onClick}>
             Secretaria
           </Link>
@@ -107,6 +110,9 @@ const PrincipalHeader = () => {
         <>
           <Link to="/home" onClick={onClick}>
             Home
+          </Link>
+          <Link to="/instituto" onClick={onClick}>
+            Instituto
           </Link>
           <Link to="/secre" onClick={onClick}>
             Secretaria
@@ -365,9 +371,8 @@ const PrincipalHeader = () => {
 
       {/* MENÚ MOBILE DESPLEGABLE */}
       <div
-        className={`navbar_mobile_menu ${
-          menuOpen ? "navbar_mobile_menu--open" : ""
-        }`}
+        className={`navbar_mobile_menu ${menuOpen ? "navbar_mobile_menu--open" : ""
+          }`}
       >
         {renderRoleLinks(closeMenu)}
         <hr className="navbar_mobile_divider" />
