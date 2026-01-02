@@ -2,337 +2,350 @@ import React, { useEffect, useRef, useState } from "react";
 import useCrud from "../hooks/useCrud";
 import IsLoadingUpload from "../components/shared/isLoadingUpload";
 import "./styles/Instituto.css";
+import useAuth from "../hooks/useAuth";
 
 const Instituto = () => {
-    const PATH_CERTIFICADOS = "/instituto/certificados/ciccenic";
-    const PATH_CERTIFICADOS_DESCARGAR = "/instituto/certificados/ciccenic/descargar";
-    const PATH_CERTIFICADOS_SUBIR = "/instituto/certificados/ciccenic/subir";
+  const PATH_CERTIFICADOS = "/instituto/certificados/ciccenic";
+  const PATH_CERTIFICADOS_DESCARGAR =
+    "/instituto/certificados/ciccenic/descargar";
+  const PATH_CERTIFICADOS_SUBIR = "/instituto/certificados/ciccenic/subir";
 
-    const [certificados, getCertificados] = useCrud();
-    const [,,,,,,,,,,,,,postApiDownloadZip] = useCrud();
-    const [,,,,,,isLoading,,,,,,,,uploadCertificadosZip] = useCrud();
+  const [certificados, getCertificados] = useCrud();
+  const [, , , , , , , , , , , , , postApiDownloadZip] = useCrud();
+  const [, , , , , , isLoading, , , , , , , , uploadCertificadosZip] =
+    useCrud();
+  const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
 
-    const [activeSection, setActiveSection] = useState("descargar");
-    const [menuOpen, setMenuOpen] = useState(false);
-    const menuRef = useRef();
-    const hamburgerRef = useRef();
+  const [activeSection, setActiveSection] = useState("descargar");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef();
+  const hamburgerRef = useRef();
 
-    const [selectedArchivos, setSelectedArchivos] = useState([]);
-    const [selectAll, setSelectAll] = useState(false);
+  const [selectedArchivos, setSelectedArchivos] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
 
-    const [archivoZip, setArchivoZip] = useState(null);
-    const [sendingDownload, setSendingDownload] = useState(false);
-    const [sendingUpload, setSendingUpload] = useState(false);
+  const [archivoZip, setArchivoZip] = useState(null);
+  const [sendingDownload, setSendingDownload] = useState(false);
+  const [sendingUpload, setSendingUpload] = useState(false);
 
-    useEffect(() => {
-        getCertificados(PATH_CERTIFICADOS);
-    }, []);
+  useEffect(() => {
+    getCertificados(PATH_CERTIFICADOS);
+    loggedUser();
+  }, []);
 
-    // Cerrar menú si clic fuera (igual que Home)
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (
-                menuOpen &&
-                menuRef.current &&
-                !menuRef.current.contains(event.target) &&
-                hamburgerRef.current &&
-                !hamburgerRef.current.contains(event.target)
-            ) {
-                setMenuOpen(false);
-            }
-        };
-        if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [menuOpen]);
+  console.log(user?.role)
 
-    const handleSelect = (section) => {
-        setActiveSection(section);
+  // Cerrar menú si clic fuera (igual que Home)
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        menuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        hamburgerRef.current &&
+        !hamburgerRef.current.contains(event.target)
+      ) {
         setMenuOpen(false);
+      }
     };
+    if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
 
-    const listaArchivos = certificados?.archivos || [];
+  const handleSelect = (section) => {
+    setActiveSection(section);
+    setMenuOpen(false);
+  };
 
-    // Mantener selectAll consistente si cambian archivos
-    useEffect(() => {
-        if (!listaArchivos.length) {
-            setSelectAll(false);
-            setSelectedArchivos([]);
-            return;
-        }
-        setSelectAll(selectedArchivos.length === listaArchivos.length);
-    }, [listaArchivos.length]);
+  const listaArchivos = certificados?.archivos || [];
 
-    const handleSelectAll = (e) => {
-        const checked = e.target.checked;
-        setSelectAll(checked);
+  // Mantener selectAll consistente si cambian archivos
+  useEffect(() => {
+    if (!listaArchivos.length) {
+      setSelectAll(false);
+      setSelectedArchivos([]);
+      return;
+    }
+    setSelectAll(selectedArchivos.length === listaArchivos.length);
+  }, [listaArchivos.length]);
 
-        if (checked) {
-            setSelectedArchivos(listaArchivos.map((a) => a.nombreArchivo));
-        } else {
-            setSelectedArchivos([]);
-        }
-    };
+  const handleSelectAll = (e) => {
+    const checked = e.target.checked;
+    setSelectAll(checked);
 
-    const handleSelectOne = (nombreArchivo) => {
-        setSelectedArchivos((prev) => {
-            if (prev.includes(nombreArchivo)) {
-                const nuevo = prev.filter((n) => n !== nombreArchivo);
-                setSelectAll(false);
-                return nuevo;
-            }
-            const nuevo = [...prev, nombreArchivo];
-            if (nuevo.length === listaArchivos.length) setSelectAll(true);
-            return nuevo;
-        });
-    };
+    if (checked) {
+      setSelectedArchivos(listaArchivos.map((a) => a.nombreArchivo));
+    } else {
+      setSelectedArchivos([]);
+    }
+  };
 
-    const handleDescargarSeleccionados = async () => {
-        if (selectedArchivos.length === 0) {
-            alert("Selecciona al menos un certificado.");
-            return;
-        }
+  const handleSelectOne = (nombreArchivo) => {
+    setSelectedArchivos((prev) => {
+      if (prev.includes(nombreArchivo)) {
+        const nuevo = prev.filter((n) => n !== nombreArchivo);
+        setSelectAll(false);
+        return nuevo;
+      }
+      const nuevo = [...prev, nombreArchivo];
+      if (nuevo.length === listaArchivos.length) setSelectAll(true);
+      return nuevo;
+    });
+  };
 
-        const data = { archivos: selectedArchivos };
+  const handleDescargarSeleccionados = async () => {
+    if (selectedArchivos.length === 0) {
+      alert("Selecciona al menos un certificado.");
+      return;
+    }
 
-        try {
-            setSendingDownload(true);
-            await postApiDownloadZip(PATH_CERTIFICADOS_DESCARGAR, data);
-            alert("Solicitud enviada. Se generará la descarga.");
-        } catch (err) {
-            console.error(err);
-            alert("Error al solicitar descarga.");
-        } finally {
-            setSendingDownload(false);
-        }
-    };
+    const data = { archivos: selectedArchivos };
 
-    const handleFileChange = (e) => {
-        const file = e.target.files?.[0];
-        setArchivoZip(file || null);
-    };
+    try {
+      setSendingDownload(true);
+      await postApiDownloadZip(PATH_CERTIFICADOS_DESCARGAR, data);
+      alert("Solicitud enviada. Se generará la descarga.");
+    } catch (err) {
+      console.error(err);
+      alert("Error al solicitar descarga.");
+    } finally {
+      setSendingDownload(false);
+    }
+  };
 
-    const handleUpload = async (e) => {
-        e.preventDefault();
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    setArchivoZip(file || null);
+  };
 
-        if (!archivoZip) {
-            alert("Selecciona un comprimido primero.");
-            return;
-        }
+  const handleUpload = async (e) => {
+    e.preventDefault();
 
-        try {
-            setSendingUpload(true);
-            await uploadCertificadosZip(PATH_CERTIFICADOS_SUBIR, archivoZip);
-            alert("Archivo subido correctamente.");
-            setArchivoZip(null);
-            e.target.reset();
-            getCertificados(PATH_CERTIFICADOS);
-        } catch (err) {
-            console.error(err);
-            alert("Error al subir archivo.");
-        } finally {
-            setSendingUpload(false);
-        }
-    };
+    if (!archivoZip) {
+      alert("Selecciona un comprimido primero.");
+      return;
+    }
 
-    return (
-        <div className="institutoPage">
-           {isLoading &&  <IsLoadingUpload/>}
-            <div className="institutoShell">
-                {/* Botón hamburguesa mobile */}
-                <button
-                    ref={hamburgerRef}
-                    className={`institutoHamburger ${menuOpen ? "is-open" : ""}`}
-                    onClick={() => setMenuOpen(!menuOpen)}
-                    aria-label="Abrir menú"
-                    aria-expanded={menuOpen}
-                >
-                    <span className="institutoHamburgerLine"></span>
-                    <span className="institutoHamburgerLine"></span>
-                    <span className="institutoHamburgerLine"></span>
-                </button>
+    try {
+      setSendingUpload(true);
+      await uploadCertificadosZip(PATH_CERTIFICADOS_SUBIR, archivoZip);
+      alert("Archivo subido correctamente.");
+      setArchivoZip(null);
+      e.target.reset();
+      getCertificados(PATH_CERTIFICADOS);
+    } catch (err) {
+      console.error(err);
+      alert("Error al subir archivo.");
+    } finally {
+      setSendingUpload(false);
+    }
+  };
 
-                {/* Overlay mobile */}
-                <div
-                    className={`institutoOverlay ${menuOpen ? "open" : ""}`}
-                    onClick={() => setMenuOpen(false)}
-                    aria-hidden={!menuOpen}
-                />
+  return (
+    <div className="institutoPage">
+      {isLoading && <IsLoadingUpload />}
+      <div className="institutoShell">
+        {/* Botón hamburguesa mobile */}
+        <button
+          ref={hamburgerRef}
+          className={`institutoHamburger ${menuOpen ? "is-open" : ""}`}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Abrir menú"
+          aria-expanded={menuOpen}
+        >
+          <span className="institutoHamburgerLine"></span>
+          <span className="institutoHamburgerLine"></span>
+          <span className="institutoHamburgerLine"></span>
+        </button>
 
-                {/* Menú lateral */}
-                <nav
-                    className={`institutoMenu ${menuOpen ? "open" : ""}`}
-                    ref={menuRef}
-                    aria-hidden={!menuOpen && window.innerWidth <= 768}
-                >
-                    <div className="institutoMenuHeader">
-                        <img
-                            src="/images/eduka_sf.png"
-                            alt="Eduka"
-                            className="institutoMenuLogo"
-                        />
-                        <p className="institutoMenuSubtitle">Panel Instituto</p>
-                    </div>
+        {/* Overlay mobile */}
+        <div
+          className={`institutoOverlay ${menuOpen ? "open" : ""}`}
+          onClick={() => setMenuOpen(false)}
+          aria-hidden={!menuOpen}
+        />
 
-                    <button
-                        className={`institutoMenuBtn ${activeSection === "descargar" ? "active" : ""
-                            }`}
-                        onClick={() => handleSelect("descargar")}
-                    >
-                        📥 Descargar certificados
-                    </button>
+        {/* Menú lateral */}
+        <nav
+          className={`institutoMenu ${menuOpen ? "open" : ""}`}
+          ref={menuRef}
+          aria-hidden={!menuOpen && window.innerWidth <= 768}
+        >
+          <div className="institutoMenuHeader">
+            <img
+              src="/images/eduka_sf.png"
+              alt="Eduka"
+              className="institutoMenuLogo"
+            />
+            <p className="institutoMenuSubtitle">Panel Instituto</p>
+          </div>
 
-                    <button
-                        className={`institutoMenuBtn ${activeSection === "subir" ? "active" : ""
-                            }`}
-                        onClick={() => handleSelect("subir")}
-                    >
-                        📤 Subir certificados firmados
-                    </button>
-                </nav>
+          <button
+            className={`institutoMenuBtn ${
+              activeSection === "descargar" ? "active" : ""
+            }`}
+            onClick={() => handleSelect("descargar")}
+          >
+            📥 Descargar certificados
+          </button>
 
-                {/* Contenido */}
-                <main className="institutoContent" tabIndex="-1">
-                    {/* ===== Descargar ===== */}
-                    {activeSection === "descargar" && (
-                        <section className="institutoCard">
-                            <div className="institutoCardHeader">
-                                <h2 className="institutoTitle">📥 Descargar certificados</h2>
-                            </div>
+          <button
+            className={`institutoMenuBtn ${
+              activeSection === "subir" ? "active" : ""
+            }`}
+            onClick={() => handleSelect("subir")}
+          >
+            📤 Subir certificados firmados
+          </button>
+        </nav>
 
-                            {!certificados ? (
-                                <IsLoading />
-                            ) : listaArchivos.length > 0 ? (
-                                <>
-                                    <p className="institutoDescription">
-                                        Selecciona uno o varios certificados. El botón “Ver” abre el
-                                        PDF, y “Descargar” enviará los seleccionados al backend.
-                                    </p>
+        {/* Contenido */}
+        <main className="institutoContent" tabIndex="-1">
+          {/* ===== Descargar ===== */}
+          {activeSection === "descargar" && (
+            <section className="institutoCard">
+              <div className="institutoCardHeader">
+                <h2 className="institutoTitle">📥 Descargar certificados</h2>
+              </div>
 
-                                    <div className="instTableWrapper">
-                                        <table className="instTable">
-                                            <thead>
-                                                <tr>
-                                                    <th className="instCheckCell">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectAll}
-                                                            onChange={handleSelectAll}
-                                                        />
-                                                    </th>
-                                                    <th>Cédula</th>
-                                                    <th>Nombre del archivo</th>
-                                                    <th>Ver</th>
-                                                </tr>
-                                            </thead>
+              {!certificados ? (
+                <IsLoading />
+              ) : listaArchivos.length > 0 ? (
+                <>
+                  <p className="institutoDescription">
+                    Selecciona uno o varios certificados. El botón “Ver” abre el
+                    PDF, y “Descargar” enviará los seleccionados al backend.
+                  </p>
 
-                                            <tbody>
-                                                {listaArchivos.map((item, idx) => (
-                                                    <tr key={idx}>
-                                                        <td className="instCheckCell">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={selectedArchivos.includes(
-                                                                    item.nombreArchivo
-                                                                )}
-                                                                onChange={() =>
-                                                                    handleSelectOne(item.nombreArchivo)
-                                                                }
-                                                            />
-                                                        </td>
-                                                        <td>{item.cedula}</td>
-                                                        <td className="instFileName">
-                                                            {item.nombreArchivo}
-                                                        </td>
-                                                        <td>
-                                                            <a
-                                                                className="instBtnOutline"
-                                                                href={item.url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                            >
-                                                                Ver
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                  <div className="instTableWrapper">
+                    <table className="instTable">
+                      <thead>
+                        <tr>
+                          <th className="instCheckCell">
+                            <input
+                              type="checkbox"
+                              checked={selectAll}
+                              onChange={handleSelectAll}
+                            />
+                          </th>
+                          <th>Cédula</th>
+                          <th>Nombre del archivo</th>
+                          <th>Ver</th>
+                        </tr>
+                      </thead>
 
-                                    <div className="instActions">
-                                        <button
-                                            className="instPrimaryBtn"
-                                            onClick={handleDescargarSeleccionados}
-                                            disabled={
-                                                sendingDownload || selectedArchivos.length === 0
-                                            }
-                                        >
-                                            {sendingDownload
-                                                ? "Generando..."
-                                                : "Descargar seleccionados"}
-                                        </button>
-
-                                        <span className="instSelectedInfo">
-                                            {selectedArchivos.length
-                                                ? `${selectedArchivos.length} seleccionado(s)`
-                                                : "Ninguno seleccionado"}
-                                        </span>
-                                    </div>
-
-                                    {/* (Opcional) vista del objeto generado */}
-                                    <pre className="instJsonPreview">
-                                        {JSON.stringify({ archivos: selectedArchivos }, null, 2)}
-                                    </pre>
-                                </>
-                            ) : (
-                                <p className="institutoMuted">No hay certificados disponibles.</p>
-                            )}
-                        </section>
-                    )}
-
-                    {/* ===== Subir ===== */}
-                    {activeSection === "subir" && (
-                        <section className="institutoCard">
-                            <div className="institutoCardHeader">
-                                <h2 className="institutoTitle">📤 Subir certificados firmados</h2>
-                            </div>
-
-                            <p className="institutoDescription">
-                                Sube un archivo comprimido (ZIP/RAR/7Z) con los certificados
-                                firmados.
-                            </p>
-
-                            <form className="instUploadForm" onSubmit={handleUpload}>
-                                <label className="instFileLabel">
-                                    <span>Archivo comprimido</span>
-                                    <input
-                                        type="file"
-                                        accept=".zip,.rar,.7z"
-                                        onChange={handleFileChange}
-                                        className="instFileInput"
-                                    />
-                                </label>
-
-                                {archivoZip && (
-                                    <p className="instFileNamePreview">
-                                        Archivo seleccionado: <strong>{archivoZip.name}</strong>
-                                    </p>
+                      <tbody>
+                        {listaArchivos.map((item, idx) => (
+                          <tr key={idx}>
+                            <td className="instCheckCell">
+                              <input
+                                type="checkbox"
+                                checked={selectedArchivos.includes(
+                                  item.nombreArchivo
                                 )}
+                                onChange={() =>
+                                  handleSelectOne(item.nombreArchivo)
+                                }
+                              />
+                            </td>
+                            <td>{item.cedula}</td>
+                            <td className="instFileName">
+                              {item.nombreArchivo}
+                            </td>
+                            <td>
+                              <a
+                                className="instBtnOutline"
+                                href={item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Ver
+                              </a>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                                <button
-                                    type="submit"
-                                    className="instPrimaryBtn"
-                                    disabled={sendingUpload}
-                                >
-                                    {sendingUpload ? "Subiendo..." : "Subir"}
-                                </button>
-                            </form>
-                        </section>
-                    )}
-                </main>
-            </div>
-        </div>
-    );
+                  <div className="instActions">
+                    <button
+                      className="instPrimaryBtn"
+                      onClick={handleDescargarSeleccionados}
+                      disabled={
+                        sendingDownload || selectedArchivos.length === 0
+                      }
+                    >
+                      {sendingDownload
+                        ? "Generando..."
+                        : "Descargar seleccionados"}
+                    </button>
+
+                    <span className="instSelectedInfo">
+                      {selectedArchivos.length
+                        ? `${selectedArchivos.length} seleccionado(s)`
+                        : "Ninguno seleccionado"}
+                    </span>
+                  </div>
+
+                  {/* (Opcional) vista del objeto generado */}
+                  <pre className="instJsonPreview">
+                    {JSON.stringify({ archivos: selectedArchivos }, null, 2)}
+                  </pre>
+                </>
+              ) : (
+                <p className="institutoMuted">
+                  No hay certificados disponibles.
+                </p>
+              )}
+            </section>
+          )}
+
+          {/* ===== Subir ===== */}
+          {activeSection === "subir" && (
+            <section className="institutoCard">
+              <div className="institutoCardHeader">
+                <h2 className="institutoTitle">
+                  📤 Subir certificados firmados
+                </h2>
+              </div>
+
+              <p className="institutoDescription">
+                Sube un archivo comprimido (ZIP/RAR/7Z) con los certificados
+                firmados.
+              </p>
+
+              <form className="instUploadForm" onSubmit={handleUpload}>
+                <label className="instFileLabel">
+                  <span>Archivo comprimido</span>
+                  <input
+                    type="file"
+                    accept=".zip,.rar,.7z"
+                    onChange={handleFileChange}
+                    className="instFileInput"
+                  />
+                </label>
+
+                {archivoZip && (
+                  <p className="instFileNamePreview">
+                    Archivo seleccionado: <strong>{archivoZip.name}</strong>
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  className="instPrimaryBtn"
+                  disabled={sendingUpload}
+                >
+                  {sendingUpload ? "Subiendo..." : "Subir"}
+                </button>
+              </form>
+            </section>
+          )}
+        </main>
+      </div>
+    </div>
+  );
 };
 
 export default Instituto;
