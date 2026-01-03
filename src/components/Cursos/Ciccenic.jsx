@@ -86,8 +86,7 @@ const Ciccenic = () => {
                     <img src="/ciccenic.png" alt="ícono CICENIC" className="ciccenic_icon" />
 
                     <h3 className="ciccenic_title">
-                        Curso Internacional en Comando Comunicacional y Estrategias de
-                        Negociación en Incidentes Críticos
+                        Curso Internacional en Operaciones Psicológicas y Confiabilidad en Técnicas de Entrevista.
                     </h3>
 
                     <p className="ciccenic_description">

@@ -400,8 +400,7 @@ const LandingPage = () => {
                   className="curso-icon"
                 />
                 <h3 className="curso-name">
-                  Curso Internacional en Comando Comunicacional y Estrategias de
-                  Negociación en Incidentes Críticos
+                  Curso Internacional en Operaciones Psicológicas y Confiabilidad en Técnicas de Entrevista.
                 </h3>
                 <button className="curso-cta">
                   Conocer más <span>➜</span>
