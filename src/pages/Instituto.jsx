@@ -1,20 +1,52 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import useCrud from "../hooks/useCrud";
 import IsLoadingUpload from "../components/shared/isLoadingUpload";
+import IsLoading from "../components/shared/isLoading";
 import "./styles/Instituto.css";
 import useAuth from "../hooks/useAuth";
 
 const Instituto = () => {
-  const PATH_CERTIFICADOS = "/instituto/certificados/ciccenic";
-  const PATH_CERTIFICADOS_DESCARGAR =
-    "/instituto/certificados/ciccenic/descargar";
-  const PATH_CERTIFICADOS_SUBIR = "/instituto/certificados/ciccenic/subir";
+
+  const superAdmin = import.meta.env.VITE_CI_SUPERADMIN;
+  const [, , , loggedUser, , , , , , , , , , user] = useAuth();
+  const [filtroCurso, setFiltroCurso] = useState("");
+
+
+  const rolePath = useMemo(() => {
+    if (!user) return "";
+
+    // SUPERADMIN → toma del select
+    if (user.cI === superAdmin) {
+      return filtroCurso || "";
+    }
+
+    // USUARIO NORMAL → toma del rol
+    return user?.role?.replace("instituto_", "") || "";
+  }, [user, filtroCurso, superAdmin]);
+
+  console.log(rolePath)
+
+
+  const PATH_CERTIFICADOS = rolePath
+    ? `/instituto/certificados/${rolePath}`
+    : null;
+
+  const PATH_CERTIFICADOS_DESCARGAR = rolePath
+    ? `/instituto/certificados/${rolePath}/descargar`
+    : null;
+
+  const PATH_CERTIFICADOS_SUBIR = rolePath
+    ? `/instituto/certificados/${rolePath}/subir`
+    : null;
+  const PATH_COURSES = "/courses";
+
 
   const [certificados, getCertificados] = useCrud();
   const [, , , , , , , , , , , , , postApiDownloadZip] = useCrud();
   const [, , , , , , isLoading, , , , , , , , uploadCertificadosZip] =
     useCrud();
-  const [, , , loggedUser, , , , , , , , , , user, setUserLogged] = useAuth();
+  const [courses, getCourses] = useCrud();
+
 
   const [activeSection, setActiveSection] = useState("descargar");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -23,17 +55,22 @@ const Instituto = () => {
 
   const [selectedArchivos, setSelectedArchivos] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-
   const [archivoZip, setArchivoZip] = useState(null);
   const [sendingDownload, setSendingDownload] = useState(false);
   const [sendingUpload, setSendingUpload] = useState(false);
 
   useEffect(() => {
-    getCertificados(PATH_CERTIFICADOS);
     loggedUser();
+    getCourses(PATH_COURSES);
+
   }, []);
 
-  console.log(user?.role)
+  useEffect(() => {
+    if (PATH_CERTIFICADOS) {
+      getCertificados(PATH_CERTIFICADOS);
+    }
+  }, [PATH_CERTIFICADOS]);
+
 
   // Cerrar menú si clic fuera (igual que Home)
   useEffect(() => {
@@ -144,6 +181,7 @@ const Instituto = () => {
   return (
     <div className="institutoPage">
       {isLoading && <IsLoadingUpload />}
+
       <div className="institutoShell">
         {/* Botón hamburguesa mobile */}
         <button
@@ -181,18 +219,16 @@ const Instituto = () => {
           </div>
 
           <button
-            className={`institutoMenuBtn ${
-              activeSection === "descargar" ? "active" : ""
-            }`}
+            className={`institutoMenuBtn ${activeSection === "descargar" ? "active" : ""
+              }`}
             onClick={() => handleSelect("descargar")}
           >
             📥 Descargar certificados
           </button>
 
           <button
-            className={`institutoMenuBtn ${
-              activeSection === "subir" ? "active" : ""
-            }`}
+            className={`institutoMenuBtn ${activeSection === "subir" ? "active" : ""
+              }`}
             onClick={() => handleSelect("subir")}
           >
             📤 Subir certificados firmados
@@ -212,6 +248,20 @@ const Instituto = () => {
                 <IsLoading />
               ) : listaArchivos.length > 0 ? (
                 <>
+                  {(user.cI === superAdmin) && (<div className="input_group secInputGroup">
+                    <select
+                      value={filtroCurso}
+                      onChange={(e) => setFiltroCurso(e.target.value)}
+                      className="buscador_input secInput"
+                    >
+                      <option value="">Todos los cursos</option>
+                      {courses?.map((c) => (
+                        <option key={c.id} value={c.sigla}>
+                          {c.sigla}
+                        </option>
+                      ))}
+                    </select>
+                  </div>)}
                   <p className="institutoDescription">
                     Selecciona uno o varios certificados. El botón “Ver” abre el
                     PDF, y “Descargar” enviará los seleccionados al backend.
@@ -288,15 +338,35 @@ const Instituto = () => {
                     </span>
                   </div>
 
-                  {/* (Opcional) vista del objeto generado */}
+                  {/*
                   <pre className="instJsonPreview">
                     {JSON.stringify({ archivos: selectedArchivos }, null, 2)}
-                  </pre>
+                  </pre>*/}
                 </>
               ) : (
-                <p className="institutoMuted">
-                  No hay certificados disponibles.
-                </p>
+
+                <div>
+
+                  <p className="institutoMuted">
+                    No hay certificados disponibles.
+                  </p>
+                  {(user?.cI === superAdmin) && (<div className="input_group secInputGroup">
+                    <select
+                      value={filtroCurso}
+                      onChange={(e) => setFiltroCurso(e.target.value)}
+                      className="buscador_input secInput"
+                    >
+                      <option value="">Todos los cursos</option>
+                      {courses?.map((c) => (
+                        <option key={c.id} value={c.sigla}>
+                          {c.sigla}
+                        </option>
+                      ))}
+                    </select>
+                  </div>)}
+                </div>
+
+
               )}
             </section>
           )}

@@ -8,6 +8,9 @@ import useAuth from "../../hooks/useAuth";
 import { FaWhatsapp, FaMapMarkerAlt } from "react-icons/fa";
 
 const PrincipalHeader = () => {
+  const superAdmin = import.meta.env.VITE_CI_SUPERADMIN;
+
+
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -32,13 +35,13 @@ const PrincipalHeader = () => {
     const role = user?.role;
 
     setGrados({
-      grado1: ci === "0503627234", // Superadmin (acceso total)
+      grado1: ci === superAdmin, // Superadmin (acceso total)
       grado2: role === "Administrador",
       grado3: role === "Sub-Administrador",
       grado4: role === "Validador",
       grado5: role === "Secretaria",
       grado6: ![
-        "0503627234",
+        superAdmin,
         "Administrador",
         "Sub-Administrador",
         "Validador",
