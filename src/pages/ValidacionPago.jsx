@@ -7,6 +7,9 @@ import { saveAs } from "file-saver";
 import useAuth from "../hooks/useAuth";
 import IsLoading from "../components/shared/isLoading";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { showAlert } from "../store/states/alert.slice";
+
 
 const BASEURL = import.meta.env.VITE_API_URL;
 const SUPERADMIN = import.meta.env.VITE_CI_SUPERADMIN;
@@ -19,6 +22,7 @@ const ValidacionPago = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
   const hamburgerRef = useRef();
+  const dispatch = useDispatch();
 
   const { register, handleSubmit, reset } = useForm();
 
@@ -34,8 +38,10 @@ const ValidacionPago = () => {
   const [pagoIdRestaurar, setPagoIdRestaurar] = useState(null);
 
   const [papelera, setPapelera] = useState(false);
+  const [verificadoOriginal, setVerificadoOriginal] = useState(false);
 
-  const [pago, getPago, , , updatePago, , isLoading] = useCrud();
+
+  const [pago, getPago, , , updatePago, error, isLoading] = useCrud();
 
   const [editPagoId, setEditPagoId] = useState(null);
   const [observacion, setObservacion] = useState("");
@@ -57,6 +63,19 @@ const ValidacionPago = () => {
   const [filtroCertificado, setFiltroCertificado] = useState("");
 
   const [ordenFechaDesc, setOrdenFechaDesc] = useState(true);
+
+  useEffect(() => {
+    if (error) {
+      const message = error.response?.data?.message ?? "Error inesperado";
+      dispatch(
+        showAlert({
+          message: `⚠️ ${message}`,
+          alertType: 1,
+        })
+      );
+    }
+  }, [error]);
+
 
   useEffect(() => {
     const handler = setTimeout(() => setFiltroGrado(inputValue), 2000);
@@ -105,18 +124,21 @@ const ValidacionPago = () => {
     getPagoDashboard(`/pagos_dashboard`);
   }, []);
 
-  const iniciarEdicion = (p) => {
-    setEditPagoId(p.id);
-    reset({
-      valorDepositado: p.valorDepositado || "",
-      entidad: p.entidad || "",
-      idDeposito: p.idDeposito || "",
-      verificado: p.verificado || false,
-      moneda: p.moneda || false,
-      distintivo: p.distintivo || false,
-      observacion: p.observacion || "",
-    });
-  };
+const iniciarEdicion = (p) => {
+  setEditPagoId(p.id);
+  setVerificadoOriginal(!!p.verificado); // ✅ estado real en BD
+
+  reset({
+    valorDepositado: p.valorDepositado || "",
+    entidad: p.entidad || "",
+    idDeposito: p.idDeposito || "",
+    verificado: !!p.verificado,
+    moneda: !!p.moneda,
+    distintivo: !!p.distintivo,
+    observacion: p.observacion || "",
+  });
+};
+
 
   const cancelarEdicion = () => {
     setEditPagoId(null);
@@ -124,19 +146,29 @@ const ValidacionPago = () => {
     setEditVerificado(false);
   };
 
-  const guardarEdicion = async (pagoId, data) => {
-    try {
-      await updatePago(PATH_PAGOS, pagoId, {
-        ...data,
-        valorDepositado: parseFloat(data.valorDepositado),
-        usuarioEdicion: user.email,
-      });
-      await getPago(PATH_PAGOS);
-      cancelarEdicion();
-    } catch (error) {
-      alert("Error al guardar los cambios.");
+const guardarEdicion = async (pagoId, data) => {
+  try {
+    // ✅ Confirmación SOLO si BD era false y ahora el input viene true
+    if (verificadoOriginal === false && data.verificado === true) {
+      const ok = window.confirm(
+        "⚠️ Al marcar este pago como VERIFICADO se emitirá el certificado.\n\n¿Deseas continuar?"
+      );
+      if (!ok) return; // ❌ no actualiza nada
     }
-  };
+
+    await updatePago(PATH_PAGOS, pagoId, {
+      ...data,
+      valorDepositado: parseFloat(data.valorDepositado),
+      usuarioEdicion: user.email,
+    });
+
+    await getPago(PATH_PAGOS);
+    cancelarEdicion();
+  } catch (error) {
+    alert("Error al guardar los cambios.");
+  }
+};
+
 
   const deletePagoPr = async (id) => {
     try {

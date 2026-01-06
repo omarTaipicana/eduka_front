@@ -51,6 +51,7 @@ const Dashboard = () => {
   const [fechaDesdePagos, setFechaDesdePagos] = useState("");
   const [fechaHastaPagos, setFechaHastaPagos] = useState("");
 
+  const [cursoFiltroInscripciones, setCursoFiltroInscripciones] = useState("todos");
   const [fechaDesdeInscripciones, setFechaDesdeInscripciones] = useState("");
   const [fechaHastaInscripciones, setFechaHastaInscripciones] = useState("");
 
@@ -65,9 +66,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     getInscipcionDashboard(
-      `/inscripcion_dashboard?desde=${fechaDesdeInscripciones}&hasta=${fechaHastaInscripciones}`
+      `/inscripcion_dashboard?desde=${fechaDesdeInscripciones}&hasta=${fechaHastaInscripciones}&curso=${cursoFiltroInscripciones}`
     );
-  }, [fechaDesdeInscripciones, fechaHastaInscripciones]);
+  }, [fechaDesdeInscripciones, fechaHastaInscripciones, cursoFiltroInscripciones]);
 
   useEffect(() => {
     getInscipcionDashboardObservacion(
@@ -114,12 +115,16 @@ const Dashboard = () => {
 
     setFechaDesdeInscripciones("");
     setFechaHastaInscripciones("");
+    setCursoFiltroInscripciones("");
 
     setusUarioEdicion("todos");
     setCursoFiltroObservaciones("todos");
     setFechaDesdeObservaciones("");
     setFechaHastaObservaciones("");
   };
+
+  const cursosUnicos = inscripcionDashboard?.inscritosPorCurso?.map((c) => c.curso) || [];
+
 
   const renderContent = () => {
     switch (activeSection) {
@@ -145,6 +150,7 @@ const Dashboard = () => {
                     setFechaDesde(e.target.value);
                     setFechaDesdeInscripciones(e.target.value);
                     setFechaDesdePagos(e.target.value);
+
                   }}
                 />
               </div>
@@ -162,6 +168,8 @@ const Dashboard = () => {
                   }}
                 />
               </div>
+
+
 
               <button
                 className="secBtnDanger"
@@ -225,6 +233,23 @@ const Dashboard = () => {
                   onChange={(e) => setFechaHastaInscripciones(e.target.value)}
                 />
               </div>
+
+              <div className="secInputGroup">
+                <label className="dashLabel">Filtrar por curso:</label>
+                <select
+                  className="secInput"
+                  value={cursoFiltroInscripciones}
+                  onChange={(e) => setCursoFiltroInscripciones(e.target.value)}
+                >
+                  <option value="todos">Todos</option>
+                  {cursosUnicos.map((curso) => (
+                    <option key={curso} value={curso}>
+                      {curso}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
 
               <button
                 className="secBtnDanger"
@@ -710,9 +735,8 @@ const Dashboard = () => {
       <div className="dashboard_container secShell dashShell">
         <button
           ref={hamburgerRef}
-          className={`secretaria_hamburger secHamburger ${
-            menuOpen ? "is-open" : ""
-          }`}
+          className={`secretaria_hamburger secHamburger ${menuOpen ? "is-open" : ""
+            }`}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
           aria-expanded={menuOpen}
@@ -732,9 +756,8 @@ const Dashboard = () => {
           </div>
 
           <button
-            className={`menu-btn secMenuBtn ${
-              activeSection === "resumen" ? "active" : ""
-            }`}
+            className={`menu-btn secMenuBtn ${activeSection === "resumen" ? "active" : ""
+              }`}
             onClick={() => {
               setActiveSection("resumen");
               setMenuOpen(false);
@@ -744,9 +767,8 @@ const Dashboard = () => {
           </button>
 
           <button
-            className={`menu-btn secMenuBtn ${
-              activeSection === "inscripciones" ? "active" : ""
-            }`}
+            className={`menu-btn secMenuBtn ${activeSection === "inscripciones" ? "active" : ""
+              }`}
             onClick={() => {
               setActiveSection("inscripciones");
               setMenuOpen(false);
@@ -756,9 +778,8 @@ const Dashboard = () => {
           </button>
 
           <button
-            className={`menu-btn secMenuBtn ${
-              activeSection === "pagos" ? "active" : ""
-            }`}
+            className={`menu-btn secMenuBtn ${activeSection === "pagos" ? "active" : ""
+              }`}
             onClick={() => {
               setActiveSection("pagos");
               setMenuOpen(false);
@@ -768,9 +789,8 @@ const Dashboard = () => {
           </button>
 
           <button
-            className={`menu-btn secMenuBtn ${
-              activeSection === "calificaciones" ? "active" : ""
-            }`}
+            className={`menu-btn secMenuBtn ${activeSection === "calificaciones" ? "active" : ""
+              }`}
             onClick={() => {
               setActiveSection("calificaciones");
               setMenuOpen(false);
@@ -780,9 +800,8 @@ const Dashboard = () => {
           </button>
 
           <button
-            className={`menu-btn secMenuBtn ${
-              activeSection === "progreso" ? "active" : ""
-            }`}
+            className={`menu-btn secMenuBtn ${activeSection === "progreso" ? "active" : ""
+              }`}
             onClick={() => {
               setActiveSection("progreso");
               setMenuOpen(false);

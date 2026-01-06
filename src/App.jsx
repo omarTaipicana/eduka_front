@@ -21,9 +21,13 @@ import ValidacionPago from "./pages/ValidacionPago";
 import Dashboard from "./pages/Dashboard";
 import Secretaria from "./pages/Secretaria";
 import SecretariaRoutes from "./routes/SecretariaRoutes";
+
 import Gkm from "./components/shared/Gkm";
 import Ciccenic from "./components/Cursos/Ciccenic";
 import Instituto from "./pages/Instituto";
+import InstitutoProtectedRoute from "./routes/InstitutoProtectedRoute";
+import SuperAdminProtectedRoute from "./routes/SuperAdminProtectedRoute";
+import UserEdit from "./pages/UserEdit";
 
 const App = () => {
   const location = useLocation();
@@ -49,22 +53,32 @@ const App = () => {
         <Route path="/accv" element={<Accv />} />
         <Route path="/login" element={<Login />} />
 
-        <Route element={<SecretariaRoutes />}>
-          <Route path="/secre" element={<Secretaria />} />
-        </Route>
-
         <Route element={<ProtectedRoutes />}>
           <Route path="/home" element={<Home />} />
+
+          <Route element={<InstitutoProtectedRoute />}>
+            <Route path="/instituto" element={<Instituto />} />
+          </Route>
+
+          <Route element={<SecretariaRoutes />}>
+            <Route path="/secre" element={<Secretaria />} />
+          </Route>
 
           <Route element={<ValidadorProtectedRoute />}>
             <Route path="/validacion" element={<ValidacionPago />} />
 
             <Route element={<SubAdminProtectedRoutes />}>
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/instituto" element={<Instituto />} />
+
+              <Route element={<SuperAdminProtectedRoute />}>
+                <Route path="/edit_user" element={<UserEdit />} />
+
+              </Route>
 
             </Route>
           </Route>
+
+
         </Route>
       </Routes>
       <Footer />

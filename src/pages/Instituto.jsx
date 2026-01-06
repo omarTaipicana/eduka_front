@@ -24,8 +24,6 @@ const Instituto = () => {
     return user?.role?.replace("instituto_", "") || "";
   }, [user, filtroCurso, superAdmin]);
 
-  console.log(rolePath)
-
 
   const PATH_CERTIFICADOS = rolePath
     ? `/instituto/certificados/${rolePath}`

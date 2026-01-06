@@ -8,6 +8,8 @@ const SecretariaRoutes = () => {
   const rolAdmin = import.meta.env.VITE_ROL_ADMIN;
   const rolvalidador = import.meta.env.VITE_ROL_VALIDADOR;
   const secretaria = import.meta.env.VITE_ROL_SUB_SECRE;
+  const rolSubAdmin = import.meta.env.VITE_ROL_SUB_ADMIN;
+
 
   useEffect(() => {
     loggedUser();
@@ -16,6 +18,7 @@ const SecretariaRoutes = () => {
   if (user) {
     if (
       user?.role === rolAdmin ||
+      user?.role === rolSubAdmin ||
       user?.role === rolvalidador ||
       user?.cI === superAdmin ||
       user?.role === secretaria

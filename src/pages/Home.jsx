@@ -110,9 +110,8 @@ const Home = () => {
           </div>
 
           <button
-            className={`homeMenuBtn ${
-              activeSection === "datos-personales" ? "active" : ""
-            }`}
+            className={`homeMenuBtn ${activeSection === "datos-personales" ? "active" : ""
+              }`}
             onClick={() => handleSelect("datos-personales")}
           >
             📄 Datos Personales
@@ -126,9 +125,8 @@ const Home = () => {
           </button>
 
           <button
-            className={`homeMenuBtn ${
-              activeSection === "calificaciones" ? "active" : ""
-            }`}
+            className={`homeMenuBtn ${activeSection === "calificaciones" ? "active" : ""
+              }`}
             onClick={() => handleSelect("calificaciones")}
           >
             📝 Calificaciones
@@ -142,9 +140,8 @@ const Home = () => {
           </button>
 
           <button
-            className={`homeMenuBtn ${
-              activeSection === "advertencia" ? "active" : ""
-            }`}
+            className={`homeMenuBtn ${activeSection === "advertencia" ? "active" : ""
+              }`}
             onClick={() => handleSelect("advertencia")}
           >
             ⚠️ Importante
@@ -304,26 +301,29 @@ const Home = () => {
                         <button
                           onClick={() => setCursoAbiertoIndex(estaAbierto ? null : index)}
                           className="homeToggle"
+                          type="button"
                         >
                           <span className="homeToggleArrow">{estaAbierto ? "▼" : "▶"}</span>
                           <span className="homeToggleText">{curso.fullname}</span>
                         </button>
 
-                        {estaAbierto && !curso.inscripcion && (
-                          <p className="homeStatus danger">
-                            ❌ No tiene inscripción en este curso.
-                          </p>
-                        )}
-
-                        {estaAbierto && curso.inscripcion && !curso.matriculado && (
-                          <p className="homeStatus warn">
-                            ⚠️ Está inscrito pero no matriculado. Solicite a soporte su
-                            matriculación.
-                          </p>
-                        )}
-
-                        {estaAbierto && curso.inscripcion && curso.matriculado && (
+                        {estaAbierto && (
                           <>
+                            {/* Estados */}
+                            {!curso.inscripcion && (
+                              <p className="homeStatus danger">
+                                ❌ No tiene inscripción en este curso.
+                              </p>
+                            )}
+
+                            {curso.inscripcion && !curso.matriculado && (
+                              <p className="homeStatus warn">
+                                ⚠️ Está inscrito pero no matriculado. Solicite a soporte su
+                                matriculación.
+                              </p>
+                            )}
+
+                            {/* ✅ Calificaciones: se muestran si existen, sin depender de inscripcion/matriculado */}
                             {Object.keys(calificaciones).length > 0 ? (
                               <ul className="homeNotes">
                                 {Object.entries(calificaciones).map(([actividad, nota]) => (
@@ -344,6 +344,7 @@ const Home = () => {
               ) : (
                 <p className="homeMuted">No hay cursos registrados.</p>
               )}
+
             </section>
           )}
 
@@ -375,14 +376,13 @@ const Home = () => {
                               <p>
                                 <strong>Pago #{j + 1}</strong>{" "}
                                 {j === 0
-                                  ? `por el certificado${
-                                      extras.length > 0
-                                        ? ", incluyendo " + extras.join(" y ")
-                                        : ""
-                                    }`
+                                  ? `por el certificado${extras.length > 0
+                                    ? ", incluyendo " + extras.join(" y ")
+                                    : ""
+                                  }`
                                   : extras.length > 0
-                                  ? `por ${extras.join(" y ")}`
-                                  : ""}
+                                    ? `por ${extras.join(" y ")}`
+                                    : ""}
                                 .
                               </p>
 

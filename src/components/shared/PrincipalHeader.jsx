@@ -25,7 +25,11 @@ const PrincipalHeader = () => {
     grado4: false,
     grado5: false,
     grado6: false,
+    grado7: false,
+
   });
+
+
 
   // Configurar grados según CI o rol
   useEffect(() => {
@@ -40,7 +44,8 @@ const PrincipalHeader = () => {
       grado3: role === "Sub-Administrador",
       grado4: role === "Validador",
       grado5: role === "Secretaria",
-      grado6: ![
+      grado6: role?.slice(0, 9) === "instituto",
+      grado7: ![
         superAdmin,
         "Administrador",
         "Sub-Administrador",
@@ -114,9 +119,6 @@ const PrincipalHeader = () => {
           <Link to="/home" onClick={onClick}>
             Home
           </Link>
-          <Link to="/instituto" onClick={onClick}>
-            Instituto
-          </Link>
           <Link to="/secre" onClick={onClick}>
             Secretaria
           </Link>
@@ -159,6 +161,16 @@ const PrincipalHeader = () => {
 
     if (grados.grado6) {
       return (
+        <>
+          <Link to="/home" onClick={onClick}>
+            Home
+          </Link>
+        </>
+      );
+    }
+
+    if (grados.grado7) {
+      return (
         <Link to="/home" onClick={onClick}>
           Home
         </Link>
@@ -181,6 +193,9 @@ const PrincipalHeader = () => {
           </Link>
           <Link to="/validacion" onClick={onClick}>
             Validacion
+          </Link>
+          <Link to="/edit_user" onClick={onClick}>
+            Editar Usuario
           </Link>
         </>
       );
@@ -231,11 +246,15 @@ const PrincipalHeader = () => {
 
     if (grados.grado6) {
       return (
-        <Link to="/home" onClick={onClick}>
-          Otros
-        </Link>
+        <>
+          <Link to="/instituto" onClick={onClick}>
+            Instituto
+          </Link>
+        </>
       );
     }
+
+
 
     return null;
   };
