@@ -1,7 +1,10 @@
-/* ========= CONTENEDOR GENERAL ========= */
+/* ============================
+   CONTENEDOR GENERAL
+============================ */
 .registro_container {
   width: 95%;
   margin: 0 auto;
+  position: relative; /* clave para el ::before */
 }
 
 /* Marca de agua con el logo */
@@ -19,7 +22,9 @@
   z-index: 0;
 }
 
-/* ========= WRAPPERS ========= */
+/* ============================
+   WRAPPERS
+============================ */
 .registro_wrapper {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
@@ -27,7 +32,7 @@
   align-items: flex-start;
 }
 
-/* Versión solo-verificación (no mostramos la columna derecha) */
+/* Versión solo-verificación */
 .registro_wrapper--verifica {
   margin-top: 1.5rem;
   grid-template-columns: 1fr;
@@ -38,7 +43,9 @@
   overflow: hidden;
 }
 
-/* ========= INTRO (ICONO + TEXTOS) ========= */
+/* ============================
+   INTRO (ICONO + TEXTOS)
+============================ */
 .registro_intro {
   position: relative;
   z-index: 1;
@@ -85,7 +92,9 @@
   margin-top: 0.8rem;
 }
 
-/* ========= FORMULARIO DE VERIFICACIÓN ========= */
+/* ============================
+   FORMULARIO DE VERIFICACIÓN
+============================ */
 .formulario_registro_val {
   position: relative;
   z-index: 1;
@@ -93,25 +102,25 @@
   margin: 0 auto;
 }
 
+/* IMPORTANTE:
+   tu HTML tiene:
+   .registro_val_field { label } + { .registro_val_row }
+   Por eso lo hacemos columna en desktop también (no afecta)
+*/
 .registro_val_field {
   width: 100%;
   display: flex;
-  gap: 2rem;
+  flex-direction: column; /* evita montajes */
+  gap: 0.5rem;
   justify-content: center;
-  align-items: center;
-}
-
-.mensaje_inscripcion{
-  margin-top: 1rem;
-  text-align: center;
-  font-weight: 500;
+  align-items: stretch;
 }
 
 .registro_label {
   display: block;
   font-weight: 600;
   color: #333743;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.2rem;
 }
 
 .registro_val_row {
@@ -121,7 +130,14 @@
   align-items: stretch;
 }
 
-/* Inputs generales (val + form principal) */
+.mensaje_inscripcion {
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: 500;
+  color: #3e4352;
+}
+
+/* Inputs generales */
 .formulario_registro_val input,
 .formulario_registro input,
 .formulario_registro select,
@@ -143,7 +159,7 @@
   color: #82879a;
 }
 
-/* Botón principal (verificar / inscribirme) */
+/* Botón principal */
 .btn_inscripcion {
   display: inline-flex;
   align-items: center;
@@ -161,7 +177,7 @@
   transition: background-color 0.2s ease, transform 0.2s ease,
     box-shadow 0.2s ease;
   height: 100%;
-  margin: o auto;
+  margin: 0 auto; /* FIX: antes tenías "o auto" */
   white-space: nowrap;
 }
 
@@ -175,8 +191,9 @@
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.4);
 }
 
-/* Mensaje de usuario ya inscrito */
-/* Mensaje de usuario ya inscrito */
+/* ============================
+   MODAL: usuario ya inscrito
+============================ */
 .usuario_existente {
   position: fixed;
   top: 50%;
@@ -200,36 +217,35 @@
 
 .btn_cerrar_existente {
   margin-top: 1rem;
-  padding: 0.5rem 1.2rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 0.6rem;
   border: none;
   background-color: #d0d4e3;
   color: #222735;
   cursor: pointer;
-  font-weight: 600;
-  width: 30%;
+  font-weight: 700;
+  width: min(180px, 60%);
 }
 
-/* ========= FORMULARIO DE INSCRIPCIÓN (VISTA 2) ========= */
+/* ============================
+   FORMULARIO INSCRIPCIÓN (VISTA 2)
+============================ */
 .registro_wrapper--form {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 66vh;
+  gap: 1rem;
 }
 
-/* Dos columnas: izquierda form, derecha info curso */
 .registro_left {
   width: 65%;
   background-color: #ffffff;
   border-radius: 1.5rem;
   padding: 2rem 2.5rem;
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.08);
-}
-
-.registro_right {
-  border-radius: 1.5rem;
-  overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 /* form completo en grid 2 columnas */
@@ -253,7 +269,18 @@
   background-color: #f1f3fb;
   border-left: 4px solid #0f2a63;
   margin-bottom: 0.5rem;
-  }
+}
+
+.incripcion_existente h3 {
+  margin: 0 0 0.6rem;
+  color: #0f2a63;
+}
+
+.incripcion_existente p {
+  margin: 0.25rem 0;
+  color: #3e4352;
+  line-height: 1.45;
+}
 
 /* checkbox bloque */
 .form_check_container {
@@ -287,7 +314,9 @@
   margin-top: 1.2rem;
 }
 
-/* ========= BLOQUE INFO CURSO DERECHA (MEJORADO) ========= */
+/* ============================
+   INFO CURSO DERECHA
+============================ */
 .registro_right {
   width: 35%;
   margin: auto 0.5rem;
@@ -314,7 +343,6 @@
   filter: brightness(0.35);
 }
 
-/* Overlay real */
 .curso_overlay {
   position: relative;
   z-index: 1;
@@ -323,7 +351,6 @@
   max-width: 100%;
 }
 
-/* Título */
 .curso_overlay h2 {
   font-size: 1.4rem;
   font-weight: 800;
@@ -331,7 +358,6 @@
   line-height: 1.3;
 }
 
-/* Texto descriptivo */
 .curso_overlay p {
   font-size: 0.95rem;
   line-height: 1.6;
@@ -339,7 +365,6 @@
   margin-bottom: 0.6rem;
 }
 
-/* Detalles tipo lista */
 .curso_overlay ul {
   margin-top: 0.8rem;
   padding-left: 1.2rem;
@@ -351,7 +376,9 @@
   opacity: 0.9;
 }
 
-/* ========= ANIMACIONES BÁSICAS ========= */
+/* ============================
+   ANIMACIONES
+============================ */
 .animate_slide_left {
   animation: slideLeft 0.5s ease-out;
 }
@@ -382,8 +409,9 @@
   }
 }
 
-
-/* ===== MENSAJES: curso no existe / oferta finalizada ===== */
+/* ============================
+   MENSAJES: curso no existe / finalizado
+============================ */
 .curso_no_encontrado {
   padding: 3rem 0 4rem;
   display: flex;
@@ -400,10 +428,9 @@
   box-shadow: 0 1.2rem 2.4rem rgba(0, 0, 0, 0.12);
   position: relative;
   overflow: hidden;
-  border-left: 6px solid #c0392b; /* rojo (no disponible) */
+  border-left: 6px solid #c0392b;
 }
 
-/* marca de agua suave */
 .mensaje_curso_caja::before {
   content: "";
   position: absolute;
@@ -434,9 +461,8 @@
   margin: 0.5rem 0;
 }
 
-/* variante finalizado */
 .mensaje_curso_caja--finalizado {
-  border-left-color: #f39c12; /* amarillo/naranja */
+  border-left-color: #f39c12;
 }
 
 .mensaje_acciones {
@@ -478,6 +504,84 @@
   background: #15713a;
 }
 
+/* ============================
+   RESPONSIVE (MOBILE)
+============================ */
+@media (max-width: 900px) {
+  .registro_container {
+    padding: 2.5rem 1.2rem 3rem;
+  }
+
+  .registro_container::before {
+    margin-top: 3rem;
+    background-size: 55%;
+  }
+
+  .registro_wrapper,
+  .registro_wrapper--form {
+    display: block;
+  }
+
+  .registro_wrapper--verifica {
+    padding: 2.2rem 1.4rem 3rem;
+  }
+
+  .registro_intro_title {
+    font-size: 1.7rem;
+  }
+
+  /* Verificación: input + botón apilados */
+  .registro_val_row {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .btn_inscripcion {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 1.2rem;
+  }
+
+  /* Vista 2: formulario a 1 columna */
+  .registro_wrapper--form {
+    min-height: auto;
+    padding: 0.5rem 0 2rem;
+  }
+
+  .registro_left,
+  .registro_right {
+    width: 100%;
+    margin: 0;
+  }
+
+  .registro_left {
+    padding: 1.6rem 1.2rem;
+    border-radius: 1.2rem;
+  }
+
+  .formulario_registro {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form_column {
+    gap: 0.9rem;
+  }
+
+  .curso_fondo {
+    min-height: 220px;
+  }
+
+  .curso_overlay {
+    padding: 1.4rem 1.3rem;
+  }
+
+  /* Modal existente más cómodo */
+  .usuario_existente {
+    padding: 1.6rem 1.2rem;
+  }
+}
+
 @media (max-width: 768px) {
   .curso_no_encontrado {
     padding: 2rem 0 3rem;
@@ -496,51 +600,28 @@
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ========= RESPONSIVE ========= */
-@media (max-width: 900px) {
-  .registro_container {
-    padding: 2.5rem 1.2rem 3rem;
-  }
-
-  .registro_wrapper,
-  .registro_wrapper--form {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 480px) {
   .registro_wrapper--verifica {
-    padding: 2.2rem 1.4rem 3rem;
+    padding: 1.6rem 1rem 2.2rem;
   }
 
-  .registro_intro_title {
-    font-size: 1.7rem;
+  .registro_intro_icon {
+    width: 3rem;
   }
 
-  .formulario_registro {
-    grid-template-columns: 1fr;
+  .registro_intro_text {
+    font-size: 1rem;
   }
 
-  .form_button_inscripcion {
-    justify-content: center;
+  .formulario_registro_val input,
+  .formulario_registro input,
+  .formulario_registro select,
+  .formulario_registro textarea {
+    padding: 0.95rem 1rem;
+    border-radius: 0.85rem;
   }
 
-  .btn_inscripcion {
+  .btn_cerrar_existente {
     width: 100%;
-  }
-
-  .curso_fondo {
-    min-height: 220px;
   }
 }

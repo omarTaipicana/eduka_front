@@ -47,12 +47,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  /* mejor para que el contenido no se pegue */
+  background: #ffffff;
 }
 
 .pagos_right {
   border-radius: 1.5rem;
   overflow: hidden;
   box-shadow: 0 1.2rem 2.4rem rgba(0, 0, 0, 0.14);
+  background: #ffffff;
 }
 
 /* ===== Felicitación ===== */
@@ -82,7 +85,6 @@
 }
 
 /* ===== Form ===== */
-
 .pagos_label_cedula {
   width: 80%;
   margin: 0 auto;
@@ -92,13 +94,16 @@
   width: 80%;
   margin: 0 auto;
 }
+
 .pagos_label span {
   display: block;
   font-weight: 800;
   color: #333743;
-  margin: 0 auto;
+  margin: 0 auto 0.35rem;
+  text-align: center;
 }
 
+/* OJO: este input estaba al 50% y en mobile se ve chiquito */
 .pagos_input_cedula {
   width: 50%;
   margin: 1rem auto;
@@ -128,6 +133,12 @@
   text-align: center;
 }
 
+/* Evita overflow feo en file input (mobile) */
+.pagos_left input[type="file"] {
+  text-align: left;
+}
+
+/* Botón */
 .pagos_btn_row {
   display: flex;
   justify-content: center;
@@ -164,6 +175,7 @@
   font-size: 0.85rem;
   color: #c0392b;
   margin-top: 0.2rem;
+  text-align: center;
 }
 
 /* ===== Vista 2 columnas internas ===== */
@@ -205,6 +217,7 @@
   margin-bottom: 0.9rem;
 }
 
+/* Checks */
 .pagos_check_row {
   display: flex;
   align-items: center;
@@ -352,18 +365,33 @@
   }
 }
 
-/* ===== Responsive ===== */
+/* =========================================================
+   RESPONSIVE (TABLET / MOBILE)
+   - Apila columnas
+   - Inputs al 100% (cedula también)
+   - Reduce paddings/gaps
+   - Evita “tarjetas gigantes” y desbordes
+========================================================= */
 @media (max-width: 1000px) {
   .pagos_wrapper {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pagos_medio_alto {
+    min-height: auto;
+  }
+
+  .pagos_left {
+    padding: 1.2rem 1rem;
+  }
+
+  .pagos_right {
+    padding: 0;
   }
 
   .pagos_panel {
     min-height: 260px;
-  }
-
-  .pagos_left {
-    padding: 1.6rem 1.4rem;
   }
 
   .pagos_form_dos {
@@ -376,5 +404,78 @@
 
   .pagos_btn {
     width: 100%;
+  }
+
+  /* en mobile la cédula a 100% */
+  .pagos_input_cedula {
+    width: 100%;
+  }
+
+  .pagos_label,
+  .pagos_label_cedula {
+    width: 100%;
+  }
+
+  .pagos_felicitacion {
+    margin: 0.6rem 0.2rem 1rem;
+    padding: 1rem 1rem;
+  }
+
+  .pagos_panel_overlay {
+    padding: 1.4rem 1.2rem;
+  }
+}
+
+/* Mobile pequeño */
+@media (max-width: 480px) {
+  .pagos_container {
+    width: 96%;
+  }
+
+  .pagos_container::before {
+    background-size: 55%;
+    opacity: 0.05;
+  }
+
+  .pagos_left {
+    border-radius: 1.2rem;
+  }
+
+  .pagos_right {
+    border-radius: 1.2rem;
+  }
+
+  .pagos_felicitacion h2 {
+    font-size: 1.15rem;
+  }
+
+  .pagos_felicitacion p {
+    font-size: 0.92rem;
+  }
+
+  .pagos_input,
+  .pagos_left input[type="file"],
+  .pagos_left input[type="number"],
+  .pagos_input_cedula {
+    padding: 0.9rem 1rem;
+    border-radius: 0.85rem;
+    font-size: 0.98rem;
+  }
+
+  .pagos_btn {
+    padding: 0.95rem 1rem;
+  }
+
+  .pagos_check_row {
+    font-size: 0.92rem;
+  }
+
+  .pagos_panel_overlay h3 {
+    font-size: 1.2rem;
+  }
+
+  .pagos_panel_overlay p,
+  .pagos_panel_overlay li {
+    font-size: 0.92rem;
   }
 }

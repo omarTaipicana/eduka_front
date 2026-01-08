@@ -260,36 +260,45 @@ const PrincipalHeader = () => {
   };
 
   /** AUTH EN MOBILE MENU */
-  const renderAuthMobile = () => {
-    if (!token) {
-      return (
-        <>
-          <Link to="/register" onClick={closeMenu}>
-            Register
-          </Link>
-          <Link to="/login" onClick={closeMenu}>
-            Login
-          </Link>
-        </>
-      );
-    }
+/** AUTH EN MOBILE MENU (igual que desktop) */
+const renderAuthMobile = () => {
+  if (!token) {
     return (
       <>
-        <Link to="/login" onClick={closeMenu}>
-          <span>Mi perfil</span>
+        <Link to="/register" onClick={closeMenu}>
+          Register
         </Link>
-        <button
-          onClick={() => {
-            handleLogout();
-            closeMenu();
-          }}
-          className="logout__button"
-        >
-          Salir
-        </button>
+        <Link to="/login" onClick={closeMenu}>
+          Login
+        </Link>
       </>
     );
-  };
+  }
+
+  return (
+    <>
+      {/* mismos links que desktop (derecha) */}
+      {renderAuthDesktop(closeMenu)}
+
+      {/* opcional: tu perfil (lo dejas como estaba) */}
+      <Link to="/login" onClick={closeMenu}>
+        <span>Mi perfil</span>
+      </Link>
+
+      {/* logout igual */}
+      <button
+        onClick={() => {
+          handleLogout();
+          closeMenu();
+        }}
+        className="logout__button"
+      >
+        Salir
+      </button>
+    </>
+  );
+};
+
 
   return (
     <header className="header_nav">

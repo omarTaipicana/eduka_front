@@ -27,8 +27,6 @@ const RegistroAlumnos = () => {
   const [userValidacion, setUserValidacion] = useState(null);
   const [userRegister, setUserRegister] = useState(null);
 
-
-
   const {
     register,
     handleSubmit,
@@ -206,60 +204,74 @@ const RegistroAlumnos = () => {
 
   const cursoActivo = course.find((c) => c.sigla === code);
 
-// 1) No existe curso
-if (!cursoActivo) {
-  return (
-    <div className="registro_container curso_no_encontrado">
-      {isLoading && <IsLoading />}
+  const missing = {
+    cedula: !userRegister?.cI?.trim(),
+    grado: !userRegister?.grado?.trim(),
+    subsistema: !userRegister?.subsistema?.trim(),
+    celular: !userRegister?.cellular?.trim(),
+    email: !userRegister?.email?.trim(),
+    nombres: !userRegister?.firstName?.trim(),
+    apellidos: !userRegister?.lastName?.trim(),
+  };
 
-      <div className="mensaje_curso_caja">
-        <h2>❌ Curso no disponible</h2>
-        <p>
-          El curso con el código <strong>{code}</strong> no se encuentra
-          disponible o no existe en nuestra base de datos.
-        </p>
-        <p>Por favor verifica el enlace o contacta con el administrador.</p>
-      </div>
-    </div>
-  );
-}
+  const showFullForm = !userRegister; // si no existe usuario -> formulario completo
+  const showConfirmEmail = showFullForm; // confirmación SOLO cuando no existe usuario
 
-// 2) Existe pero NO está vigente
-if (cursoActivo?.vigente === false) {
-  return (
-    <div className="registro_container curso_no_encontrado">
-      {isLoading && <IsLoading />}
 
-      <div className="mensaje_curso_caja mensaje_curso_caja--finalizado">
-        <h2>⏳ Oferta académica finalizada</h2>
-        <p>
-          La oferta académica del <strong>{cursoActivo?.nombre}</strong>{" "}
-          ha finalizado.
-        </p>
-        <p>
-          Si necesitas información, por favor contacta con el administrador o
-          revisa nuestros cursos disponibles.
-        </p>
+  // 1) No existe curso
+  if (!cursoActivo) {
+    return (
+      <div className="registro_container curso_no_encontrado">
+        {isLoading && <IsLoading />}
 
-        <div className="mensaje_acciones">
-          <a className="mensaje_btn" href="/#/" >
-            Ir al inicio
-          </a>
-          <a
-            className="mensaje_btn mensaje_btn--whatsapp"
-            href="https://wa.me/593980773229"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            WhatsApp
-          </a>
+        <div className="mensaje_curso_caja">
+          <h2>❌ Curso no disponible</h2>
+          <p>
+            El curso con el código <strong>{code}</strong> no se encuentra
+            disponible o no existe en nuestra base de datos.
+          </p>
+          <p>Por favor verifica el enlace o contacta con el administrador.</p>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-// 3) Existe y está vigente -> sigue normal
+  // 2) Existe pero NO está vigente
+  if (cursoActivo?.vigente === false) {
+    return (
+      <div className="registro_container curso_no_encontrado">
+        {isLoading && <IsLoading />}
+
+        <div className="mensaje_curso_caja mensaje_curso_caja--finalizado">
+          <h2>⏳ Oferta académica finalizada</h2>
+          <p>
+            La oferta académica del <strong>{cursoActivo?.nombre}</strong>{" "}
+            ha finalizado.
+          </p>
+          <p>
+            Si necesitas información, por favor contacta con el administrador o
+            revisa nuestros cursos disponibles.
+          </p>
+
+          <div className="mensaje_acciones">
+            <a className="mensaje_btn" href="/#/" >
+              Ir al inicio
+            </a>
+            <a
+              className="mensaje_btn mensaje_btn--whatsapp"
+              href="https://wa.me/593980773229"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 3) Existe y está vigente -> sigue normal
 
 
   return (
@@ -360,38 +372,107 @@ if (cursoActivo?.vigente === false) {
             >
               {/* Columna 1 del formulario */}
               <div className="form_column">
+
                 {userRegister && (
                   <div className="incripcion_existente">
                     <h3>✅ Usuario existente</h3>
-                    <p>
-                      <strong>Grado:</strong> {userRegister.grado}
-                    </p>
-                    <p>
-                      <strong>Nombres:</strong> {userRegister.firstName}
-                    </p>
-                    <p>
-                      <strong>Apellidos:</strong> {userRegister.lastName}
-                    </p>
-                    <p>
-                      <strong>Cédula:</strong> {userRegister.cI}
-                    </p>
 
-                    <p>
-                      <strong>Eje Policial:</strong> {userRegister.subsistema}
-                    </p>
-                    <p>
-                      <strong>Email:</strong> {userRegister.email}
-                    </p>
-                    <p className="mensaje_inscripcion">
-                      Si requiere modificar su información persona, puede
-                      crearse una cuenta con notoros usando su correo
-                      electrónicao y editar la información, o comuniquese con
-                      soporte en la sección contactanos.
-                    </p>
+                    <p><strong>Grado:</strong> {userRegister.grado || <em>Falta completar</em>}</p>
+                    <p><strong>Nombres:</strong> {userRegister.firstName || <em>Falta completar</em>}</p>
+                    <p><strong>Apellidos:</strong> {userRegister.lastName || <em>Falta completar</em>}</p>
+                    <p><strong>Cédula:</strong> {userRegister.cI || <em>Falta completar</em>}</p>
+                    <p><strong>Eje Policial:</strong> {userRegister.subsistema || <em>Falta completar</em>}</p>
+                    <p><strong>Email:</strong> {userRegister.email || <em>Falta completar</em>}</p>
+
+                    {(missing.cedula || missing.grado || missing.subsistema || missing.celular) && (
+                      <p className="mensaje_inscripcion">
+                        Tu perfil está incompleto. Completa los campos faltantes para continuar con la inscripción.
+                      </p>
+                    )}
                   </div>
                 )}
 
-                {!userRegister && (
+
+                {userRegister && (
+                  <>
+                    {missing.nombres && (
+                      <label className="registro_label">
+                        Nombres
+                        <input
+                          placeholder="Nombres completos"
+                          required
+                          {...register("nombres")}
+                          defaultValue=""
+                        />
+                      </label>
+                    )}
+
+                    {missing.apellidos && (
+                      <label className="registro_label">
+                        Apellidos
+                        <input
+                          placeholder="Apellidos completos"
+                          required
+                          {...register("apellidos")}
+                          defaultValue=""
+                        />
+                      </label>
+                    )}
+
+                    {missing.cedula && (
+                      <label className="registro_label">
+                        Cédula
+                        <input
+                          required
+                          {...register("cedula")}
+                          defaultValue=""
+                        />
+                      </label>
+                    )}
+
+                    {missing.grado && (
+                      <label className="registro_label">
+                        Grado
+                        <select required {...register("grado")} className="form_input">
+                          <option value="">Seleccione una opción</option>
+                          {[...new Set(variables.map((v) => v.grado).filter(Boolean))].map((grado, i) => (
+                            <option key={i} value={grado}>{grado}</option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
+                  </>
+                )}
+
+                {userRegister && (
+                  <>
+                    {!missing.cedula && (
+                      <input type="hidden" value={userRegister.cI} {...register("cedula")} />
+                    )}
+                    {!missing.nombres && (
+                      <input type="hidden" value={userRegister.firstName} {...register("nombres")} />
+                    )}
+                    {!missing.apellidos && (
+                      <input type="hidden" value={userRegister.lastName} {...register("apellidos")} />
+                    )}
+                    {!missing.email && (
+                      <input type="hidden" value={userRegister.email} {...register("email")} />
+                    )}
+                    {!missing.celular && (
+                      <input type="hidden" value={userRegister.cellular} {...register("celular")} />
+                    )}
+                    {!missing.grado && (
+                      <input type="hidden" value={userRegister.grado} {...register("grado")} />
+                    )}
+                    {!missing.subsistema && (
+                      <input type="hidden" value={userRegister.subsistema} {...register("subsistema")} />
+                    )}
+
+
+                  </>
+                )}
+
+                 {!userRegister && (
                   <>
                     <label className="registro_label">
                       Confirmar Email
@@ -450,86 +531,58 @@ if (cursoActivo?.vigente === false) {
                   </>
                 )}
 
-                {userRegister && (
-                  <>
-                    <input
-                      type="hidden"
-                      value={userRegister.cI}
-                      {...register("cedula")}
-                    />
-                    <input
-                      type="hidden"
-                      value={userRegister.firstName}
-                      {...register("nombres")}
-                    />
-                    <input
-                      type="hidden"
-                      value={userRegister.lastName}
-                      {...register("apellidos")}
-                    />
-                    <input
-                      type="hidden"
-                      value={userRegister.email}
-                      {...register("email")}
-                    />
-                    <input
-                      type="hidden"
-                      value={userRegister.cellular}
-                      {...register("celular")}
-                    />
-                    <input
-                      type="hidden"
-                      value={userRegister.grado}
-                      {...register("grado")}
-                    />
-                    <input
-                      type="hidden"
-                      value={userRegister.subsistema}
-                      {...register("subsistema")}
-                    />
-                    <input
-                      type="hidden"
-                      value={userRegister.email}
-                      {...register("confirmEmail")}
-                    />
-                  </>
-                )}
+
+
               </div>
 
               {/* Columna 2 del formulario */}
 
               <div className="form_column">
+                {userRegister && (
+                  <>
+                    {missing.celular && (
+                      <label className="registro_label">
+                        Celular
+                        <input required {...register("celular")} defaultValue="" />
+                      </label>
+                    )}
+
+                    {missing.subsistema && (
+                      <label className="registro_label">
+                        Eje Policial
+                        <select required {...register("subsistema")} className="form_input">
+                          <option value="">Seleccione una opción</option>
+                          {[...new Set(variables.map((v) => v.subsistema).filter(Boolean))].map((s, i) => (
+                            <option key={i} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
+
+
+                  </>
+                )}
+
                 {!userRegister && (
-                  <div>
+                  <>
                     <label className="registro_label">
                       Celular
-                      <input
-                        required
-                        {...register("celular")}
-                        defaultValue={userRegister?.cellular || ""}
-                      />
+                      <input required {...register("celular")} />
                     </label>
+
                     <label className="registro_label">
                       Eje Policial
-                      <select
-                        required
-                        {...register("subsistema")}
-                        className="form_input"
-                      >
+                      <select required {...register("subsistema")} className="form_input">
                         <option value="">Seleccione una opción</option>
-                        {[
-                          ...new Set(
-                            variables.map((v) => v.subsistema).filter(Boolean)
-                          ),
-                        ].map((subsistema, i) => (
-                          <option key={i} value={subsistema}>
-                            {subsistema}
-                          </option>
+                        {[...new Set(variables.map((v) => v.subsistema).filter(Boolean))].map((s, i) => (
+                          <option key={i} value={s}>{s}</option>
                         ))}
                       </select>
                     </label>
-                  </div>
+                  </>
                 )}
+
+
                 <div className="form_check_container">
                   <label className="form_check_label">
                     Acepto recibir correos electrónicos con información sobre

@@ -54,7 +54,7 @@ export const RegistroPagos = () => {
       if (watchExtras[1]) precio += 10;
       setTotal(precio);
     } else {
-      let precio = 26;
+      let precio = 32;
       if (watchExtras[0]) precio += 15;
       if (watchExtras[1]) precio += 10;
       setTotal(precio);
