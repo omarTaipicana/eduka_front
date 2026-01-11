@@ -264,11 +264,12 @@
 /* tarjeta usuario existente dentro del form */
 .incripcion_existente {
   width: 100%;
-  padding: 1rem 1.3rem;
+  padding: 0.7rem 1.3rem;
   border-radius: 1rem;
   background-color: #f1f3fb;
   border-left: 4px solid #0f2a63;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
+  font-size: 0.85rem;
 }
 
 .incripcion_existente h3 {
@@ -293,7 +294,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0.7rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #444a5a;
 }
 

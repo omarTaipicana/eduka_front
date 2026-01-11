@@ -10,7 +10,6 @@ import { FaWhatsapp, FaMapMarkerAlt } from "react-icons/fa";
 const PrincipalHeader = () => {
   const superAdmin = import.meta.env.VITE_CI_SUPERADMIN;
 
-
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -26,10 +25,7 @@ const PrincipalHeader = () => {
     grado5: false,
     grado6: false,
     grado7: false,
-
   });
-
-
 
   // Configurar grados según CI o rol
   useEffect(() => {
@@ -254,51 +250,48 @@ const PrincipalHeader = () => {
       );
     }
 
-
-
     return null;
   };
 
   /** AUTH EN MOBILE MENU */
-/** AUTH EN MOBILE MENU (igual que desktop) */
-const renderAuthMobile = () => {
-  if (!token) {
+  /** AUTH EN MOBILE MENU (igual que desktop) */
+  const renderAuthMobile = () => {
+    if (!token) {
+      return (
+        <>
+          <Link to="/register" onClick={closeMenu}>
+            Register
+          </Link>
+          <Link to="/login" onClick={closeMenu}>
+            Login
+          </Link>
+        </>
+      );
+    }
+
     return (
       <>
-        <Link to="/register" onClick={closeMenu}>
-          Register
-        </Link>
+        {/* mismos links que desktop (derecha) */}
+        {renderAuthDesktop(closeMenu)}
+
+        {/* opcional: tu perfil (lo dejas como estaba) */}
         <Link to="/login" onClick={closeMenu}>
-          Login
+          <span>Mi perfil</span>
         </Link>
+
+        {/* logout igual */}
+        <button
+          onClick={() => {
+            handleLogout();
+            closeMenu();
+          }}
+          className="logout__button"
+        >
+          Salir
+        </button>
       </>
     );
-  }
-
-  return (
-    <>
-      {/* mismos links que desktop (derecha) */}
-      {renderAuthDesktop(closeMenu)}
-
-      {/* opcional: tu perfil (lo dejas como estaba) */}
-      <Link to="/login" onClick={closeMenu}>
-        <span>Mi perfil</span>
-      </Link>
-
-      {/* logout igual */}
-      <button
-        onClick={() => {
-          handleLogout();
-          closeMenu();
-        }}
-        className="logout__button"
-      >
-        Salir
-      </button>
-    </>
-  );
-};
-
+  };
 
   return (
     <header className="header_nav">
@@ -371,7 +364,7 @@ const renderAuthMobile = () => {
       <nav className="navbar">
         {/* Hamburguesa (solo se ve en mobile con CSS) */}
         <button
-          className="menu_icon"
+          className={`menu_icon ${menuOpen ? "menu_icon--open" : ""}`}
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >
@@ -390,7 +383,7 @@ const renderAuthMobile = () => {
           <img
             src="/images/eduka_sf.png"
             alt="Logo Eduka"
-            className="logo_navbar"
+            className="logo_navbar_ph"
           />
         </Link>
 
@@ -402,8 +395,9 @@ const renderAuthMobile = () => {
 
       {/* MENÚ MOBILE DESPLEGABLE */}
       <div
-        className={`navbar_mobile_menu ${menuOpen ? "navbar_mobile_menu--open" : ""
-          }`}
+        className={`navbar_mobile_menu ${
+          menuOpen ? "navbar_mobile_menu--open" : ""
+        }`}
       >
         {renderRoleLinks(closeMenu)}
         <hr className="navbar_mobile_divider" />

@@ -375,7 +375,7 @@ const RegistroAlumnos = () => {
 
                 {userRegister && (
                   <div className="incripcion_existente">
-                    <h3>✅ Usuario existente</h3>
+                    <h3>✅ Información encontrada</h3>
 
                     <p><strong>Grado:</strong> {userRegister.grado || <em>Falta completar</em>}</p>
                     <p><strong>Nombres:</strong> {userRegister.firstName || <em>Falta completar</em>}</p>

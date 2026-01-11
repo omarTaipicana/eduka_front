@@ -89,7 +89,7 @@
 
 .institutoCard {
   position: relative;
-  width: min(1100px, 100%);
+  width:90%;
   border-radius: 1.4rem;
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(6px);

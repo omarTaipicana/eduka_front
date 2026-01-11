@@ -80,7 +80,7 @@
 }
 
 /* LOGO grande y sobresaliendo hacia abajo */
-.logo_navbar {
+.logo_navbar_ph {
   height: 8rem;
   justify-self: center;
   align-self: flex-start;
@@ -99,7 +99,6 @@
 .navbar_links-left,
 .navbar_links-right {
   justify-content: space-around;
-
 }
 
 /* BOTONES DEL MENÚ */
@@ -113,7 +112,6 @@
   padding: 0.25rem 0.5rem;
   transition: color 0.3s ease;
   font-weight: 600;
-
 }
 
 .navbar_links button::after {
@@ -227,7 +225,6 @@
   }
 }
 
-
 /* ========= TARJETA DE TEXTO ========= */
 .hero-card {
   max-width: 40rem;
@@ -293,8 +290,6 @@
   overflow: hidden;
 }
 
-
-
 .nosotros-inner {
   position: relative;
   width: 80%;
@@ -357,7 +352,6 @@
 .nosotros-content p {
   margin: 0;
 }
-
 
 /* ========== MISIÓN · VISIÓN · VALORES ========== */
 
@@ -701,7 +695,6 @@
   font-size: 1.7rem;
   font-weight: 700;
   cursor: pointer;
-
 }
 
 .footer-btn span {
@@ -764,8 +757,7 @@
   color: #cacbcc;
   font-size: 1.3rem;
   text-decoration: none;
-  transition: background-color 0.2s ease, color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .footer-social a:hover {
@@ -793,7 +785,6 @@
   font-size: 1rem;
   text-decoration: none;
   text-align: left;
-
 }
 
 .footer-text-link:hover {
@@ -809,19 +800,6 @@
   margin-bottom: 3rem;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ========= RESPONSIVE (MOBILE ≤ 768px) ========= */
 @media (max-width: 768px) {
   /* ---------- TOPBAR ---------- */
@@ -834,25 +812,27 @@
   }
 
   .topbar-left {
-    gap: 0.1rem;
+    display: none;
   }
 
   .topbar-right {
-    gap: 0.8rem;
+    justify-content: space-around;
+    width: 80%;
+    margin: 0 auto;
   }
 
   /* ---------- NAVBAR + MENÚ MOBILE ---------- */
   .navbar {
-    top: 2.7rem;              /* debajo de la topbar */
+    top: 2.7rem; /* debajo de la topbar */
     height: 3.5rem;
     grid-template-columns: auto 1fr auto;
     padding: 0 1rem;
     align-items: center;
   }
 
-  .logo_navbar {
-    height: 3rem !important;
-    transform: translateY(40%);
+  .logo_navbar_ph {
+    height: 3.3rem;
+    transform: translate(286%, 3%) !important;
     margin-top: 0;
   }
 
@@ -902,7 +882,7 @@
 
   /* ---------- HERO ---------- */
   .hero {
-    margin-top: 8.5rem;                     /* topbar + navbar */
+    margin-top: 8.5rem; /* topbar + navbar */
     min-height: calc(100vh - 8.5rem);
     padding: 1.5rem 1rem;
     justify-content: center;
@@ -949,7 +929,7 @@
   }
 
   .nosotros-content {
-    grid-template-columns: 1fr;  /* 1 columna */
+    grid-template-columns: 1fr; /* 1 columna */
     font-size: 0.95rem;
     row-gap: 1.2rem;
   }
@@ -957,7 +937,7 @@
   .mvv-section {
     margin-top: 2.5rem;
     padding: 2.5rem 1.2rem;
-    grid-template-columns: 1fr;  /* 3 tarjetas una debajo de otra */
+    grid-template-columns: 1fr; /* 3 tarjetas una debajo de otra */
     row-gap: 2rem;
   }
 
@@ -991,7 +971,7 @@
   }
 
   .cursos-grid {
-    grid-template-columns: 1fr;  /* 1 curso por fila */
+    grid-template-columns: 1fr; /* 1 curso por fila */
     gap: 2rem;
   }
 
@@ -1011,7 +991,7 @@
 
   .contacto-inner {
     width: 100%;
-    grid-template-columns: 1fr;  /* formulario arriba, mapa abajo */
+    grid-template-columns: 1fr; /* formulario arriba, mapa abajo */
     row-gap: 2rem;
   }
 
@@ -1047,7 +1027,7 @@
 
   .footer-inner {
     width: 100%;
-    grid-template-columns: 1fr;   /* columnas apiladas */
+    grid-template-columns: 1fr; /* columnas apiladas */
     row-gap: 2.5rem;
     align-items: flex-start;
   }

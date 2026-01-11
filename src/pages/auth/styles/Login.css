@@ -273,17 +273,6 @@ select.input__form__info {
 }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .login_shell {
-    padding: 1.6rem;
-  }
-  .login_card {
-    padding: 1.6rem;
-  }
-  .form__user__info {
-    grid-template-columns: 1fr;
-  }
-}
 
 @media (max-width: 768px) {
   .login_page {
@@ -323,5 +312,21 @@ select.input__form__info {
 
   .btn_primary_full {
     font-size: 1.05rem;
+  }
+  .form__user__info {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* 2) Manda el botón al final del formulario (aunque esté en el article del medio) */
+  .form__user__info .btn_primary {
+    grid-row: 12; /* último */
+    width: 100%;
+    justify-self: stretch;
+    margin-top: 0.6rem;
+  }
+  .form__user__seccion {
+    display: contents;
   }
 }

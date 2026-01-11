@@ -453,14 +453,14 @@ const guardarEdicion = async (pagoId, data) => {
                         Fecha {ordenFechaDesc ? "⬇️" : "⬆️"}
                       </th>
                       <th>Curso</th>
-                      <th>Distintivo</th>
-                      <th>Moneda</th>
+                      <th>Distin</th>
+                      <th>Mon</th>
                       <th>Valor</th>
                       <th>Entidad</th>
                       <th>Id Pago</th>
-                      <th>Comprobante</th>
-                      <th>Verificado</th>
-                      <th>Observación</th>
+                      <th>Comp</th>
+                      <th>Verif</th>
+                      <th>Obser</th>
                       <th>Editor</th>
                       <th colSpan={papelera ? 1 : 2}>{papelera ? "Restaurar" : "Acción"}</th>
                     </tr>
@@ -502,7 +502,7 @@ const guardarEdicion = async (pagoId, data) => {
                             )}
                           </td>
 
-                          <td>
+                          <td className="vpTdWrap">
                             {papelera ? (
                               p.entidad || "---"
                             ) : isEditing ? (
@@ -564,7 +564,7 @@ const guardarEdicion = async (pagoId, data) => {
                           <td className="vpTdWrap">{p.usuarioEdicion ? p.usuarioEdicion : "Sin editar"}</td>
 
                           {papelera ? (
-                            <td>
+                            <td className="vpTdWrap">
                               <button
                                 className="secBtnPrimary vpBtnSmall"
                                 type="button"
@@ -578,7 +578,7 @@ const guardarEdicion = async (pagoId, data) => {
                             </td>
                           ) : (
                             <>
-                              <td>
+                              <td className="vpTdWrap">
                                 {isEditing ? (
                                   <>
                                     <button

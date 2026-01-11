@@ -353,7 +353,7 @@
 
 .vpTdWrap {
   white-space: normal !important;
-  max-width: 240px;
+  max-width: 5rem;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -394,12 +394,12 @@
 .vp-btn-save,
 .vp-btn-cancel {
   padding: 6px 8px;
-  font-size: 0.72rem !important;
+  font-size: 0.5rem !important;
   border-radius: 10px;
   border: none;
   cursor: pointer;
   margin-right: 6px;
-  font-weight: 900;
+  font-weight: 700;
   transition: 0.15s ease;
 }
 
@@ -542,6 +542,7 @@
 .btn:hover {
   transform: scale(1.05);
 }
+
 
 /* ============================
    ANIM
