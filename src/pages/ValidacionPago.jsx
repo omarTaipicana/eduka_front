@@ -578,7 +578,7 @@ const guardarEdicion = async (pagoId, data) => {
                             </td>
                           ) : (
                             <>
-                              <td className="vpTdWrap">
+                              <td className="vpTdWrap2">
                                 {isEditing ? (
                                   <>
                                     <button
