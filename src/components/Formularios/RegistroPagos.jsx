@@ -40,7 +40,13 @@ export const RegistroPagos = () => {
     reset,
   } = useForm();
 
-  const watchExtras = watch(["moneda", "distintivo"]);
+  const watchAll = watch([
+    "moneda",
+    "distintivo",
+    "sPolicial",
+    "oProfesionales",
+  ]);
+  const [moneda, distintivo, sPolicial, oProfesionales] = watchAll;
 
   useEffect(() => {
     getCourse(PATH_COURSES);
@@ -48,18 +54,24 @@ export const RegistroPagos = () => {
   }, [inscrito]);
 
   useEffect(() => {
-    if (certificadoPagado) {
-      let precio = 0;
-      if (watchExtras[0]) precio += 15;
-      if (watchExtras[1]) precio += 10;
-      setTotal(precio);
+    // Extras en centavos
+    let extrasCentavos = 0;
+    if (moneda) extrasCentavos += 1500;
+    if (distintivo) extrasCentavos += 1000;
+
+    // Base en centavos
+    let baseCentavos = 0;
+
+    if (!certificadoPagado) {
+      // si NO es pagado, depende del tipo
+      if (oProfesionales) baseCentavos = 3200; // $32.00
+      else baseCentavos = 1999; // $19.99 (default y también si sPolicial)
     } else {
-      let precio = 32;
-      if (watchExtras[0]) precio += 15;
-      if (watchExtras[1]) precio += 10;
-      setTotal(precio);
+      baseCentavos = 0; // certificado ya pagado
     }
-  }, [watchExtras, certificadoPagado]);
+
+    setTotal((baseCentavos + extrasCentavos) / 100);
+  }, [moneda, distintivo, sPolicial, oProfesionales, certificadoPagado]);
 
   const cursoActivo = courses.find((c) => c.sigla === code);
 
@@ -126,67 +138,67 @@ export const RegistroPagos = () => {
       setInscrito(null);
     }
   }, [newUpload]);
-  
+
   useEffect(() => {
     if (total > 0) {
       setValue("valorDepositado", total);
     }
   }, [total, setValue]);
 
-// 1) No existe curso
-if (!cursoActivo) {
-  return (
-    <div className="registro_container curso_no_encontrado">
-      {isLoading && <IsLoading />}
+  // 1) No existe curso
+  if (!cursoActivo) {
+    return (
+      <div className="registro_container curso_no_encontrado">
+        {isLoading && <IsLoading />}
 
-      <div className="mensaje_curso_caja">
-        <h2>❌ Curso no disponible</h2>
-        <p>
-          El curso con el código <strong>{code}</strong> no se encuentra
-          disponible o no existe en nuestra base de datos.
-        </p>
-        <p>Por favor verifica el enlace o contacta con el administrador.</p>
-      </div>
-    </div>
-  );
-}
-
-// 2) Existe pero NO está vigente
-if (cursoActivo?.vigente === false) {
-  return (
-    <div className="registro_container curso_no_encontrado">
-      {isLoading && <IsLoading />}
-
-      <div className="mensaje_curso_caja mensaje_curso_caja--finalizado">
-        <h2>⏳ Oferta académica finalizada</h2>
-        <p>
-          La oferta académica del <strong>{cursoActivo?.nombre}</strong>{" "}
-          ha finalizado.
-        </p>
-        <p>
-          Si necesitas información, por favor contacta con el administrador o
-          revisa nuestros cursos disponibles.
-        </p>
-
-        <div className="mensaje_acciones">
-          <a className="mensaje_btn" href="/#/" >
-            Ir al inicio
-          </a>
-          <a
-            className="mensaje_btn mensaje_btn--whatsapp"
-            href="https://wa.me/593980773229"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            WhatsApp
-          </a>
+        <div className="mensaje_curso_caja">
+          <h2>❌ Curso no disponible</h2>
+          <p>
+            El curso con el código <strong>{code}</strong> no se encuentra
+            disponible o no existe en nuestra base de datos.
+          </p>
+          <p>Por favor verifica el enlace o contacta con el administrador.</p>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-// 3) Existe y está vigente -> sigue normal
+  // 2) Existe pero NO está vigente
+  if (cursoActivo?.vigente === false) {
+    return (
+      <div className="registro_container curso_no_encontrado">
+        {isLoading && <IsLoading />}
+
+        <div className="mensaje_curso_caja mensaje_curso_caja--finalizado">
+          <h2>⏳ Oferta académica finalizada</h2>
+          <p>
+            La oferta académica del <strong>{cursoActivo?.nombre}</strong> ha
+            finalizado.
+          </p>
+          <p>
+            Si necesitas información, por favor contacta con el administrador o
+            revisa nuestros cursos disponibles.
+          </p>
+
+          <div className="mensaje_acciones">
+            <a className="mensaje_btn" href="/#/">
+              Ir al inicio
+            </a>
+            <a
+              className="mensaje_btn mensaje_btn--whatsapp"
+              href="https://wa.me/593980773229"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 3) Existe y está vigente -> sigue normal
 
   const onRegistrarNuevo = () => {
     setUsuario(newValidate?.user);
@@ -271,6 +283,33 @@ if (cursoActivo?.vigente === false) {
                   <p>
                     <strong>Cédula:</strong> {usuario.cI}
                   </p>
+
+                  <div className="pagos_box_1">
+                    <label className="pagos_check_row">
+                      <span>Servidor Policial</span>
+                      <input
+                        type="checkbox"
+                        {...register("sPolicial")}
+                        onChange={(e) => {
+                          setValue("sPolicial", e.target.checked);
+                          if (e.target.checked)
+                            setValue("oProfesionales", false);
+                        }}
+                      />
+                    </label>
+
+                    <label className="pagos_check_row">
+                      <span>Otros Profesionales</span>
+                      <input
+                        type="checkbox"
+                        {...register("oProfesionales")}
+                        onChange={(e) => {
+                          setValue("oProfesionales", e.target.checked);
+                          if (e.target.checked) setValue("sPolicial", false);
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
                 <div className="pagos_box">
                   <label className="pagos_check_row">

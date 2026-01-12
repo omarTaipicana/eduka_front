@@ -44,18 +44,7 @@ const LandingPage = () => {
     checkToken();
   }, [token]);
 
-  const [
-    ,
-    ,
-    postApi,
-    ,
-    ,
-    ,
-    isLoading,
-    newReg,
-    ,
-    ,
-  ] = useCrud();
+  const [, , postApi, , , , isLoading, newReg, , ,] = useCrud();
 
   const {
     register,
@@ -104,7 +93,8 @@ const LandingPage = () => {
 
     if (!element) return;
 
-    const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+    const elementPosition =
+      element.getBoundingClientRect().top + window.scrollY;
     const offsetPosition = elementPosition - offset;
 
     window.scrollTo({
@@ -114,7 +104,6 @@ const LandingPage = () => {
 
     setMenuOpen(false);
   };
-
 
   return (
     <div className="app">
@@ -144,7 +133,6 @@ const LandingPage = () => {
               +593 980 773 229
             </span>
           </a>
-
         </div>
 
         <div className="topbar-right">
@@ -156,7 +144,8 @@ const LandingPage = () => {
                   src="../../../user.png"
                   alt="User Icon"
                   onClick={handleRegisterClick}
-                />Registrarse
+                />
+                Registrarse
               </button>
               <span className="topbar-separator">|</span>
               <button className="topbar-link" onClick={handleLoginClick}>
@@ -190,24 +179,22 @@ const LandingPage = () => {
 
         <div className="navbar_links navbar_links-right">
           <button onClick={() => scrollToSection(cursosRef)}>Cursos</button>
-          <button onClick={() => scrollToSection(contactoRef)}>Contactos</button>
-
+          <button onClick={() => scrollToSection(contactoRef)}>
+            Contactos
+          </button>
         </div>
       </nav>
 
-
       <div
-        className={`navbar_mobile_menu ${menuOpen ? "navbar_mobile_menu--open" : ""
-          }`}
+        className={`navbar_mobile_menu ${
+          menuOpen ? "navbar_mobile_menu--open" : ""
+        }`}
       >
         <button onClick={() => scrollToSection(inicioRef)}>Inicio</button>
         <button onClick={() => scrollToSection(nosotrosRef)}>Nosotros</button>
         <button onClick={() => scrollToSection(cursosRef)}>Cursos</button>
         <button onClick={() => scrollToSection(contactoRef)}>Contactos</button>
       </div>
-
-
-
 
       <motion.section
         className="hero"
@@ -229,9 +216,6 @@ const LandingPage = () => {
         </div>
       </motion.section>
 
-
-
-
       <motion.section
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -241,65 +225,61 @@ const LandingPage = () => {
       >
         <div className="nosotros-inner">
           <div className="nosotros-header">
-            <img
-              src="/mano_1.png"
-              alt="hand"
-              className="mano_1"
-            />
+            <img src="/mano_1.png" alt="hand" className="mano_1" />
             <h2 className="nosotros-title">¿Por qué elegir a EDUKA?</h2>
           </div>
 
           <div className="nosotros-content">
             <p>
               <strong>Eduka</strong> es una plataforma de formación en línea
-              comprometida con el fortalecimiento de las capacidades profesionales
-              de los servidores policiales del Ecuador. Nuestra misión es
-              proporcionar programas educativos actualizados y de alta calidad que
-              respondan a los desafíos actuales en materia de seguridad ciudadana,
-              derechos humanos, y gestión del orden público.
+              comprometida con el fortalecimiento de las capacidades
+              profesionales de los servidores policiales del Ecuador. Nuestra
+              misión es proporcionar programas educativos actualizados y de alta
+              calidad que respondan a los desafíos actuales en materia de
+              seguridad ciudadana, derechos humanos, y gestión del orden
+              público.
             </p>
-
-
 
             <p>
               A través de nuestras aulas virtuales, los participantes acceden a
               contenidos interactivos, estudios de caso, simulaciones y recursos
               actualizados, diseñados para fortalecer sus conocimientos en áreas
               estratégicas como inteligencia policial, liderazgo operativo,
-              mediación de conflictos, uso progresivo de la fuerza, ciberseguridad y
-              gestión de crisis.
+              mediación de conflictos, uso progresivo de la fuerza,
+              ciberseguridad y gestión de crisis.
             </p>
 
             <p>
               Contamos con la colaboración de un equipo docente internacional
-              conformado por expertos y académicos de reconocidas instituciones en
-              América Latina y Europa. Esta cooperación multinacional nos permite
-              ofrecer una perspectiva comparada, moderna y práctica, adaptada a la
-              realidad operativa de la Policía Nacional del Ecuador.
+              conformado por expertos y académicos de reconocidas instituciones
+              en América Latina y Europa. Esta cooperación multinacional nos
+              permite ofrecer una perspectiva comparada, moderna y práctica,
+              adaptada a la realidad operativa de la Policía Nacional del
+              Ecuador.
             </p>
 
             <p>
-              En <strong>Eduka</strong>, creemos firmemente que una policía mejor
-              preparada es clave para construir comunidades más seguras, justas y
-              resilientes. Por ello, seguimos innovando en nuestras metodologías y
-              expandiendo alianzas académicas con el fin de contribuir de forma
-              sostenible al desarrollo profesional de quienes protegen y sirven a
-              nuestra sociedad.
+              En <strong>Eduka</strong>, creemos firmemente que una policía
+              mejor preparada es clave para construir comunidades más seguras,
+              justas y resilientes. Por ello, seguimos innovando en nuestras
+              metodologías y expandiendo alianzas académicas con el fin de
+              contribuir de forma sostenible al desarrollo profesional de
+              quienes protegen y sirven a nuestra sociedad.
             </p>
           </div>
         </div>
 
         <div className="mvv-section">
-
           <div className="mvv-card">
             <img src="/flecha.png" alt="flecha" className="mvv-icon" />
             <h3 className="mvv-title">Misión</h3>
             <p className="mvv-text">
-              Fortalecer las capacidades profesionales de los servidores policiales del
-              Ecuador mediante programas de formación en línea actualizados, accesibles y
-              orientados a la práctica. Impulsamos el desarrollo de competencias técnicas
-              y éticas que respondan a los retos contemporáneos de la seguridad ciudadana,
-              promoviendo un servicio más eficiente, humano y comprometido con la sociedad.
+              Fortalecer las capacidades profesionales de los servidores
+              policiales del Ecuador mediante programas de formación en línea
+              actualizados, accesibles y orientados a la práctica. Impulsamos el
+              desarrollo de competencias técnicas y éticas que respondan a los
+              retos contemporáneos de la seguridad ciudadana, promoviendo un
+              servicio más eficiente, humano y comprometido con la sociedad.
             </p>
           </div>
 
@@ -307,12 +287,13 @@ const LandingPage = () => {
             <img src="/foco.png" alt="foco" className="mvv-icon" />
             <h3 className="mvv-title">Visión</h3>
             <p className="mvv-text">
-              Convertirnos en la plataforma líder en capacitación policial y seguridad
-              pública en la región, reconocida por su calidad académica, su enfoque innovador
-              y su capacidad para generar aprendizajes significativos. Aspiramos a transformar
-              la formación profesional de los servidores policiales y contribuir al
-              fortalecimiento de una fuerza pública preparada, responsable y alineada con las
-              necesidades actuales del país.
+              Convertirnos en la plataforma líder en capacitación policial y
+              seguridad pública en la región, reconocida por su calidad
+              académica, su enfoque innovador y su capacidad para generar
+              aprendizajes significativos. Aspiramos a transformar la formación
+              profesional de los servidores policiales y contribuir al
+              fortalecimiento de una fuerza pública preparada, responsable y
+              alineada con las necesidades actuales del país.
             </p>
           </div>
 
@@ -320,32 +301,17 @@ const LandingPage = () => {
             <img src="/mano_2.png" alt="hand" className="mvv-icon" />
             <h3 className="mvv-title">Valores</h3>
             <p className="mvv-text">
-              Nos guiamos por la excelencia académica, asegurando contenidos de alto nivel
-              y pertinencia. Fomentamos la innovación en cada proceso formativo, promovemos
-              una práctica profesional ética y respetuosa de los derechos humanos, e
-              impulsamos la cooperación internacional para enriquecer nuestras propuestas.
-              Estos valores sostienen nuestro compromiso con una policía más capacitada,
-              consciente y orientada al bienestar de la comunidad.
+              Nos guiamos por la excelencia académica, asegurando contenidos de
+              alto nivel y pertinencia. Fomentamos la innovación en cada proceso
+              formativo, promovemos una práctica profesional ética y respetuosa
+              de los derechos humanos, e impulsamos la cooperación internacional
+              para enriquecer nuestras propuestas. Estos valores sostienen
+              nuestro compromiso con una policía más capacitada, consciente y
+              orientada al bienestar de la comunidad.
             </p>
           </div>
-
         </div>
-
       </motion.section>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       <motion.section
         initial={{ opacity: 0, y: 30 }}
@@ -357,7 +323,11 @@ const LandingPage = () => {
         <div className="cursos-inner">
           {/* Título con icono */}
           <div className="cursos-header">
-            <img src="/cursos.png" alt="icono cursos" className="cursos-header-icon" />
+            <img
+              src="/cursos.png"
+              alt="icono cursos"
+              className="cursos-header-icon"
+            />
             <h2 className="cursos-title">Nuestros Cursos</h2>
           </div>
 
@@ -371,8 +341,8 @@ const LandingPage = () => {
                   className="curso-icon"
                 />
                 <h3 className="curso-name">
-                  Gestión integral de la Seguridad Ciudadana y el Orden Público con
-                  enfoque en Negociación en Situación de Crisis
+                  Gestión integral de la Seguridad Ciudadana y el Orden Público
+                  con enfoque en Negociación en Situación de Crisis
                 </h3>
                 <button className="curso-cta">
                   Conocer más <span>➜</span>
@@ -382,7 +352,11 @@ const LandingPage = () => {
 
             <Link to="/accv">
               <article className="curso-item">
-                <img src="/accv.png" alt="Análisis en conducta" className="curso-icon" />
+                <img
+                  src="/accv.png"
+                  alt="Análisis en conducta"
+                  className="curso-icon"
+                />
                 <h3 className="curso-name">
                   Análisis en Conducta Criminal y Victimología
                 </h3>
@@ -392,7 +366,7 @@ const LandingPage = () => {
               </article>
             </Link>
 
-            {/* <Link to="/ciccenic">
+            <Link to="/ciccenic">
               <article className="curso-item">
                 <img
                   src="/ciccenic.png"
@@ -400,18 +374,17 @@ const LandingPage = () => {
                   className="curso-icon"
                 />
                 <h3 className="curso-name">
-                  Curso Internacional en Operaciones Psicológicas y Confiabilidad en Técnicas de Entrevista.
+                  Curso Internacional en Operaciones Psicológicas y
+                  Confiabilidad en Técnicas de Entrevista.
                 </h3>
                 <button className="curso-cta">
                   Conocer más <span>➜</span>
                 </button>
               </article>
-            </Link> */}
+            </Link>
           </div>
         </div>
       </motion.section>
-
-
 
       <motion.section
         initial={{ opacity: 0, y: 30 }}
@@ -472,16 +445,6 @@ const LandingPage = () => {
           </div>
         </div>
       </motion.section>
-
-
-
-
-
-
-
-
-
-
 
       <footer className="footer">
         <div className="footer-inner">
@@ -621,13 +584,7 @@ const LandingPage = () => {
         <div className="footer-bottom">
           <p>Copyright 2025 Eduka Corporación Educativa</p>
         </div>
-
-
       </footer>
-
-
-
-
     </div>
   );
 };
