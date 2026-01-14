@@ -1,12 +1,6 @@
 /* ===== HOME EDUKA STYLE ===== */
 
-.homePage {
-  width: 100%;
-}
-
-/* Ajusta este valor según tu header total:
-   topbar (5rem) + navbar (5rem) = 10rem aprox.
-   Si usas 9rem, deja 9rem. */
+/* Ajusta este valor según tu header total */
 :root {
   --appHeaderOffset: 9rem;
   --edukaBlue: #1b326b;
@@ -15,17 +9,26 @@
   --edukaAccent: #ffb703;
 }
 
+.homePage {
+  width: 100%;
+  overflow-x: hidden; /* ✅ evita que algo empuje el layout en mobile */
+}
+
 /* Contenedor general */
 .homeShell {
   width: 100%;
   min-height: calc(100dvh - var(--appHeaderOffset));
   padding-top: 1.2rem;
   display: grid;
-  grid-template-columns: 280px 1fr;
+
+  /* ✅ IMPORTANTE: minmax(0,1fr) evita overflow por hijos anchos */
+  grid-template-columns: 280px minmax(0, 1fr);
+
   gap: 1.5rem;
   position: relative;
-
   background: #ffffff;
+
+  overflow-x: hidden; /* ✅ blindaje extra */
 }
 
 /* ===== MENU ===== */
@@ -89,11 +92,16 @@
 /* ===== CONTENT ===== */
 .homeContent {
   padding: 0 1rem 2.5rem 0;
+  min-width: 0; /* ✅ permite que se encoja y no rompa el grid */
 }
 
 .homeCard {
   position: relative;
   width: min(1100px, 100%);
+  max-width: 1100px;
+  margin: 0 auto;
+  min-width: 0; /* ✅ evita overflow por contenido interno */
+
   border-radius: 1.4rem;
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(6px);
@@ -133,7 +141,20 @@
   border-bottom: 3px solid var(--edukaAccent);
 }
 
-/* Datos personales: grid bonito */
+/* ===== Anti-overflow de textos (clave en mobile) ===== */
+.homeLink,
+.homeLinkCert,
+.homeToggleText,
+.homePaymentCourseTitle,
+.homePaymentItem p,
+.homeDataValue,
+.homeMuted,
+.homeNotice p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ===== Datos personales ===== */
 .homeDataGrid {
   position: relative;
   z-index: 1;
@@ -150,6 +171,7 @@
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 1rem;
   padding: 1rem 1.1rem;
+  min-width: 0;
 }
 
 .homeDataLabel {
@@ -165,6 +187,7 @@
   font-size: 1.05rem;
   font-weight: 800;
   color: #2f2f2f;
+  min-width: 0;
 }
 
 .homeWarn {
@@ -172,7 +195,7 @@
   font-weight: 900;
 }
 
-/* Listas (cursos/calificaciones) */
+/* ===== Listas (cursos/calificaciones) ===== */
 .homeList {
   position: relative;
   z-index: 1;
@@ -189,12 +212,14 @@
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 1rem;
   padding: 1rem 1.1rem;
+  min-width: 0; /* ✅ evita que el contenido fuerce ancho */
 }
 
 .homeListTop {
   display: flex;
   align-items: center;
   gap: 0.65rem;
+  min-width: 0;
 }
 
 .homeDot {
@@ -207,6 +232,7 @@
   text-decoration: none;
   color: var(--edukaBlue2);
   font-weight: 900;
+  min-width: 0;
 }
 
 .homeLink:hover {
@@ -216,6 +242,7 @@
 .homeListBottom {
   margin-top: 0.6rem;
   padding-left: 2.05rem;
+  min-width: 0;
 }
 
 .homeLinkCert {
@@ -231,7 +258,7 @@
   font-weight: 700;
 }
 
-/* Toggle calificaciones */
+/* ===== Toggle calificaciones ===== */
 .homeToggle {
   width: 100%;
   display: flex;
@@ -242,16 +269,19 @@
   cursor: pointer;
   padding: 0;
   text-align: left;
+  min-width: 0;
 }
 
 .homeToggleArrow {
   font-weight: 900;
   color: var(--edukaBlue);
+  flex: 0 0 auto;
 }
 
 .homeToggleText {
   font-weight: 900;
   color: var(--edukaBlue2);
+  min-width: 0;
 }
 
 .homeStatus {
@@ -267,12 +297,7 @@
   border: 1px solid rgba(22, 122, 44, 0.22);
 }
 
-.homeStatus.pending {
-  background: rgba(255, 183, 3, 0.18);
-  color: #8a5b00;
-  border: 1px solid rgba(255, 183, 3, 0.35);
-}
-
+.homeStatus.pending,
 .homeStatus.warn {
   background: rgba(255, 183, 3, 0.18);
   color: #8a5b00;
@@ -296,11 +321,12 @@
   margin-bottom: 0.35rem;
 }
 
-/* Pagos */
+/* ===== Pagos ===== */
 .homePayments {
   position: relative;
   z-index: 1;
   margin-top: 1.2rem;
+  min-width: 0;
 }
 
 .homePaymentCourse {
@@ -309,6 +335,7 @@
   border-radius: 1rem;
   padding: 1rem 1.1rem;
   margin-bottom: 1rem;
+  min-width: 0;
 }
 
 .homePaymentCourseTitle {
@@ -336,6 +363,7 @@
   font-weight: 900;
   box-shadow: 0 0.7rem 1.6rem rgba(0, 0, 0, 0.25);
   transition: transform 0.2s ease, background-color 0.2s ease;
+  min-width: 0;
 }
 
 .homeBtnLink:hover {
@@ -350,6 +378,7 @@
   margin: 1rem 0 0;
 }
 
+/* ===== Notice ===== */
 .homeNotice {
   position: relative;
   z-index: 1;
@@ -360,6 +389,7 @@
   color: #4d4d4d;
   font-weight: 700;
   line-height: 1.8;
+  min-width: 0;
 }
 
 .homeNotice p {
@@ -369,7 +399,7 @@
   margin-bottom: 0;
 }
 
-/* Anim */
+/* ===== Anim ===== */
 @keyframes homeFade {
   from {
     opacity: 0;
@@ -401,8 +431,8 @@
   justify-content: center;
   gap: 6px;
   padding: 0 10px;
-    display: none;
 
+  display: none;
 }
 
 .homeHamburgerLine {

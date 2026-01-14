@@ -83,7 +83,7 @@
 }
 
 /* LOGO grande sobresaliendo */
-.logo_navbar {
+.logo_navbar_ph {
   height: 8rem;
   justify-self: center;
   align-self: flex-start;
@@ -202,6 +202,7 @@
 
 /* ========= RESPONSIVE (MOBILE ≤ 768px) ========= */
 @media (max-width: 768px) {
+
   /* topbar más compacta */
   .topbar {
     height: auto;
@@ -231,11 +232,25 @@
     align-items: center;
   }
 
-.logo_navbar {
-    height: 3.3rem;
-    transform: translate(-24%, 3%);
-    margin-top: 0;
+  /* el Link mide lo mismo que la imagen */
+  .logo_link {
+    display: inline-flex;
+    width: fit-content;
+    line-height: 0;
+    justify-self: center;
+    /* si estás en grid */
+    align-self: center;
+    padding: 0;
+    transform: translate(-28%, 30%) !important;
+
   }
+
+  /* la imagen normal */
+  .logo_navbar_ph {
+    height: 3.3rem;
+    display: block;
+  }
+
 
   /* mostrar hamburguesa, ocultar links desktop */
   .menu_icon {
@@ -287,13 +302,14 @@
     font-weight: 600;
   }
 
-    .menu_icon span{
+  .menu_icon span {
     width: 20px;
     height: 3.5px;
     margin: 3.4px 0;
     border-radius: 2px;
   }
-    .menu_icon--open span:nth-child(1) {
+
+  .menu_icon--open span:nth-child(1) {
     transform: translateY(7px) rotate(45deg);
   }
 

@@ -11,6 +11,8 @@ const useAuth = () => {
   const [userUpdate, setUserUpdate] = useState("");
   const [userLogged, setUserLogged] = useState();
   const [userResetPassword, setUserResetPassword] = useState("");
+  const [deleteReg, setDeleteReg] = useState();
+
 
   const navigate = useNavigate();
   const urlBase = import.meta.env.VITE_API_URL;
@@ -61,20 +63,20 @@ const useAuth = () => {
       .finally(() => setIsLoading(false));
   };
 
-const loggedUser = async () => {
-  setIsLoading(true);
-  const url = `${urlBase}/users/me`;
-  try {
-    const res = await axios.get(url, getConfigToken());
-    setUserLogged(res.data);
-    return true;
-  } catch (error) {
-    setError(error);
-    return false;  // Indica fallo pero no lanza error
-  } finally {
-    setIsLoading(false);
-  }
-};
+  const loggedUser = async () => {
+    setIsLoading(true);
+    const url = `${urlBase}/users/me`;
+    try {
+      const res = await axios.get(url, getConfigToken());
+      setUserLogged(res.data);
+      return true;
+    } catch (error) {
+      setError(error);
+      return false;  // Indica fallo pero no lanza error
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
 
@@ -127,6 +129,22 @@ const loggedUser = async () => {
       .finally(() => setIsLoading(false));
   };
 
+  const deleteUser = ( id) => {
+    setIsLoading(true);
+    const url = `${urlBase}/users/${id}`;
+    axios
+      .delete(url, getConfigToken())
+      .then((res) => {
+        // console.log(res.data);
+        setDeleteReg(res.data);
+      })
+      .finally(() => setIsLoading(false))
+      .catch((err) => {
+        setError(err);
+        // console.log(err);
+      });
+  };
+
   return [
     registerUser,
     updateUser,
@@ -143,6 +161,8 @@ const loggedUser = async () => {
     userUpdate,
     userLogged,
     setUserLogged,
+    deleteUser,
+    deleteReg,
   ];
 };
 

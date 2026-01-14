@@ -260,8 +260,6 @@ const Login = () => {
       cellular: celularLimpio,
     };
 
-    console.log(formattedData);
-
     if (
       data?.dateBirth &&
       data?.cI &&

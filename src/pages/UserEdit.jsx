@@ -19,6 +19,8 @@ const UserEdit = () => {
   const [sugerencias, setSugerencias] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [userEdit, setUserEdit] = useState(false);
+  const [showDelete, setShowDelete] = useState(false)
+  const [userIdDelete, setUserIdDelete] = useState()
 
   const [senplades, getSenplades] = useCrud();
   const [variables, getVariables] = useCrud();
@@ -27,7 +29,7 @@ const UserEdit = () => {
   const [usersAll, getUsers, , , , , isLoadingUsers] = useCrud();
 
   // updateUser del auth
-  const [, updateUser, , loggedUser, , , isLoadingAuth, error, , , , , userUpdate] =
+  const [, updateUser, , loggedUser, , , isLoadingAuth, error, , , , , userUpdate, , , deleteUserApi, deleteReg] =
     useAuth();
 
   // ====== STATES CONTROLADOS (TODO editable) ======
@@ -69,6 +71,13 @@ const UserEdit = () => {
       dispatch(showAlert({ message: `⚠️ ${msg}`, alertType: 1 }));
     }
   }, [error]);
+
+
+  useEffect(() => {
+    if (deleteReg) {
+      dispatch(showAlert({ message: `⚠️ ${deleteReg?.message}`, alertType: 1 }));
+    }
+  }, [deleteUserApi]);
 
   const usersList = useMemo(() => usersAll?.data || [], [usersAll]);
   const senpladesVal = senplades || [];
@@ -243,6 +252,17 @@ const UserEdit = () => {
     setSelectedUser((prev) => (prev ? { ...prev, ...formattedData } : prev));
   };
 
+  const deleteUser = async (id) => {
+
+    try {
+      await deleteUserApi(id)
+
+      setShowDelete(false);
+    } catch (error) {
+      alert("Error al guardar los cambios.");
+    }
+  };
+
   return (
     <div className="ue_page">
       {(isLoadingUsers || isLoadingAuth) && <IsLoading />}
@@ -315,6 +335,17 @@ const UserEdit = () => {
                   >
                     {userEdit ? "Cancelar edición" : "Editar"}
                     <span className="ue_btnArrow">➜</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="ue_btnPrimary delete"
+                    onClick={() => {
+                      setUserIdDelete(selectedUser.id)
+                      setShowDelete(true)
+                    }}
+                  >
+                    Eliminar
                   </button>
                 </div>
               </div>
@@ -532,11 +563,38 @@ const UserEdit = () => {
                     Guardar cambios <span className="ue_btnArrow">➜</span>
                   </button>
                 </div>
+
+
+
               </form>
             </section>
           )}
+
+
         </div>
       </section>
+      {showDelete && (
+        <div className="modal_overlay_user">
+          <article className="user_delete_content_2">
+            <span>¿Deseas eliminar el registro?</span>
+            <section className="btn_content_2">
+              <button className="btn yes" onClick={() => deleteUser(userIdDelete)} type="button">
+                Sí
+              </button>
+              <button
+                className="btn no"
+                onClick={() => {
+                  setShowDelete(false);
+                  setUserIdDelete(null);
+                }}
+                type="button"
+              >
+                No
+              </button>
+            </section>
+          </article>
+        </div>
+      )}
     </div>
   );
 };

@@ -336,10 +336,10 @@ const Instituto = () => {
                     </span>
                   </div>
 
-                  {/*
+                  
                   <pre className="instJsonPreview">
                     {JSON.stringify({ archivos: selectedArchivos }, null, 2)}
-                  </pre>*/}
+                  </pre>
                 </>
               ) : (
 

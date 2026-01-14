@@ -1,5 +1,5 @@
 /* ========= TOPBAR BLANCA SUPERIOR ========= */
-.topbar {
+.topbars {
   position: fixed;
   top: 0;
   left: 0;
@@ -80,7 +80,7 @@
 }
 
 /* LOGO grande y sobresaliendo hacia abajo */
-.logo_navbar_ph {
+.logo_navbar {
   height: 8rem;
   justify-self: center;
   align-self: flex-start;
@@ -803,8 +803,8 @@
 /* ========= RESPONSIVE (MOBILE ≤ 768px) ========= */
 @media (max-width: 768px) {
   /* ---------- TOPBAR ---------- */
-  .topbar {
-    height: auto;
+  .topbars {
+    height: 2.8rem;
     padding: 0.4rem 1rem;
     font-size: 0.7rem;
     flex-direction: row;
@@ -819,6 +819,7 @@
     justify-content: space-around;
     width: 80%;
     margin: 0 auto;
+    height: 100%
   }
 
   /* ---------- NAVBAR + MENÚ MOBILE ---------- */
@@ -830,9 +831,9 @@
     align-items: center;
   }
 
-  .logo_navbar_ph {
+  .logo_navbar {
     height: 3.3rem;
-    transform: translate(286%, 3%) !important;
+    transform: translate(-28%, 3%) !important;
     margin-top: 0;
   }
 

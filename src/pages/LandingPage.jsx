@@ -110,7 +110,7 @@ const LandingPage = () => {
       {isLoading && <IsLoading />}
 
       {/* FRANJA BLANCA SUPERIOR */}
-      <div className="topbar">
+      <div className="topbars">
         <div className="topbar-left">
           <a
             href="https://www.google.com/maps?q=-0.200737103819847,-78.4886245727539"

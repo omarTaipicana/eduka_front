@@ -308,14 +308,49 @@
 /* ============================
    TABLE
    ============================ */
+/* Wrapper con scroll ARRIBA */
 .secTableWrap {
   position: relative;
   z-index: 1;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  /* 🔑 truco */
+  transform: rotateX(180deg);
+
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 1rem;
-  overflow: auto;
   background: rgba(255, 255, 255, 0.85);
 }
+
+.secTable {
+  width: 100%;
+  min-width: 1100px; /* fuerza scroll */
+  border-collapse: collapse;
+
+  /* 🔑 corrige la inversión */
+  transform: rotateX(180deg);
+}
+
+.secTableWrap::-webkit-scrollbar {
+  height: 10px;
+}
+
+.secTableWrap::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+}
+
+.secTableWrap::-webkit-scrollbar-thumb {
+  background: var(--edukaBlue2);
+  border-radius: 999px;
+}
+
+.secTableWrap::-webkit-scrollbar-thumb:hover {
+  background: #081a3f;
+}
+
 
 .secTable {
   width: 100%;
@@ -558,6 +593,11 @@
     transform: translateY(0);
   }
 }
+
+
+
+
+
 
 /* ============================
    RESPONSIVE

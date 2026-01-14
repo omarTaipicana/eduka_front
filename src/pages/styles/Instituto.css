@@ -1,10 +1,5 @@
 /* ===== INSTITUTO STYLE (similar a Home) ===== */
 
-.institutoPage {
-  width: 100%;
-}
-
-/* usa las mismas variables */
 :root {
   --appHeaderOffset: 9rem;
   --edukaBlue: #1b326b;
@@ -13,15 +8,35 @@
   --edukaAccent: #ffb703;
 }
 
+.institutoPage {
+  width: 100%;
+  overflow-x: hidden; /* ✅ evita que algo empuje el layout */
+}
+
+/* ✅ SUPER IMPORTANTE en grid: permite que el contenido se encoja */
 .institutoShell {
   width: 100%;
   min-height: calc(100dvh - var(--appHeaderOffset));
   padding-top: 1.2rem;
   display: grid;
-  grid-template-columns: 280px 1fr;
+
+  /* ✅ antes: 280px 1fr (puede causar overflow)
+     ahora: el 1fr puede encogerse sin empujar */
+  grid-template-columns: 280px minmax(0, 1fr);
+
   gap: 1.5rem;
   position: relative;
   background: #ffffff;
+
+  /* ✅ evita “ancho fantasma” por hijos */
+  overflow-x: hidden;
+}
+
+/* ✅ también clave: que estos contenedores puedan encogerse */
+.institutoContent,
+.institutoCard,
+.instTableWrapper {
+  min-width: 0;
 }
 
 /* ===== MENU ===== */
@@ -31,7 +46,6 @@
   height: calc(100dvh - var(--appHeaderOffset) - 2rem);
   border-radius: 1.2rem;
   overflow: hidden;
-
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.07);
   box-shadow: 0 0.9rem 2rem rgba(0, 0, 0, 0.08);
@@ -87,9 +101,14 @@
   padding: 0 1rem 2.5rem 0;
 }
 
+/* ✅ antes: width: 90% (puede generar comportamientos raros en mobile)
+   ahora: 100% + centrado */
 .institutoCard {
   position: relative;
-  width:90%;
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+
   border-radius: 1.4rem;
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(6px);
@@ -150,11 +169,21 @@
   position: relative;
   z-index: 1;
   margin-top: 1.2rem;
+
+  /* ✅ esto es lo que debe hacer scroll */
   overflow-x: auto;
+
+  /* ✅ ayuda en iOS */
+  -webkit-overflow-scrolling: touch;
+
+  /* ✅ evita que “salte” el ancho por algo interno */
+  max-width: 100%;
 }
 
+/* ✅ Para que la tabla pueda ser más ancha sin romper el layout */
 .instTable {
   width: 100%;
+  min-width: 720px; /* ✅ fuerza scroll horizontal en mobile si hace falta */
   border-collapse: collapse;
   font-size: 0.95rem;
   background: rgba(232, 234, 239, 0.6);
@@ -171,6 +200,9 @@
   padding: 0.75rem 0.9rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
   text-align: left;
+
+  /* ✅ evita que textos larguísimos rompan celdas */
+  max-width: 0;
 }
 
 .instTable th {
@@ -194,9 +226,13 @@
   cursor: pointer;
 }
 
+/* ✅ tu archivo puede venir MUY largo (URLs, etc.) */
 .instFileName {
-  word-break: break-all;
   font-weight: 700;
+
+  /* ✅ rompe palabras largas y evita overflow */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Botón ver */
@@ -212,8 +248,8 @@
   font-weight: 800;
   font-size: 0.85rem;
   text-decoration: none;
-  transition: background-color 0.2s ease, color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap;
 }
 
 .instBtnOutline:hover {
@@ -266,7 +302,7 @@
   color: #6b6f7b;
 }
 
-/* JSON preview (opcional) */
+/* JSON preview */
 .instJsonPreview {
   position: relative;
   z-index: 1;
@@ -278,6 +314,11 @@
   overflow: auto;
   font-weight: 700;
   color: #2e2e2e;
+
+  /* ✅ por si JSON trae líneas larguísimas */
+  max-width: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* Upload */
@@ -321,18 +362,15 @@
   font-size: 0.9rem;
   font-weight: 800;
   color: #4d4d4d;
+
+  /* ✅ nombres largos */
+  overflow-wrap: anywhere;
 }
 
 /* Anim */
 @keyframes homeFade {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ===== Hamburger Mobile ===== */
@@ -350,12 +388,11 @@
   box-shadow: 0 0.9rem 1.6rem rgba(0, 0, 0, 0.12);
   cursor: pointer;
 
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: center;
   gap: 6px;
   padding: 0 10px;
-  display: none;
 }
 
 .institutoHamburgerLine {
@@ -381,6 +418,9 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  /* ✅ por si algún hijo se pasa, lo cortamos */
+  body { overflow-x: hidden; }
+
   .institutoShell {
     grid-template-columns: 1fr;
     padding-top: 1rem;
@@ -439,5 +479,10 @@
   .instPrimaryBtn {
     width: 100%;
     justify-content: center;
+  }
+
+  /* ✅ si el JSON preview era el culpable, aquí lo aseguramos */
+  .instJsonPreview {
+    max-width: 100%;
   }
 }

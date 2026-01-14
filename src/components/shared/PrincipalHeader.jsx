@@ -379,7 +379,7 @@ const PrincipalHeader = () => {
         </div>
 
         {/* LOGO CENTRADO */}
-        <Link to="/" onClick={closeMenu}>
+        <Link to="/" onClick={closeMenu} className="logo_link">
           <img
             src="/images/eduka_sf.png"
             alt="Logo Eduka"

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import "./styles/ValidacionPago.css";
 import useCrud from "../hooks/useCrud";
@@ -16,11 +16,17 @@ const SUPERADMIN = import.meta.env.VITE_CI_SUPERADMIN;
 
 const PATH_PAGOS = "/pagos";
 const PATH_VARIABLES = "/variables";
+// guarda posición
+
 
 const ValidacionPago = () => {
   const [activeSection, setActiveSection] = useState("resumen");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
+
+  const contentRef = useRef(null);        // el contenedor que scrollea
+  const scrollPosRef = useRef(0);
+  const lastClickedRef = useRef(null);
   const hamburgerRef = useRef();
   const dispatch = useDispatch();
 
@@ -64,6 +70,37 @@ const ValidacionPago = () => {
 
   const [ordenFechaDesc, setOrdenFechaDesc] = useState(true);
 
+
+  const getScroller = () => {
+    const el = contentRef.current;
+    if (!el) return window;
+
+    const st = getComputedStyle(el);
+    const overflowY = st.overflowY;
+    const canScroll =
+      (overflowY === "auto" || overflowY === "scroll") &&
+      el.scrollHeight > el.clientHeight + 2;
+
+    return canScroll ? el : window; // ✅ si main no puede scrollear, usa window
+  };
+
+  const saveScroll = () => {
+    const scroller = getScroller();
+    scrollPosRef.current = scroller === window ? window.scrollY : scroller.scrollTop;
+  };
+
+const SCROLL_OFFSET = -100; // 👈 ajusta a gusto (80, 120, 160...)
+
+const restoreScroll = () => {
+  const scroller = getScroller();
+  const top = Math.max(0, scrollPosRef.current - SCROLL_OFFSET);
+
+  if (scroller === window) window.scrollTo(0, top);
+  else scroller.scrollTop = top;
+};
+
+
+
   useEffect(() => {
     if (error) {
       const message = error.response?.data?.message ?? "Error inesperado";
@@ -81,6 +118,28 @@ const ValidacionPago = () => {
     const handler = setTimeout(() => setFiltroGrado(inputValue), 2000);
     return () => clearTimeout(handler);
   }, [inputValue]);
+
+  useLayoutEffect(() => {
+    if (editPagoId == null) return;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        restoreScroll();
+
+        // opcional: evitar que el focus auto provoque scroll
+        if (lastClickedRef.current?.focus) {
+          try {
+            lastClickedRef.current.focus({ preventScroll: true });
+          } catch {
+            lastClickedRef.current.focus();
+          }
+        }
+      });
+    });
+  }, [editPagoId]);
+
+
+
 
   useEffect(() => {
     getPago(
@@ -124,20 +183,26 @@ const ValidacionPago = () => {
     getPagoDashboard(`/pagos_dashboard`);
   }, []);
 
-const iniciarEdicion = (p) => {
-  setEditPagoId(p.id);
-  setVerificadoOriginal(!!p.verificado); // ✅ estado real en BD
+  const iniciarEdicion = (p, e) => {
+    lastClickedRef.current = e?.currentTarget || null;
+    saveScroll();
 
-  reset({
-    valorDepositado: p.valorDepositado || "",
-    entidad: p.entidad || "",
-    idDeposito: p.idDeposito || "",
-    verificado: !!p.verificado,
-    moneda: !!p.moneda,
-    distintivo: !!p.distintivo,
-    observacion: p.observacion || "",
-  });
-};
+    setEditPagoId(p.id);
+    setVerificadoOriginal(!!p.verificado);
+
+    reset({
+      valorDepositado: p.valorDepositado || "",
+      entidad: p.entidad || "",
+      idDeposito: p.idDeposito || "",
+      verificado: !!p.verificado,
+      moneda: !!p.moneda,
+      distintivo: !!p.distintivo,
+      observacion: p.observacion || "",
+    });
+  };
+
+
+
 
 
   const cancelarEdicion = () => {
@@ -146,28 +211,28 @@ const iniciarEdicion = (p) => {
     setEditVerificado(false);
   };
 
-const guardarEdicion = async (pagoId, data) => {
-  try {
-    // ✅ Confirmación SOLO si BD era false y ahora el input viene true
-    if (verificadoOriginal === false && data.verificado === true) {
-      const ok = window.confirm(
-        "⚠️ Al marcar este pago como VERIFICADO se emitirá el certificado.\n\n¿Deseas continuar?"
-      );
-      if (!ok) return; // ❌ no actualiza nada
+  const guardarEdicion = async (pagoId, data) => {
+    try {
+      // ✅ Confirmación SOLO si BD era false y ahora el input viene true
+      if (verificadoOriginal === false && data.verificado === true) {
+        const ok = window.confirm(
+          "⚠️ Al marcar este pago como VERIFICADO se emitirá el certificado.\n\n¿Deseas continuar?"
+        );
+        if (!ok) return; // ❌ no actualiza nada
+      }
+
+      await updatePago(PATH_PAGOS, pagoId, {
+        ...data,
+        valorDepositado: parseFloat(data.valorDepositado),
+        usuarioEdicion: user.email,
+      });
+
+      await getPago(PATH_PAGOS);
+      cancelarEdicion();
+    } catch (error) {
+      alert("Error al guardar los cambios.");
     }
-
-    await updatePago(PATH_PAGOS, pagoId, {
-      ...data,
-      valorDepositado: parseFloat(data.valorDepositado),
-      usuarioEdicion: user.email,
-    });
-
-    await getPago(PATH_PAGOS);
-    cancelarEdicion();
-  } catch (error) {
-    alert("Error al guardar los cambios.");
-  }
-};
+  };
 
 
   const deletePagoPr = async (id) => {
@@ -593,9 +658,14 @@ const guardarEdicion = async (pagoId, data) => {
                                     </button>
                                   </>
                                 ) : (
-                                  <button onClick={() => iniciarEdicion(p)} className="vp-btn-edit" type="button">
+                                  <button
+                                    onClick={(e) => iniciarEdicion(p, e)}
+                                    className="vp-btn-edit"
+                                    type="button"
+                                  >
                                     Registrar Validación
                                   </button>
+
                                 )}
                               </td>
 
@@ -1003,7 +1073,9 @@ const guardarEdicion = async (pagoId, data) => {
           </button>
         </nav>
 
-        <main className="secContent vpContent">{renderContent()}</main>
+        <main ref={contentRef} className="secContent vpContent">
+          {renderContent()}
+        </main>
 
         {/* MODALES */}
         {showDelete && (
