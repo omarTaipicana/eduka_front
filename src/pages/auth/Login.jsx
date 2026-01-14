@@ -70,6 +70,8 @@ const Login = () => {
         console.log("❌ Token inválido, removido");
         localStorage.removeItem("token");
         setUserLogged(null);
+
+        window.__RN_LOGOUT__?.();
       }
     };
     checkToken();

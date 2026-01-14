@@ -28,15 +28,30 @@ import Instituto from "./pages/Instituto";
 import InstitutoProtectedRoute from "./routes/InstitutoProtectedRoute";
 import SuperAdminProtectedRoute from "./routes/SuperAdminProtectedRoute";
 import UserEdit from "./pages/UserEdit";
+import { useEffect } from "react";
 
 const App = () => {
   const location = useLocation();
   const showHeader = location.pathname !== "/";
 
+  // main.jsx o App.jsx (una sola vez)
+useEffect (() => {
+  window.__RN_LOGOUT__ = () => {
+    try {
+      window.ReactNativeWebView?.postMessage(
+        JSON.stringify({ type: "LOGOUT" })
+      );
+    } catch {}
+  };
+}, []);
+
+
   return (
     <div>
       {location.pathname !== "/" && <PrincipalHeader />}
-      <main className={showHeader ? "app-main app-main--with-header" : "app-main"}></main>
+      <main
+        className={showHeader ? "app-main app-main--with-header" : "app-main"}
+      ></main>
       {/* <Gkm /> */}
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -72,13 +87,9 @@ const App = () => {
 
               <Route element={<SuperAdminProtectedRoute />}>
                 <Route path="/edit_user" element={<UserEdit />} />
-
               </Route>
-
             </Route>
           </Route>
-
-
         </Route>
       </Routes>
       <Footer />
