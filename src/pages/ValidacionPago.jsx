@@ -303,7 +303,11 @@ const restoreScroll = () => {
       Comprobante: p.pagoUrl || "",
       Verificado: p.verificado ? "Sí" : "No",
       Fecha: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "",
+      Email: p?.inscripcion?.user?.email || "",
+      Celular: p?.inscripcion?.user?.cellular || "",
     }));
+
+    
 
     const ws = XLSX.utils.json_to_sheet(datosExcel);
     const wb = XLSX.utils.book_new();
@@ -311,6 +315,9 @@ const restoreScroll = () => {
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const blob = new Blob([wbout], { type: "application/octet-stream" });
     saveAs(blob, "pagos_filtrados.xlsx");
+
+
+    
   };
 
   const descargarExcelInscripcion = () => {

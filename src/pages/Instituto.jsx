@@ -6,11 +6,9 @@ import "./styles/Instituto.css";
 import useAuth from "../hooks/useAuth";
 
 const Instituto = () => {
-
   const superAdmin = import.meta.env.VITE_CI_SUPERADMIN;
   const [, , , loggedUser, , , , , , , , , , user] = useAuth();
   const [filtroCurso, setFiltroCurso] = useState("");
-
 
   const rolePath = useMemo(() => {
     if (!user) return "";
@@ -23,7 +21,6 @@ const Instituto = () => {
     // USUARIO NORMAL → toma del rol
     return user?.role?.replace("instituto_", "") || "";
   }, [user, filtroCurso, superAdmin]);
-
 
   const PATH_CERTIFICADOS = rolePath
     ? `/instituto/certificados/${rolePath}`
@@ -38,13 +35,11 @@ const Instituto = () => {
     : null;
   const PATH_COURSES = "/courses";
 
-
   const [certificados, getCertificados] = useCrud();
   const [, , , , , , , , , , , , , postApiDownloadZip] = useCrud();
   const [, , , , , , isLoading, , , , , , , , uploadCertificadosZip] =
     useCrud();
   const [courses, getCourses] = useCrud();
-
 
   const [activeSection, setActiveSection] = useState("descargar");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -60,7 +55,6 @@ const Instituto = () => {
   useEffect(() => {
     loggedUser();
     getCourses(PATH_COURSES);
-
   }, []);
 
   useEffect(() => {
@@ -68,7 +62,6 @@ const Instituto = () => {
       getCertificados(PATH_CERTIFICADOS);
     }
   }, [PATH_CERTIFICADOS]);
-
 
   // Cerrar menú si clic fuera (igual que Home)
   useEffect(() => {
@@ -217,16 +210,18 @@ const Instituto = () => {
           </div>
 
           <button
-            className={`institutoMenuBtn ${activeSection === "descargar" ? "active" : ""
-              }`}
+            className={`institutoMenuBtn ${
+              activeSection === "descargar" ? "active" : ""
+            }`}
             onClick={() => handleSelect("descargar")}
           >
             📥 Descargar certificados
           </button>
 
           <button
-            className={`institutoMenuBtn ${activeSection === "subir" ? "active" : ""
-              }`}
+            className={`institutoMenuBtn ${
+              activeSection === "subir" ? "active" : ""
+            }`}
             onClick={() => handleSelect("subir")}
           >
             📤 Subir certificados firmados
@@ -246,24 +241,33 @@ const Instituto = () => {
                 <IsLoading />
               ) : listaArchivos.length > 0 ? (
                 <>
-                  {(user.cI === superAdmin) && (<div className="input_group secInputGroup">
-                    <select
-                      value={filtroCurso}
-                      onChange={(e) => setFiltroCurso(e.target.value)}
-                      className="buscador_input secInput"
-                    >
-                      <option value="">Todos los cursos</option>
-                      {courses?.map((c) => (
-                        <option key={c.id} value={c.sigla}>
-                          {c.sigla}
-                        </option>
-                      ))}
-                    </select>
-                  </div>)}
+                  {user.cI === superAdmin && (
+                    <div className="input_group secInputGroup">
+                      <select
+                        value={filtroCurso}
+                        onChange={(e) => setFiltroCurso(e.target.value)}
+                        className="buscador_input secInput"
+                      >
+                        <option value="">Todos los cursos</option>
+                        {courses?.map((c) => (
+                          <option key={c.id} value={c.sigla}>
+                            {c.sigla}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <p className="institutoDescription">
                     Selecciona uno o varios certificados. El botón “Ver” abre el
                     PDF, y “Descargar” enviará los seleccionados al backend.
                   </p>
+
+                  <span className="instSelectedInfo">
+                    {selectedArchivos.length
+                      ? `${selectedArchivos.length} seleccionado(s)`
+                      : "Ninguno seleccionado"}{" "}
+                    de {listaArchivos.length}
+                  </span>
 
                   <div className="instTableWrapper">
                     <table className="instTable">
@@ -289,7 +293,7 @@ const Instituto = () => {
                               <input
                                 type="checkbox"
                                 checked={selectedArchivos.includes(
-                                  item.nombreArchivo
+                                  item.nombreArchivo,
                                 )}
                                 onChange={() =>
                                   handleSelectOne(item.nombreArchivo)
@@ -336,35 +340,32 @@ const Instituto = () => {
                     </span>
                   </div>
 
-                  
                   <pre className="instJsonPreview">
                     {JSON.stringify({ archivos: selectedArchivos }, null, 2)}
                   </pre>
                 </>
               ) : (
-
                 <div>
-
                   <p className="institutoMuted">
                     No hay certificados disponibles.
                   </p>
-                  {(user?.cI === superAdmin) && (<div className="input_group secInputGroup">
-                    <select
-                      value={filtroCurso}
-                      onChange={(e) => setFiltroCurso(e.target.value)}
-                      className="buscador_input secInput"
-                    >
-                      <option value="">Todos los cursos</option>
-                      {courses?.map((c) => (
-                        <option key={c.id} value={c.sigla}>
-                          {c.sigla}
-                        </option>
-                      ))}
-                    </select>
-                  </div>)}
+                  {user?.cI === superAdmin && (
+                    <div className="input_group secInputGroup">
+                      <select
+                        value={filtroCurso}
+                        onChange={(e) => setFiltroCurso(e.target.value)}
+                        className="buscador_input secInput"
+                      >
+                        <option value="">Todos los cursos</option>
+                        {courses?.map((c) => (
+                          <option key={c.id} value={c.sigla}>
+                            {c.sigla}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
-
-
               )}
             </section>
           )}
