@@ -89,15 +89,15 @@ const ValidacionPago = () => {
     scrollPosRef.current = scroller === window ? window.scrollY : scroller.scrollTop;
   };
 
-const SCROLL_OFFSET = -100; // 👈 ajusta a gusto (80, 120, 160...)
+  const SCROLL_OFFSET = -100; // 👈 ajusta a gusto (80, 120, 160...)
 
-const restoreScroll = () => {
-  const scroller = getScroller();
-  const top = Math.max(0, scrollPosRef.current - SCROLL_OFFSET);
+  const restoreScroll = () => {
+    const scroller = getScroller();
+    const top = Math.max(0, scrollPosRef.current - SCROLL_OFFSET);
 
-  if (scroller === window) window.scrollTo(0, top);
-  else scroller.scrollTop = top;
-};
+    if (scroller === window) window.scrollTo(0, top);
+    else scroller.scrollTop = top;
+  };
 
 
 
@@ -307,7 +307,7 @@ const restoreScroll = () => {
       Celular: p?.inscripcion?.user?.cellular || "",
     }));
 
-    
+
 
     const ws = XLSX.utils.json_to_sheet(datosExcel);
     const wb = XLSX.utils.book_new();
@@ -317,7 +317,7 @@ const restoreScroll = () => {
     saveAs(blob, "pagos_filtrados.xlsx");
 
 
-    
+
   };
 
   const descargarExcelInscripcion = () => {
@@ -566,13 +566,19 @@ const restoreScroll = () => {
 
                           <td>
                             {papelera ? (
-                              `$${p.valorDepositado?.toFixed(2) || "0.00"}`
+                              `$${Number(p.valorDepositado || 0).toFixed(2)}`
                             ) : isEditing ? (
-                              <input type="number" step="0.01" {...register("valorDepositado")} className="vpMiniInput" />
+                              <input
+                                type="number"
+                                step="0.01"
+                                {...register("valorDepositado")}
+                                className="vpMiniInput"
+                              />
                             ) : (
-                              `$${p.valorDepositado?.toFixed(2) || "0.00"}`
+                              `$${Number(p.valorDepositado || 0).toFixed(2)}`
                             )}
                           </td>
+
 
                           <td className="vpTdWrap">
                             {papelera ? (
@@ -831,7 +837,7 @@ const restoreScroll = () => {
                         <td className="vpTdWrap">{p.curso}</td>
                         <td style={{ textAlign: "center" }}>{p.moneda ? "✅" : "❌"}</td>
                         <td style={{ textAlign: "center" }}>{p.distintivo ? "✅" : "❌"}</td>
-                        <td>{`$${p.valorDepositado?.toFixed(2) || "0.00"}`}</td>
+                        <td>${Number(p.valorDepositado || 0).toFixed(2)}</td>
                         <td style={{ textAlign: "center" }}>{p.verificado ? "✅" : "❌"}</td>
                         <td>
                           {p.pagoUrl ? (
@@ -965,7 +971,7 @@ const restoreScroll = () => {
                       <td>{p?.inscripcion?.user?.cI || "-"}</td>
                       <td>{p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-"}</td>
                       <td className="vpTdWrap">{p.curso}</td>
-                      <td>${p.valorDepositado?.toFixed(2) || "0.00"}</td>
+                      <td>${Number(p.valorDepositado || 0).toFixed(2)}</td>
                       <td>
                         {p.pagoUrl ? (
                           <a className="vpLink" href={p.pagoUrl} target="_blank" rel="noopener noreferrer">

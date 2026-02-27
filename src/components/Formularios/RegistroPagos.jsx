@@ -115,7 +115,7 @@ export const RegistroPagos = () => {
 
     reset();
     setCursoActual(null);
-    setTotal(26);
+    setTotal(0);
   };
 
   useEffect(() => {
@@ -335,8 +335,7 @@ export const RegistroPagos = () => {
                   <span>Valor depositado:</span>
                   <input
                     type="number"
-                    step="1"
-                    min="0"
+                    step="0.01" min="0"
                     {...register("valorDepositado", {
                       required: "Debes ingresar el valor depositado.",
                     })}
