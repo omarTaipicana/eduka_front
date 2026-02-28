@@ -125,7 +125,6 @@ const Dashboard = () => {
 
   const cursosUnicos = inscripcionDashboard?.inscritosPorCurso?.map((c) => c.curso) || [];
 
-
   const renderContent = () => {
     switch (activeSection) {
       case "resumen": {

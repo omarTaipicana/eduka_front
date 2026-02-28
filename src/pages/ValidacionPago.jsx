@@ -299,7 +299,7 @@ const ValidacionPago = () => {
       Apellidos: p?.inscripcion?.user?.lastName || "",
       Cedula: p?.inscripcion?.user?.cI || "",
       Curso: p.curso || "",
-      "Valor Depositado": p.valorDepositado?.toFixed(2) || "0.00",
+      "Valor Depositado": Number(p.valorDepositado || 0).toFixed(2) || "0.00",
       Comprobante: p.pagoUrl || "",
       Verificado: p.verificado ? "Sí" : "No",
       Fecha: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "",
