@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import "./styles/ValidacionPago.css";
@@ -11,8 +12,11 @@ import { useDispatch } from "react-redux";
 import { showAlert } from "../store/states/alert.slice";
 
 
+
 const BASEURL = import.meta.env.VITE_API_URL;
 const SUPERADMIN = import.meta.env.VITE_CI_SUPERADMIN;
+const urlBase = import.meta.env.VITE_API_URL;
+
 
 const PATH_PAGOS = "/pagos";
 const PATH_VARIABLES = "/variables";
@@ -45,6 +49,7 @@ const ValidacionPago = () => {
 
   const [papelera, setPapelera] = useState(false);
   const [verificadoOriginal, setVerificadoOriginal] = useState(false);
+  const [generaFactura, setGeneraFactura] = useState()
 
 
   const [pago, getPago, , , updatePago, error, isLoading] = useCrud();
@@ -100,6 +105,17 @@ const ValidacionPago = () => {
   };
 
 
+  useEffect(() => {
+    if (generaFactura) {
+      const message = generaFactura.message ?? "Error inesperado";
+      dispatch(
+        showAlert({
+          message: `⚠️ ${message}`,
+          alertType: 2,
+        })
+      );
+    }
+  }, [generaFactura]);
 
   useEffect(() => {
     if (error) {
@@ -346,6 +362,38 @@ const ValidacionPago = () => {
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const blob = new Blob([wbout], { type: "application/octet-stream" });
     saveAs(blob, "inscripciones.xlsx");
+  };
+
+  const emitirFacturaManual = async (pagoId) => {
+    try {
+
+      const { data } = await axios.post(
+        `${urlBase}/contifico/factura/emitir-manual`,
+        { pagoId }
+      );
+      setGeneraFactura(data)
+
+      getPago(PATH_PAGOS)
+    } catch (e) {
+
+      console.error("Error emitir factura:", e.response?.data || e.message);
+
+    }
+  };
+
+  const getFacturaUI = (p) => {
+    // 1) No hay documento
+    if (!p.contificoDocumentoId) {
+      return { type: "emitir", label: "Emitir factura" };
+    }
+
+    // 2) Ya hay autorización => ver RIDE
+    if (p.contificoAutorizacion) {
+      return { type: "ver", label: "Ver factura", href: p.contificoUrlRide || p.contificoUrlXml };
+    }
+
+    // 3) Hay documento pero no autorización
+    return { type: "pendiente", label: "Pendiente SRI" };
   };
 
   const limpiarFiltrosBase = () => {
@@ -679,7 +727,57 @@ const ValidacionPago = () => {
                                     Registrar Validación
                                   </button>
 
+
+
+
+
                                 )}
+
+                                {(() => {
+                                  const f = getFacturaUI(p);
+
+                                  // Emitir (solo si pago está verificado)
+                                  if (f.type === "emitir") {
+                                    return (
+                                      <button
+                                        className="secBtnPrimary vpBtnSmall"
+                                        type="button"
+                                        disabled={!p.verificado}
+                                        title={!p.verificado ? "Primero verifica el pago" : "Emitir factura en Contífico"}
+                                        onClick={() => emitirFacturaManual(p.id)}
+                                        style={{ marginLeft: 8 }}
+                                      >
+                                        Emitir
+                                      </button>
+                                    );
+                                  }
+
+                                  // Pendiente
+                                  if (f.type === "pendiente") {
+                                    return (
+                                      <span style={{ marginLeft: 10, fontSize: 12 }}>
+                                        🟡 Pendiente
+                                      </span>
+                                    );
+                                  }
+
+                                  // Ver
+                                  return f.href ? (
+                                    <a
+                                      className="vpLink"
+                                      href={f.href}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{ marginLeft: 10 }}
+                                    >
+                                      Ver
+                                    </a>
+                                  ) : (
+                                    <span style={{ marginLeft: 10, fontSize: 12 }}>
+                                      🟢 Autorizada
+                                    </span>
+                                  );
+                                })()}
                               </td>
 
                               <td>
