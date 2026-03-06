@@ -29,22 +29,22 @@ import InstitutoProtectedRoute from "./routes/InstitutoProtectedRoute";
 import SuperAdminProtectedRoute from "./routes/SuperAdminProtectedRoute";
 import UserEdit from "./pages/UserEdit";
 import { useEffect } from "react";
+import ProgramaSuperiorAdmin from "./pages/ProgramaSuperiorAdmin";
 
 const App = () => {
   const location = useLocation();
   const showHeader = location.pathname !== "/";
 
   // main.jsx o App.jsx (una sola vez)
-useEffect (() => {
-  window.__RN_LOGOUT__ = () => {
-    try {
-      window.ReactNativeWebView?.postMessage(
-        JSON.stringify({ type: "LOGOUT" })
-      );
-    } catch {}
-  };
-}, []);
-
+  useEffect(() => {
+    window.__RN_LOGOUT__ = () => {
+      try {
+        window.ReactNativeWebView?.postMessage(
+          JSON.stringify({ type: "LOGOUT" }),
+        );
+      } catch {}
+    };
+  }, []);
 
   return (
     <div>
@@ -84,6 +84,7 @@ useEffect (() => {
 
             <Route element={<SubAdminProtectedRoutes />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/programa-superior" element={<ProgramaSuperiorAdmin />} />
 
               <Route element={<SuperAdminProtectedRoute />}>
                 <Route path="/edit_user" element={<UserEdit />} />

@@ -79,7 +79,7 @@ const PrincipalHeader = () => {
         showAlert({
           message: `⚠️ Hasta pronto ${firstName} ${lastName}, te esperamos.`,
           alertType: 4,
-        })
+        }),
       );
     }
     localStorage.removeItem("token");
@@ -191,6 +191,9 @@ const PrincipalHeader = () => {
           <Link to="/validacion" onClick={onClick}>
             Validacion
           </Link>
+          <Link to="/programa-superior" onClick={onClick}>
+            Prog. Sup
+          </Link>
           <Link to="/edit_user" onClick={onClick}>
             Editar Usuario
           </Link>
@@ -206,6 +209,9 @@ const PrincipalHeader = () => {
           </Link>
           <Link to="/validacion" onClick={onClick}>
             Validacion
+          </Link>
+          <Link to="/programa-superior" onClick={onClick}>
+            Prog. Sup
           </Link>
         </>
       );
