@@ -834,7 +834,7 @@ const ProgramaSuperiorAdmin = () => {
                 <input
                   className="secInput"
                   value={getProgramaNombre(
-                    selectedInscripcionPago.programasSuperiore.nombre,
+                    selectedInscripcionPago.programasSuperiore?.nombre,
                   )}
                   readOnly
                 />
