@@ -62,6 +62,7 @@ const ProgramaSuperiorAdmin = () => {
 
   const [selectedPrograma, setSelectedPrograma] = useState("");
   const [selectedInscripcionId, setSelectedInscripcionId] = useState("");
+  const [selectedTipoPrograma, setSelectedTipoPrograma] = useState("");
   const [isSubmittingInscripcion, setIsSubmittingInscripcion] = useState(false);
   const [isSubmittingPago, setIsSubmittingPago] = useState(false);
   const [isEmitiendoFactura, setIsEmitiendoFactura] = useState(false);
@@ -220,6 +221,17 @@ const ProgramaSuperiorAdmin = () => {
   /* =============================
      MEMOS
   ============================= */
+
+  const programasFiltradosPorTipo = useMemo(() => {
+    if (!Array.isArray(programas)) return [];
+
+    if (!selectedTipoPrograma) return [];
+
+    return programas.filter(
+      (p) =>
+        String(p?.tipo || "").trim() === String(selectedTipoPrograma).trim(),
+    );
+  }, [programas, selectedTipoPrograma]);
 
   const inscripcionesUnicas = useMemo(() => {
     if (!Array.isArray(inscripciones)) return [];
@@ -663,20 +675,36 @@ const ProgramaSuperiorAdmin = () => {
 
         <form onSubmit={handleSubmit(submitInscripcion)} className="secFilters">
           <div className="secInputGroup">
+            <label className="vpLbl">Tipo</label>
+            <select
+              className="secInput"
+              value={selectedTipoPrograma}
+              onChange={(e) => setSelectedTipoPrograma(e.target.value)}
+              required
+            >
+              <option value="">Seleccione</option>
+              <option value="tecnologia">Tecnología</option>
+              <option value="maestria">Maestría</option>
+              <option value="licenciatura">Licenciatura</option>
+              <option value="combo">MBA - Licenciatura</option>
+            </select>
+          </div>
+
+          <div className="secInputGroup">
             <label className="vpLbl">Programa</label>
             <select
               className="secInput"
               value={selectedPrograma}
               onChange={(e) => setSelectedPrograma(e.target.value)}
               required
+              disabled={!selectedTipoPrograma}
             >
               <option value="">Seleccione</option>
-              {Array.isArray(programas) &&
-                programas.map((p) => (
-                  <option key={normalizeId(p.id)} value={normalizeId(p.id)}>
-                    {p.nombre}
-                  </option>
-                ))}
+              {programasFiltradosPorTipo.map((p) => (
+                <option key={normalizeId(p.id)} value={normalizeId(p.id)}>
+                  {p.nombre}
+                </option>
+              ))}
             </select>
           </div>
 
