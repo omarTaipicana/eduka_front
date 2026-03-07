@@ -996,7 +996,7 @@ const ProgramaSuperiorAdmin = () => {
                 return (
                   <tr key={normalizeId(i.id)}>
                     <td className="vpTdWrap">
-                      {getProgramaNombre(i.programasSuperiore.nombre)}
+                      {getProgramaNombre(i?.programasSuperiore?.nombre)}
                     </td>
 
                     <td className="vpTdWrap">
