@@ -52,10 +52,19 @@ const ProgramaSuperiorAdmin = () => {
   } = useForm();
 
   const [programas, getProgramas] = useCrud();
-  const [inscripciones, getInscripciones] = useCrud();
+  const [
+    inscripciones,
+    getInscripciones,
+    ,
+    ,
+    updateInscripcion,
+    errorI,
+    isLoadingI,
+  ] = useCrud();
   const [pagos, getPagos, , , updatePago, error, isLoading] = useCrud();
   const [variables, getVariables] = useCrud();
   const [editPagoId, setEditPagoId] = useState(null);
+  const [editInscripcionId, setEditInscripcionId] = useState(null);
   const dispatch = useDispatch();
 
   const [, , , loggedUser, , , , , , , , , , user] = useAuth();
@@ -88,6 +97,18 @@ const ProgramaSuperiorAdmin = () => {
     }
   }, [error, dispatch]);
 
+  useEffect(() => {
+    if (errorI) {
+      const message = errorI.response?.data?.message || "Error inesperado";
+      dispatch(
+        showAlert({
+          message: `⚠️ ${message}`,
+          alertType: 1,
+        }),
+      );
+    }
+  }, [errorI, dispatch]);
+
   const iniciarEdicionPago = (pago) => {
     setEditPagoId(pago.id);
 
@@ -100,6 +121,15 @@ const ProgramaSuperiorAdmin = () => {
     });
   };
 
+  const iniciarEdicionInscripcion = (inscrito) => {
+    setEditInscripcionId(inscrito.id);
+
+    resetEdit({
+      descuento: inscrito.descuento || "",
+      totalAPagar: inscrito.totalAPagar || "",
+    });
+  };
+
   const cancelarEdicionPago = () => {
     setEditPagoId(null);
     resetEdit({
@@ -108,6 +138,14 @@ const ProgramaSuperiorAdmin = () => {
       idDeposito: "",
       observacion: "",
       verificado: true,
+    });
+  };
+
+  const cancelarEdicionInscripcion = () => {
+    setEditInscripcionId(null);
+    resetEdit({
+      descuento: "",
+      totalAPagar: "",
     });
   };
 
@@ -129,6 +167,34 @@ const ProgramaSuperiorAdmin = () => {
       dispatch(
         showAlert({
           message: "✅ Pago actualizado correctamente",
+          alertType: 3,
+        }),
+      );
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+      dispatch(
+        showAlert({
+          message: `⚠️ ${err.response?.data?.message || err.response?.data?.error || "Error actualizando pago"}`,
+          alertType: 1,
+        }),
+      );
+    }
+  };
+
+  const guardarEdicionInscripcion = async (inscripcionId, data) => {
+    try {
+      await updateInscripcion(PATH_INSCRIPCIONES, inscripcionId, {
+        descuento: Number(data.descuento || 0),
+        totalAPagar: Number(data.totalAPagar || 0),
+      });
+
+      await getPagos(PATH_PAGOS);
+      await getInscripciones(PATH_INSCRIPCIONES);
+      cancelarEdicionInscripcion();
+
+      dispatch(
+        showAlert({
+          message: "✅ Inscripción actualizada correctamente",
           alertType: 3,
         }),
       );
@@ -666,6 +732,7 @@ const ProgramaSuperiorAdmin = () => {
     return (
       <section className="secCard">
         {(isLoading ||
+          isLoadingI ||
           isSubmittingInscripcion ||
           isSubmittingPago ||
           isEmitiendoFactura) && <IsLoading />}
@@ -795,7 +862,9 @@ const ProgramaSuperiorAdmin = () => {
     );
 
     const totalPrograma = Number(selectedInscripcionPago?.totalAPagar || 0);
-    const saldoActual = totalPrograma - totalPagadoActual;
+    const comision = Number(selectedInscripcionPago?.descuento || 0);
+    const total = totalPrograma + comision;
+    const saldoActual = total - totalPagadoActual;
 
     return (
       <section className="secCard">
@@ -966,10 +1035,13 @@ const ProgramaSuperiorAdmin = () => {
             <thead>
               <tr>
                 <th>Programa</th>
+                <th>Inscrito Por</th>
                 <th>Participante</th>
                 <th>Cédula</th>
                 <th>Email</th>
                 <th>Total Programa</th>
+                <th>Comisión</th>
+                <th>Total</th>
                 <th>Total Pagado</th>
                 <th>Saldo</th>
                 <th>Estado</th>
@@ -983,8 +1055,14 @@ const ProgramaSuperiorAdmin = () => {
                   i?.totalAPagar || getProgramaPrecio(i?.programa) || 0,
                 );
 
+                const comision = Number(
+                  i?.descuento || getProgramaPrecio(i?.programa) || 0,
+                );
+
+                const total = totalPrograma + comision;
+
                 const totalPagado = calcularTotalPagadoPorInscripcion(i?.id);
-                const saldo = totalPrograma - totalPagado;
+                const saldo = total - totalPagado;
 
                 const estado =
                   saldo <= 0
@@ -1000,12 +1078,43 @@ const ProgramaSuperiorAdmin = () => {
                     </td>
 
                     <td className="vpTdWrap">
+                      {getProgramaNombre(i?.inscritoPor)}
+                    </td>
+
+                    <td className="vpTdWrap">
                       {i.user?.firstName} {i.user?.lastName}
                     </td>
 
                     <td>{i.user?.cI || i.user?.cedula || "-"}</td>
                     <td>{i.user?.email || "-"}</td>
-                    <td>${totalPrograma.toFixed(2)}</td>
+
+                    <td>
+                      {editInscripcionId === i.id ? (
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="vpMiniInput"
+                          {...registerEdit("totalAPagar")}
+                        />
+                      ) : (
+                        `$${Number(i?.totalAPagar || 0).toFixed(2)}`
+                      )}
+                    </td>
+
+                    <td>
+                      {editInscripcionId === i.id ? (
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="vpMiniInput"
+                          {...registerEdit("descuento")}
+                        />
+                      ) : (
+                        `$${Number(i?.descuento || 0).toFixed(2)}`
+                      )}
+                    </td>
+
+                    <td>${total.toFixed(2)}</td>
                     <td>${totalPagado.toFixed(2)}</td>
 
                     <td style={{ color: saldo > 0 ? "#c0392b" : "#2e7d32" }}>
@@ -1018,7 +1127,7 @@ const ProgramaSuperiorAdmin = () => {
                       {estado === "Pendiente" && "❌ Pendiente"}
                     </td>
 
-                    <td>
+                    <td className="td-btn">
                       <button
                         className="secBtnPrimary vpBtnSmall"
                         type="button"
@@ -1040,6 +1149,35 @@ const ProgramaSuperiorAdmin = () => {
                       >
                         Registrar pago
                       </button>
+
+                      {editInscripcionId === i.id ? (
+                        <>
+                          <button
+                            type="button"
+                            className="vp-btn-save"
+                            onClick={handleSubmitEdit((data) =>
+                              guardarEdicionInscripcion(i.id, data),
+                            )}
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            type="button"
+                            className="vp-btn-cancel"
+                            onClick={cancelarEdicionInscripcion}
+                          >
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="vp-btn-edit"
+                          onClick={() => iniciarEdicionInscripcion(i)}
+                        >
+                          Editar
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
@@ -1290,6 +1428,7 @@ const ProgramaSuperiorAdmin = () => {
                       </td>
 
                       <td className="vpTdWrap">{p?.usuarioEdicion || "-"}</td>
+
                       <td className="vpTdWrap2">
                         {editPagoId === p.id ? (
                           <>
