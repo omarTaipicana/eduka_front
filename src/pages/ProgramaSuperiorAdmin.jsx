@@ -754,6 +754,7 @@ const ProgramaSuperiorAdmin = () => {
               <option value="maestria">Maestría</option>
               <option value="licenciatura">Licenciatura</option>
               <option value="combo">MBA - Licenciatura</option>
+              <option value="abogacia">Abogacía</option>
             </select>
           </div>
 
@@ -800,7 +801,7 @@ const ProgramaSuperiorAdmin = () => {
           </div>
 
           <div className="secInputGroup">
-            <label className="vpLbl">Descuento</label>
+            <label className="vpLbl">Comisión</label>
             <input
               type="number"
               step="0.01"
