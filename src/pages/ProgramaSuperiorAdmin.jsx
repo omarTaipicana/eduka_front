@@ -85,6 +85,12 @@ const ProgramaSuperiorAdmin = () => {
 
   const inscritoPorValue = watch("inscritoPor");
 
+  const [filtroBusquedaInscrito, setFiltroBusquedaInscrito] = useState("");
+  const [filtroFechaInicioInscrito, setFiltroFechaInicioInscrito] = useState("");
+  const [filtroFechaFinInscrito, setFiltroFechaFinInscrito] = useState("");
+  const [filtroInscritoPor, setFiltroInscritoPor] = useState("");
+  const [filtroEstadoInscrito, setFiltroEstadoInscrito] = useState("");
+
   useEffect(() => {
     if (error) {
       const message = error.response?.data?.message || "Error inesperado";
@@ -108,6 +114,36 @@ const ProgramaSuperiorAdmin = () => {
       );
     }
   }, [errorI, dispatch]);
+
+  useEffect(() => {
+    cargarInscripcionesFiltradas();
+  }, [
+    filtroBusquedaInscrito,
+    filtroFechaInicioInscrito,
+    filtroFechaFinInscrito,
+    filtroInscritoPor,
+    filtroEstadoInscrito,
+  ]);
+
+  const cargarInscripcionesFiltradas = async () => {
+    const params = new URLSearchParams();
+
+    if (filtroBusquedaInscrito) params.append("busqueda", filtroBusquedaInscrito);
+    if (filtroFechaInicioInscrito) params.append("fechaInicio", filtroFechaInicioInscrito);
+    if (filtroFechaFinInscrito) params.append("fechaFin", filtroFechaFinInscrito);
+    if (filtroInscritoPor) params.append("inscritoPor", filtroInscritoPor);
+    if (filtroEstadoInscrito) params.append("estadoPago", filtroEstadoInscrito);
+
+    await getInscripciones(`${PATH_INSCRIPCIONES}?${params.toString()}`);
+  };
+
+  const limpiarFiltrosInscritos = () => {
+    setFiltroBusquedaInscrito("");
+    setFiltroFechaInicioInscrito("");
+    setFiltroFechaFinInscrito("");
+    setFiltroInscritoPor("");
+    setFiltroEstadoInscrito("");
+  };
 
   const iniciarEdicionPago = (pago) => {
     setEditPagoId(pago.id);
@@ -347,9 +383,8 @@ const ProgramaSuperiorAdmin = () => {
       const q = filtroBusquedaPago.trim().toLowerCase();
 
       data = data.filter((p) => {
-        const nombres = `${p?.inscripcion?.user?.firstName || ""} ${
-          p?.inscripcion?.user?.lastName || ""
-        }`.toLowerCase();
+        const nombres = `${p?.inscripcion?.user?.firstName || ""} ${p?.inscripcion?.user?.lastName || ""
+          }`.toLowerCase();
 
         const cedula = String(p?.inscripcion?.user?.cI || "").toLowerCase();
         const email = String(p?.inscripcion?.user?.email || "").toLowerCase();
@@ -537,8 +572,8 @@ const ProgramaSuperiorAdmin = () => {
       console.error(error.response?.data || error.message);
       alert(
         error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Error al crear inscripción",
+        error.response?.data?.error ||
+        "Error al crear inscripción",
       );
     } finally {
       setIsSubmittingInscripcion(false);
@@ -624,8 +659,8 @@ const ProgramaSuperiorAdmin = () => {
       console.error(error.response?.data || error.message);
       alert(
         error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Error registrando pago",
+        error.response?.data?.error ||
+        "Error registrando pago",
       );
     } finally {
       setIsSubmittingPago(false);
@@ -660,8 +695,8 @@ const ProgramaSuperiorAdmin = () => {
       console.error(error.response?.data || error.message);
       alert(
         error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Error al emitir factura",
+        error.response?.data?.error ||
+        "Error al emitir factura",
       );
     } finally {
       setIsEmitiendoFactura(false);
@@ -1030,6 +1065,75 @@ const ProgramaSuperiorAdmin = () => {
         <div className="secCardHeader">
           <h2 className="secTitle">📋 Lista Inscritos</h2>
         </div>
+        <div className="secFilters vpFiltersRow">
+          <div className="secInputGroup">
+            <label className="vpLbl">Buscar</label>
+            <input
+              className="secInput"
+              type="text"
+              placeholder="Nombre, cédula, email, programa..."
+              value={filtroBusquedaInscrito}
+              onChange={(e) => setFiltroBusquedaInscrito(e.target.value)}
+            />
+          </div>
+
+          <div className="secInputGroup">
+            <label className="vpLbl">Inscrito por</label>
+            <select
+              className="secInput"
+              value={filtroInscritoPor}
+              onChange={(e) => setFiltroInscritoPor(e.target.value)}
+            >
+              <option value="">Todos</option>
+              <option value="eduka">Eduka</option>
+              <option value="asociado">Asociado</option>
+            </select>
+          </div>
+
+          {/* <div className="secInputGroup">
+            <label className="vpLbl">Estado</label>
+            <select
+              className="secInput"
+              value={filtroEstadoInscrito}
+              onChange={(e) => setFiltroEstadoInscrito(e.target.value)}
+            >
+              <option value="">Todos</option>
+              <option value="pagado">Pagado</option>
+              <option value="en_pagos">En pagos</option>
+              <option value="pendiente">Pendiente</option>
+            </select>
+          </div> */}
+
+          <div className="secInputGroup">
+            <label className="vpLbl">Fecha inicio</label>
+            <input
+              className="secInput"
+              type="date"
+              value={filtroFechaInicioInscrito}
+              onChange={(e) => setFiltroFechaInicioInscrito(e.target.value)}
+            />
+          </div>
+
+          <div className="secInputGroup">
+            <label className="vpLbl">Fecha fin</label>
+            <input
+              className="secInput"
+              type="date"
+              value={filtroFechaFinInscrito}
+              onChange={(e) => setFiltroFechaFinInscrito(e.target.value)}
+            />
+          </div>
+
+          <button
+            className="secBtnDanger"
+            onClick={limpiarFiltrosInscritos}
+            type="button"
+          >
+            ❌ Eliminar filtros
+          </button>
+        </div>
+
+        <div className="secCount">Total: {inscripcionesUnicas.length}</div>
 
         <div className="secTableWrap">
           <table className="secTable">
