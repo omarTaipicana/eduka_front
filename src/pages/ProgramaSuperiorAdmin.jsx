@@ -9,6 +9,9 @@ import IsLoading from "../components/shared/isLoading";
 import { useDispatch } from "react-redux";
 import { showAlert } from "../store/states/alert.slice";
 
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 const BASEURL = import.meta.env.VITE_API_URL;
 
 const PATH_PROGRAMAS = "/programa-superior";
@@ -318,6 +321,120 @@ const ProgramaSuperiorAdmin = () => {
     }
 
     return { type: "pendiente", label: "Pendiente SRI" };
+  };
+
+
+  const descargarExcelInscritos = () => {
+    const data = inscripcionesUnicas.map((i) => {
+      const totalPrograma = Number(
+        i?.totalAPagar || getProgramaPrecio(i?.programa) || 0
+      );
+
+      const comision = Number(
+        i?.descuento || getProgramaPrecio(i?.programa) || 0
+      );
+
+      const total = totalPrograma + comision;
+      const totalPagado = calcularTotalPagadoPorInscripcion(i?.id);
+      const saldo = total - totalPagado;
+
+      const estado =
+        saldo <= 0
+          ? "Pagado"
+          : totalPagado > 0
+            ? "En pagos"
+            : "Pendiente";
+
+      return {
+        Programa: getProgramaNombre(i?.programasSuperiore?.nombre) || "-",
+        "Inscrito Por": getProgramaNombre(i?.inscritoPor) || "-",
+        Participante: `${i.user?.firstName || ""} ${i.user?.lastName || ""}`.trim(),
+        Cédula: i.user?.cI || i.user?.cedula || "-",
+        Email: i.user?.email || "-",
+        "Total Programa": totalPrograma.toFixed(2),
+        Comisión: Number(i?.descuento || 0).toFixed(2),
+        Total: total.toFixed(2),
+        "Total Pagado": totalPagado.toFixed(2),
+        Saldo: saldo.toFixed(2),
+        Estado: estado,
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Inscritos");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileData = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+    });
+
+    saveAs(fileData, `inscritos_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+
+  const descargarExcelPagos = () => {
+    const data = pagosFiltrados.map((p) => {
+      const factura = getFacturaUI(p);
+
+      let estadoFactura = "-";
+      if (factura.type === "emitir") estadoFactura = "Por emitir";
+      if (factura.type === "pendiente") estadoFactura = "Pendiente";
+      if (factura.type === "ver") estadoFactura = "Autorizada";
+
+      return {
+        Fecha: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-",
+        Programa: p?.inscripcion?.programasSuperiore?.nombre || "-",
+        Participante: `${p?.inscripcion?.user?.firstName || ""} ${p?.inscripcion?.user?.lastName || ""}`.trim(),
+        Cédula: p?.inscripcion?.user?.cI || "-",
+        Entidad: p?.entidad || "-",
+        "ID Depósito": p?.idDeposito || "-",
+        Valor: Number(p?.valorPagado || 0).toFixed(2),
+        Comprobante: p?.pagoUrl || "No disponible",
+        Verificado: p?.verificado ? "Sí" : "No",
+        Observación: p?.observacion || "-",
+        Factura: estadoFactura,
+        Editor: p?.usuarioEdicion || "-",
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    worksheet["!cols"] = [
+      { wch: 14 },
+      { wch: 30 },
+      { wch: 28 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 12 },
+      { wch: 45 },
+      { wch: 12 },
+      { wch: 30 },
+      { wch: 15 },
+      { wch: 20 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Pagos");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileData = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+    });
+
+    saveAs(fileData, `pagos_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   /* =============================
@@ -1090,7 +1207,7 @@ const ProgramaSuperiorAdmin = () => {
             </select>
           </div>
 
-          {/* <div className="secInputGroup">
+          <div className="secInputGroup">
             <label className="vpLbl">Estado</label>
             <select
               className="secInput"
@@ -1102,7 +1219,7 @@ const ProgramaSuperiorAdmin = () => {
               <option value="en_pagos">En pagos</option>
               <option value="pendiente">Pendiente</option>
             </select>
-          </div> */}
+          </div>
 
           <div className="secInputGroup">
             <label className="vpLbl">Fecha inicio</label>
@@ -1123,6 +1240,14 @@ const ProgramaSuperiorAdmin = () => {
               onChange={(e) => setFiltroFechaFinInscrito(e.target.value)}
             />
           </div>
+
+          <button
+            className="secBtnPrimary"
+            onClick={descargarExcelInscritos}
+            type="button"
+          >
+            📥 Descargar Excel
+          </button>
 
           <button
             className="secBtnDanger"
@@ -1317,19 +1442,6 @@ const ProgramaSuperiorAdmin = () => {
             />
           </div>
 
-          {/* <div className="secInputGroup">
-            <label className="vpLbl">Verificado</label>
-            <select
-              className="secInput"
-              value={filtroVerificadoPago}
-              onChange={(e) => setFiltroVerificadoPago(e.target.value)}
-            >
-              <option value="">Todos</option>
-              <option value="true">Verificados</option>
-              <option value="false">No verificados</option>
-            </select>
-          </div> */}
-
           <div className="secInputGroup">
             <label className="vpLbl">Fecha inicio</label>
             <input
@@ -1349,6 +1461,14 @@ const ProgramaSuperiorAdmin = () => {
               onChange={(e) => setFiltroFechaFinPago(e.target.value)}
             />
           </div>
+
+          <button
+            className="secBtnPrimary"
+            onClick={descargarExcelPagos}
+            type="button"
+          >
+            📥 Descargar Excel
+          </button>
 
           <button
             className="secBtnDanger"

@@ -42,7 +42,7 @@ const App = () => {
         window.ReactNativeWebView?.postMessage(
           JSON.stringify({ type: "LOGOUT" }),
         );
-      } catch {}
+      } catch { }
     };
   }, []);
 
@@ -85,6 +85,8 @@ const App = () => {
             <Route element={<SubAdminProtectedRoutes />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/programa-superior" element={<ProgramaSuperiorAdmin />} />
+              <Route path="/edit_user" element={<UserEdit />} />
+
 
               <Route element={<SuperAdminProtectedRoute />}>
                 <Route path="/edit_user" element={<UserEdit />} />

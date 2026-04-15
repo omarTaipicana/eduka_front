@@ -213,6 +213,9 @@ const PrincipalHeader = () => {
           <Link to="/programa-superior" onClick={onClick}>
             Prog. Sup
           </Link>
+          <Link to="/edit_user" onClick={onClick}>
+            Editar Usuario
+          </Link>
         </>
       );
     }
@@ -402,9 +405,8 @@ const PrincipalHeader = () => {
 
       {/* MENÚ MOBILE DESPLEGABLE */}
       <div
-        className={`navbar_mobile_menu ${
-          menuOpen ? "navbar_mobile_menu--open" : ""
-        }`}
+        className={`navbar_mobile_menu ${menuOpen ? "navbar_mobile_menu--open" : ""
+          }`}
       >
         {renderRoleLinks(closeMenu)}
         <hr className="navbar_mobile_divider" />
