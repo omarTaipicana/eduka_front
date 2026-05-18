@@ -89,7 +89,8 @@ const ProgramaSuperiorAdmin = () => {
   const inscritoPorValue = watch("inscritoPor");
 
   const [filtroBusquedaInscrito, setFiltroBusquedaInscrito] = useState("");
-  const [filtroFechaInicioInscrito, setFiltroFechaInicioInscrito] = useState("");
+  const [filtroFechaInicioInscrito, setFiltroFechaInicioInscrito] =
+    useState("");
   const [filtroFechaFinInscrito, setFiltroFechaFinInscrito] = useState("");
   const [filtroInscritoPor, setFiltroInscritoPor] = useState("");
   const [filtroEstadoInscrito, setFiltroEstadoInscrito] = useState("");
@@ -131,9 +132,12 @@ const ProgramaSuperiorAdmin = () => {
   const cargarInscripcionesFiltradas = async () => {
     const params = new URLSearchParams();
 
-    if (filtroBusquedaInscrito) params.append("busqueda", filtroBusquedaInscrito);
-    if (filtroFechaInicioInscrito) params.append("fechaInicio", filtroFechaInicioInscrito);
-    if (filtroFechaFinInscrito) params.append("fechaFin", filtroFechaFinInscrito);
+    if (filtroBusquedaInscrito)
+      params.append("busqueda", filtroBusquedaInscrito);
+    if (filtroFechaInicioInscrito)
+      params.append("fechaInicio", filtroFechaInicioInscrito);
+    if (filtroFechaFinInscrito)
+      params.append("fechaFin", filtroFechaFinInscrito);
     if (filtroInscritoPor) params.append("inscritoPor", filtroInscritoPor);
     if (filtroEstadoInscrito) params.append("estadoPago", filtroEstadoInscrito);
 
@@ -225,6 +229,8 @@ const ProgramaSuperiorAdmin = () => {
       await updateInscripcion(PATH_INSCRIPCIONES, inscripcionId, {
         descuento: Number(data.descuento || 0),
         totalAPagar: Number(data.totalAPagar || 0),
+        periodo: data?.periodo,
+        inscritoPor: data?.inscritoPor,
       });
 
       await getPagos(PATH_PAGOS);
@@ -323,15 +329,14 @@ const ProgramaSuperiorAdmin = () => {
     return { type: "pendiente", label: "Pendiente SRI" };
   };
 
-
   const descargarExcelInscritos = () => {
     const data = inscripcionesUnicas.map((i) => {
       const totalPrograma = Number(
-        i?.totalAPagar || getProgramaPrecio(i?.programa) || 0
+        i?.totalAPagar || getProgramaPrecio(i?.programa) || 0,
       );
 
       const comision = Number(
-        i?.descuento || getProgramaPrecio(i?.programa) || 0
+        i?.descuento || getProgramaPrecio(i?.programa) || 0,
       );
 
       const total = totalPrograma + comision;
@@ -339,16 +344,13 @@ const ProgramaSuperiorAdmin = () => {
       const saldo = total - totalPagado;
 
       const estado =
-        saldo <= 0
-          ? "Pagado"
-          : totalPagado > 0
-            ? "En pagos"
-            : "Pendiente";
+        saldo <= 0 ? "Pagado" : totalPagado > 0 ? "En pagos" : "Pendiente";
 
       return {
         Programa: getProgramaNombre(i?.programasSuperiore?.nombre) || "-",
         "Inscrito Por": getProgramaNombre(i?.inscritoPor) || "-",
-        Participante: `${i.user?.firstName || ""} ${i.user?.lastName || ""}`.trim(),
+        Participante:
+          `${i.user?.firstName || ""} ${i.user?.lastName || ""}`.trim(),
         Cédula: i.user?.cI || i.user?.cedula || "-",
         Email: i.user?.email || "-",
         "Total Programa": totalPrograma.toFixed(2),
@@ -361,7 +363,6 @@ const ProgramaSuperiorAdmin = () => {
     });
 
     const worksheet = XLSX.utils.json_to_sheet(data);
-
 
     const workbook = XLSX.utils.book_new();
 
@@ -379,7 +380,6 @@ const ProgramaSuperiorAdmin = () => {
     saveAs(fileData, `inscritos_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
-
   const descargarExcelPagos = () => {
     const data = pagosFiltrados.map((p) => {
       const factura = getFacturaUI(p);
@@ -392,7 +392,8 @@ const ProgramaSuperiorAdmin = () => {
       return {
         Fecha: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-",
         Programa: p?.inscripcion?.programasSuperiore?.nombre || "-",
-        Participante: `${p?.inscripcion?.user?.firstName || ""} ${p?.inscripcion?.user?.lastName || ""}`.trim(),
+        Participante:
+          `${p?.inscripcion?.user?.firstName || ""} ${p?.inscripcion?.user?.lastName || ""}`.trim(),
         Cédula: p?.inscripcion?.user?.cI || "-",
         Entidad: p?.entidad || "-",
         "ID Depósito": p?.idDeposito || "-",
@@ -500,8 +501,9 @@ const ProgramaSuperiorAdmin = () => {
       const q = filtroBusquedaPago.trim().toLowerCase();
 
       data = data.filter((p) => {
-        const nombres = `${p?.inscripcion?.user?.firstName || ""} ${p?.inscripcion?.user?.lastName || ""
-          }`.toLowerCase();
+        const nombres = `${p?.inscripcion?.user?.firstName || ""} ${
+          p?.inscripcion?.user?.lastName || ""
+        }`.toLowerCase();
 
         const cedula = String(p?.inscripcion?.user?.cI || "").toLowerCase();
         const email = String(p?.inscripcion?.user?.email || "").toLowerCase();
@@ -671,6 +673,7 @@ const ProgramaSuperiorAdmin = () => {
           programasSuperioreId: selectedPrograma,
           registradoPor: user.id,
           inscritoPor: data.inscritoPor,
+          periodo: data.periodo,
           descuento,
           totalAPagar,
         },
@@ -689,8 +692,8 @@ const ProgramaSuperiorAdmin = () => {
       console.error(error.response?.data || error.message);
       alert(
         error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Error al crear inscripción",
+          error.response?.data?.error ||
+          "Error al crear inscripción",
       );
     } finally {
       setIsSubmittingInscripcion(false);
@@ -776,8 +779,8 @@ const ProgramaSuperiorAdmin = () => {
       console.error(error.response?.data || error.message);
       alert(
         error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Error registrando pago",
+          error.response?.data?.error ||
+          "Error registrando pago",
       );
     } finally {
       setIsSubmittingPago(false);
@@ -812,8 +815,8 @@ const ProgramaSuperiorAdmin = () => {
       console.error(error.response?.data || error.message);
       alert(
         error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Error al emitir factura",
+          error.response?.data?.error ||
+          "Error al emitir factura",
       );
     } finally {
       setIsEmitiendoFactura(false);
@@ -925,6 +928,15 @@ const ProgramaSuperiorAdmin = () => {
                   {p.nombre}
                 </option>
               ))}
+            </select>
+          </div>
+
+          <div className="secInputGroup">
+            <label className="vpLbl">Período</label>
+            <select className="secInput" {...register("periodo")} required>
+              <option value="">Seleccione</option>
+              <option value="primero">Primer Péríodo</option>
+              <option value="segundo">Segundo Período</option>
             </select>
           </div>
 
@@ -1266,6 +1278,7 @@ const ProgramaSuperiorAdmin = () => {
               <tr>
                 <th>Programa</th>
                 <th>Inscrito Por</th>
+                <th>Período</th>
                 <th>Participante</th>
                 <th>Cédula</th>
                 <th>Email</th>
@@ -1308,7 +1321,35 @@ const ProgramaSuperiorAdmin = () => {
                     </td>
 
                     <td className="vpTdWrap">
-                      {getProgramaNombre(i?.inscritoPor)}
+                      {editInscripcionId === i.id ? (
+                        <select
+                          className="vpMiniInput"
+                          {...registerEdit("inscritoPor")}
+                          defaultValue={i?.inscritoPor || ""}
+                        >
+                          <option value="">Seleccionar</option>
+                          <option value="eduka">Eduka</option>
+                          <option value="asociado">Asociado</option>
+                        </select>
+                      ) : (
+                        i?.inscritoPor || "-"
+                      )}
+                    </td>
+
+                    <td className="vpTdWrap">
+                      {editInscripcionId === i.id ? (
+                        <select
+                          className="vpMiniInput"
+                          {...registerEdit("periodo")}
+                          defaultValue={i?.periodo || ""}
+                        >
+                          <option value="">Seleccionar</option>
+                          <option value="primero">Primero</option>
+                          <option value="segundo">Segundo</option>
+                        </select>
+                      ) : (
+                        i?.periodo || "-"
+                      )}
                     </td>
 
                     <td className="vpTdWrap">
