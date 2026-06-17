@@ -877,8 +877,36 @@ const seleccionarSugerencia = (sug) => {
                               <td className="col-curso" rowSpan={cursos.length}>
                                 {usuario.firstName} {usuario.lastName}
                               </td>
-                              <td rowSpan={cursos.length}>{usuario.cellular}</td>
-                            </>
+<td rowSpan={cursos.length}>
+  {(() => {
+    const celular = String(usuario.cellular || "").replace(/\D/g, "");
+
+    if (!celular || celular.length < 9) {
+      return usuario.cellular || "";
+    }
+
+    const numeroWhatsapp = celular.startsWith("0")
+      ? `593${celular.slice(1)}`
+      : celular.startsWith("593")
+      ? celular
+      : `593${celular}`;
+
+    return (
+      <a
+        href={`https://wa.me/${numeroWhatsapp}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          color: "#0b66c3",
+          fontWeight: 700,
+          textDecoration: "underline",
+        }}
+      >
+        {usuario.cellular}
+      </a>
+    );
+  })()}
+</td>                           </>
                           )}
 
                           <td className="col-curso">{curso.fullname}</td>
