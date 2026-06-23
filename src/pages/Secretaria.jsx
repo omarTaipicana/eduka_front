@@ -21,6 +21,7 @@ const Secretaria = () => {
   const [nombreBuscado, setNombreBuscado] = useState("");
   const [filtroPago, setFiltroPago] = useState("");
   const [filtroCertificado, setFiltroCertificado] = useState("");
+  const [filtroObservacion, setFiltroObservacion] = useState("");
   const [filtroDetalle, setFiltroDetalle] = useState("");
   const [filtroUltimoAcceso, setFiltroUltimoAcceso] = useState("");
   const [filtroCurso, setFiltroCurso] = useState("");
@@ -58,7 +59,7 @@ const Secretaria = () => {
 
     cargaTimeoutRef.current = setTimeout(() => {
       getUsers(
-        `/users?cedula=${cedulaBuscada}&search=${nombreBuscado}&notaFinal=${filtroDetalle}&acces=${filtroUltimoAcceso}&pagos=${filtroPago}&certificado=${filtroCertificado}&curso=${filtroCurso}&page=${pagina}&limit=${limite}`
+        `/users?cedula=${cedulaBuscada}&search=${nombreBuscado}&notaFinal=${filtroDetalle}&acces=${filtroUltimoAcceso}&pagos=${filtroPago}&certificado=${filtroCertificado}&curso=${filtroCurso}&observacion=${filtroObservacion}&page=${pagina}&limit=${limite}`
       );
     }, 2000); // 2 segundos de espera
   };
@@ -83,6 +84,7 @@ const Secretaria = () => {
     pagos: "",
     certificado: "",
     curso: "",
+    observacion: "",
     page: 1,
   });
 
@@ -96,6 +98,7 @@ const Secretaria = () => {
       pagos: filtroPago,
       certificado: filtroCertificado,
       curso: filtroCurso,
+      observacion: filtroObservacion,
       page: paginaActual,
     };
   }, [
@@ -105,6 +108,7 @@ const Secretaria = () => {
     filtroUltimoAcceso,
     filtroPago,
     filtroCertificado,
+    filtroObservacion,
     filtroCurso,
     paginaActual,
   ]);
@@ -116,7 +120,7 @@ const Secretaria = () => {
     const actualizarUsuarios = () => {
       const f = filtrosRef.current; // usamos los valores actuales de los filtros
       getUsers(
-        `/users?cedula=${f.cedula}&search=${f.nombre}&notaFinal=${f.notaFinal}&acces=${f.acces}&pagos=${f.pagos}&certificado=${f.certificado}&curso=${f.curso}&page=${f.page}`
+        `/users?cedula=${f.cedula}&search=${f.nombre}&notaFinal=${f.notaFinal}&acces=${f.acces}&pagos=${f.pagos}&certificado=${f.certificado}&curso=${f.curso}&observacion=${f.observacion}&page=${f.page}`
       );
     };
 
@@ -139,7 +143,7 @@ const Secretaria = () => {
 
   useEffect(() => {
     getUsers(
-      `/users?cedula=${cedulaBuscada}&search=${nombreBuscado}&notaFinal=${filtroDetalle}&acces=${filtroUltimoAcceso}&pagos=${filtroPago}&certificado=${filtroCertificado}&curso=${filtroCurso}&page=${paginaActual}`
+      `/users?cedula=${cedulaBuscada}&search=${nombreBuscado}&notaFinal=${filtroDetalle}&acces=${filtroUltimoAcceso}&pagos=${filtroPago}&certificado=${filtroCertificado}&curso=${filtroCurso}&observacion=${filtroObservacion}&page=${paginaActual}`
     );
   }, [
     cedulaBuscada,
@@ -148,6 +152,7 @@ const Secretaria = () => {
     filtroPago,
     filtroCertificado,
     filtroCurso,
+    filtroObservacion,
     paginaActual,
     filtroUltimoAcceso,
   ]);
@@ -161,6 +166,7 @@ const Secretaria = () => {
     filtroPago,
     filtroCertificado,
     filtroCurso,
+    filtroObservacion,
     filtroUltimoAcceso,
   ]);
 
@@ -275,6 +281,7 @@ const Secretaria = () => {
     setFiltroPago("");
     setFiltroCertificado("");
     setFiltroCurso("");
+    setFiltroObservacion("");
     setFiltroDetalle("");
     setFiltroUltimoAcceso("");
     setBusquedaRealizada(false);
@@ -282,27 +289,27 @@ const Secretaria = () => {
   };
 
   // Al seleccionar sugerencia llenamos input y vaciamos sugerencias
-const seleccionarSugerencia = (sug) => {
-  const nombre = `${sug.user?.firstName || ""} ${sug.user?.lastName || ""}`.trim();
-  const ci = sug.user?.cI || "";
+  const seleccionarSugerencia = (sug) => {
+    const nombre = `${sug.user?.firstName || ""} ${sug.user?.lastName || ""}`.trim();
+    const ci = sug.user?.cI || "";
 
-  // 1) llenar inputs visibles (opcional pero recomendado)
-  setInputNombre(nombre);
-  setInputCedula(ci);
+    // 1) llenar inputs visibles (opcional pero recomendado)
+    setInputNombre(nombre);
+    setInputCedula(ci);
 
-  // 2) aplicar filtros reales
-  setNombreBuscado(nombre);
-  setCedulaBuscada(ci);
+    // 2) aplicar filtros reales
+    setNombreBuscado(nombre);
+    setCedulaBuscada(ci);
 
-  // 3) ocultar sugerencias
-  setSugerencias([]);
+    // 3) ocultar sugerencias
+    setSugerencias([]);
 
-  // 4) ✅ activar resultados (clave)
-  setBusquedaRealizada(true);
+    // 4) ✅ activar resultados (clave)
+    setBusquedaRealizada(true);
 
-  // 5) ✅ opcional: reset a página 1
-  setPaginaActual(1);
-};
+    // 5) ✅ opcional: reset a página 1
+    setPaginaActual(1);
+  };
 
 
 
@@ -721,6 +728,18 @@ const seleccionarSugerencia = (sug) => {
                 </div>
 
                 <div className="input_group secInputGroup">
+                  <select
+                    value={filtroObservacion}
+                    onChange={(e) => setFiltroObservacion(e.target.value)}
+                    className="buscador_input secInput"
+                  >
+                    <option value="">Observación</option>
+                    <option value="true">Con observación</option>
+                    <option value="false">Sin observación</option>
+                  </select>
+                </div>
+
+                <div className="input_group secInputGroup">
                   <button
                     className="btn_buscar secBtnPrimary"
                     onClick={() => {
@@ -743,6 +762,7 @@ const seleccionarSugerencia = (sug) => {
                       setFiltroPago("");
                       setFiltroCertificado("");
                       setFiltroCurso("");
+                      setFiltroObservacion("");
                       setFiltroDetalle("");
                       setFiltroUltimoAcceso("");
                     }}
@@ -877,36 +897,37 @@ const seleccionarSugerencia = (sug) => {
                               <td className="col-curso" rowSpan={cursos.length}>
                                 {usuario.firstName} {usuario.lastName}
                               </td>
-<td rowSpan={cursos.length}>
-  {(() => {
-    const celular = String(usuario.cellular || "").replace(/\D/g, "");
+                              <td rowSpan={cursos.length}>
+                                {(() => {
+                                  const celular = String(usuario.cellular || "").replace(/\D/g, "");
 
-    if (!celular || celular.length < 9) {
-      return usuario.cellular || "";
-    }
+                                  if (!celular || celular.length < 9) {
+                                    return usuario.cellular || "";
+                                  }
 
-    const numeroWhatsapp = celular.startsWith("0")
-      ? `593${celular.slice(1)}`
-      : celular.startsWith("593")
-      ? celular
-      : `593${celular}`;
+                                  const numeroWhatsapp = celular.startsWith("0")
+                                    ? `593${celular.slice(1)}`
+                                    : celular.startsWith("593")
+                                      ? celular
+                                      : `593${celular}`;
 
-    return (
-      <a
-        href={`https://wa.me/${numeroWhatsapp}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          color: "#0b66c3",
-          fontWeight: 700,
-          textDecoration: "underline",
-        }}
-      >
-        {usuario.cellular}
-      </a>
-    );
-  })()}
-</td>                           </>
+                                  return (
+                                    <a
+                                      href={`https://wa.me/${numeroWhatsapp}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{
+                                        color: "#0b66c3",
+                                        fontWeight: 700,
+                                        textDecoration: "underline",
+                                      }}
+                                    >
+                                      {usuario.cellular}
+                                    </a>
+                                  );
+                                })()}
+                              </td>
+                            </>
                           )}
 
                           <td className="col-curso">{curso.fullname}</td>
@@ -936,7 +957,7 @@ const seleccionarSugerencia = (sug) => {
                             )}
                           </td>
 
-                          <td className="celda-observacion">
+                          <td className="celda-observacion tooltip-observacion">
                             {editInscripcionId === curso.id ? (
                               <input
                                 type="text"
@@ -945,7 +966,23 @@ const seleccionarSugerencia = (sug) => {
                                 className="vp-input"
                               />
                             ) : curso.observacion ? (
-                              curso.observacion
+                              <>
+                                {curso.observacion}
+                                <span className="tooltip-text">
+                                  Registrado el:{" "}
+                                  {new Date(curso.updatedAt).toLocaleString(
+                                    "es-EC",
+                                    {
+                                      timeZone: "America/Guayaquil",
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    },
+                                  )}
+                                </span>
+                              </>
                             ) : (
                               "👍"
                             )}
