@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import useCrud from "../../hooks/useCrud";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -26,10 +26,24 @@ export const RegistroPagos = () => {
   const [certificadoPagado, setCertificadoPagado] = useState(false);
   const [total, setTotal] = useState(0);
 
-  const [resUploads, getUpload, , , , , isLoading, , , , uploadPdf, newUpload] =
+  const [, , , , , , isLoading, , , , uploadPdf, newUpload] =
     useCrud();
 
-  const resUpload = resUploads.filter((p) => p.confirmacion === true);
+  const coursesData = useMemo(() => {
+    if (Array.isArray(courses)) {
+      return courses;
+    }
+
+    if (Array.isArray(courses?.data)) {
+      return courses.data;
+    }
+
+    if (Array.isArray(courses?.results)) {
+      return courses.results;
+    }
+
+    return [];
+  }, [courses]);
 
   const {
     register,
@@ -50,8 +64,7 @@ export const RegistroPagos = () => {
 
   useEffect(() => {
     getCourse(PATH_COURSES);
-    getUpload(PATH_PAGOS);
-  }, [inscrito]);
+  }, []);
 
   useEffect(() => {
     // Extras en centavos
@@ -73,49 +86,86 @@ export const RegistroPagos = () => {
     setTotal((baseCentavos + extrasCentavos) / 100);
   }, [moneda, distintivo, sPolicial, oProfesionales, certificadoPagado]);
 
-  const cursoActivo = courses.find((c) => c.sigla === code);
+  const cursoActivo = coursesData.find((c) => c.sigla === code);
 
   useEffect(() => {
-    if (newValidate) {
-      setUsuario(newValidate?.user);
-      setInscrito(newValidate?.inscripcion);
-
-      if (newValidate?.pagos?.length > 0) {
-        setPagoExistente(newValidate?.pagos);
-      }
-
-      if (newValidate?.message) {
-        dispatch(
-          showAlert({
-            message: newValidate?.message,
-            alertType: 1,
-          })
-        );
-      }
+    if (!newValidate) {
+      return;
     }
-  }, [newValidate]);
+
+    setUsuario(newValidate?.user || null);
+    setInscrito(newValidate?.inscripcion || null);
+
+    const pagosEncontrados = Array.isArray(newValidate?.pagos)
+      ? newValidate.pagos
+      : [];
+
+    setPagoExistente(
+      pagosEncontrados.length > 0
+        ? pagosEncontrados
+        : null,
+    );
+
+    if (newValidate?.message) {
+      dispatch(
+        showAlert({
+          message: newValidate.message,
+          alertType: newValidate?.exists === false ? 1 : 2,
+        }),
+      );
+    }
+  }, [newValidate, dispatch]);
 
   const buscarCedula = (data) => {
     const cedula = data?.cedula.trim();
     const body = { cedula, code };
-    const curso = courses?.find((c) => c.sigla === code);
+    const curso = coursesData.find((c) => c.sigla === code);
     setCursoActual(curso);
     postVlidate(PATH_PAGOSVALIDATE, body);
   };
 
-  const submit = (data) => {
+  const submit = async (data) => {
+    if (!inscrito?.id) {
+      dispatch(
+        showAlert({
+          message:
+            "⚠️ No se encontró una inscripción válida para registrar el pago.",
+          alertType: 1,
+        }),
+      );
+
+      return;
+    }
+
+    const file = data?.archivo?.[0];
+
+    if (!file) {
+      dispatch(
+        showAlert({
+          message:
+            "⚠️ Debes seleccionar un comprobante de pago.",
+          alertType: 1,
+        }),
+      );
+
+      return;
+    }
+
     const body = {
       ...data,
       curso: code,
       inscripcionId: inscrito.id,
     };
 
-    const file = data.archivo[0];
-    uploadPdf(PATH_PAGOS, body, file);
+    try {
+      await uploadPdf(PATH_PAGOS, body, file);
 
-    reset();
-    setCursoActual(null);
-    setTotal(0);
+      reset();
+      setCursoActual(null);
+      setTotal(0);
+    } catch (error) {
+      console.error("Error al registrar el pago:", error);
+    }
   };
 
   useEffect(() => {
@@ -140,10 +190,16 @@ export const RegistroPagos = () => {
   }, [newUpload]);
 
   useEffect(() => {
-    if (total > 0) {
-      setValue("valorDepositado", total);
-    }
+    setValue("valorDepositado", total);
   }, [total, setValue]);
+
+  if (isLoading3 && coursesData.length === 0) {
+    return (
+      <div className="registro_container curso_no_encontrado">
+        <IsLoading />
+      </div>
+    );
+  }
 
   // 1) No existe curso
   if (!cursoActivo) {
@@ -202,8 +258,17 @@ export const RegistroPagos = () => {
 
   const onRegistrarNuevo = () => {
     setUsuario(newValidate?.user);
-    const curso = courses?.find((c) => c.sigla === pagoExistente[0]?.curso);
-    setCursoActual(curso);
+
+    const primerPago =
+      Array.isArray(pagoExistente) && pagoExistente.length > 0
+        ? pagoExistente[0]
+        : null;
+
+    const curso = coursesData.find(
+      (c) => c.sigla === primerPago?.curso,
+    );
+
+    setCursoActual(curso || cursoActivo || null);
     setPagoExistente(null);
     setCertificadoPagado(true);
   };
@@ -215,7 +280,7 @@ export const RegistroPagos = () => {
 
       {pagoExistente && (
         <ModalPagoExistente
-          pagos={resUpload}
+          pagos={Array.isArray(pagoExistente) ? pagoExistente : []}
           onRegistrarNuevo={onRegistrarNuevo}
           onClose={() => {
             setPagoExistente(null);
