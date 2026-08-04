@@ -366,7 +366,7 @@ const UserEdit = () => {
 
   return (
     <div className="ue_page">
-      {isLoading && <IsLoading />}
+      {false && <IsLoading />}
 
       <section className="ue_shell">
         <div className="ue_card">
