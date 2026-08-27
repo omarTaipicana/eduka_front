@@ -94,6 +94,7 @@ const ProgramaSuperiorAdmin = () => {
   const [filtroFechaFinInscrito, setFiltroFechaFinInscrito] = useState("");
   const [filtroInscritoPor, setFiltroInscritoPor] = useState("");
   const [filtroEstadoInscrito, setFiltroEstadoInscrito] = useState("");
+  const [filtroPeriodoInscrito, setFiltroPeriodoInscrito] = useState("");
 
   useEffect(() => {
     if (error) {
@@ -150,6 +151,7 @@ const ProgramaSuperiorAdmin = () => {
     setFiltroFechaFinInscrito("");
     setFiltroInscritoPor("");
     setFiltroEstadoInscrito("");
+    setFiltroPeriodoInscrito("");
   };
 
   const iniciarEdicionPago = (pago) => {
@@ -329,8 +331,27 @@ const ProgramaSuperiorAdmin = () => {
     return { type: "pendiente", label: "Pendiente SRI" };
   };
 
+  const formatearPeriodo = (periodo) => {
+    if (!periodo) return "-";
+
+    const valor = String(periodo).trim();
+    const partes = valor.split("_");
+
+    if (partes.length === 2) {
+      const [nombre, anio] = partes;
+
+      if (nombre === "primero") return `Primer Período ${anio}`;
+      if (nombre === "segundo") return `Segundo Período ${anio}`;
+    }
+
+    if (valor === "primero") return "Primer Período";
+    if (valor === "segundo") return "Segundo Período";
+
+    return valor.replaceAll("_", " ");
+  };
+
   const descargarExcelInscritos = () => {
-    const data = inscripcionesUnicas.map((i) => {
+    const data = inscripcionesFiltradasPeriodo.map((i) => {
       const totalPrograma = Number(
         i?.totalAPagar || getProgramaPrecio(i?.programa) || 0,
       );
@@ -349,6 +370,7 @@ const ProgramaSuperiorAdmin = () => {
       return {
         Programa: getProgramaNombre(i?.programasSuperiore?.nombre) || "-",
         "Inscrito Por": getProgramaNombre(i?.inscritoPor) || "-",
+        "Período": formatearPeriodo(i?.periodo),
         Participante:
           `${i.user?.firstName || ""} ${i.user?.lastName || ""}`.trim(),
         Cédula: i.user?.cI || i.user?.cedula || "-",
@@ -468,6 +490,28 @@ const ProgramaSuperiorAdmin = () => {
     return Array.from(map.values());
   }, [inscripciones]);
 
+  const periodosDisponibles = useMemo(() => {
+    if (!Array.isArray(inscripcionesUnicas)) return [];
+
+    return [
+      ...new Set(
+        inscripcionesUnicas
+          .map((i) => String(i?.periodo || "").trim())
+          .filter(Boolean),
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  }, [inscripcionesUnicas]);
+
+  const inscripcionesFiltradasPeriodo = useMemo(() => {
+    if (!filtroPeriodoInscrito) return inscripcionesUnicas;
+
+    return inscripcionesUnicas.filter(
+      (i) =>
+        String(i?.periodo || "").trim() ===
+        String(filtroPeriodoInscrito).trim(),
+    );
+  }, [inscripcionesUnicas, filtroPeriodoInscrito]);
+
   const entidadesUnicas = useMemo(() => {
     if (!Array.isArray(pagos)) return [];
 
@@ -501,9 +545,8 @@ const ProgramaSuperiorAdmin = () => {
       const q = filtroBusquedaPago.trim().toLowerCase();
 
       data = data.filter((p) => {
-        const nombres = `${p?.inscripcion?.user?.firstName || ""} ${
-          p?.inscripcion?.user?.lastName || ""
-        }`.toLowerCase();
+        const nombres = `${p?.inscripcion?.user?.firstName || ""} ${p?.inscripcion?.user?.lastName || ""
+          }`.toLowerCase();
 
         const cedula = String(p?.inscripcion?.user?.cI || "").toLowerCase();
         const email = String(p?.inscripcion?.user?.email || "").toLowerCase();
@@ -692,8 +735,8 @@ const ProgramaSuperiorAdmin = () => {
       console.error(error.response?.data || error.message);
       alert(
         error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Error al crear inscripción",
+        error.response?.data?.error ||
+        "Error al crear inscripción",
       );
     } finally {
       setIsSubmittingInscripcion(false);
@@ -779,8 +822,8 @@ const ProgramaSuperiorAdmin = () => {
       console.error(error.response?.data || error.message);
       alert(
         error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Error registrando pago",
+        error.response?.data?.error ||
+        "Error registrando pago",
       );
     } finally {
       setIsSubmittingPago(false);
@@ -815,8 +858,8 @@ const ProgramaSuperiorAdmin = () => {
       console.error(error.response?.data || error.message);
       alert(
         error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Error al emitir factura",
+        error.response?.data?.error ||
+        "Error al emitir factura",
       );
     } finally {
       setIsEmitiendoFactura(false);
@@ -935,8 +978,10 @@ const ProgramaSuperiorAdmin = () => {
             <label className="vpLbl">Período</label>
             <select className="secInput" {...register("periodo")} required>
               <option value="">Seleccione</option>
-              <option value="primero">Primer Péríodo</option>
-              <option value="segundo">Segundo Período</option>
+              <option value="primero_2026">Primer Período 2026</option>
+              <option value="segundo_2026">Segundo Período 2026</option>
+              <option value="primero_2027">Primer Período 2027</option>
+              <option value="segundo_2027">Segundo Período 2027</option>
             </select>
           </div>
 
@@ -1234,6 +1279,22 @@ const ProgramaSuperiorAdmin = () => {
           </div>
 
           <div className="secInputGroup">
+            <label className="vpLbl">Período</label>
+            <select
+              className="secInput"
+              value={filtroPeriodoInscrito}
+              onChange={(e) => setFiltroPeriodoInscrito(e.target.value)}
+            >
+              <option value="">Todos</option>
+              {periodosDisponibles.map((periodo) => (
+                <option key={periodo} value={periodo}>
+                  {formatearPeriodo(periodo)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="secInputGroup">
             <label className="vpLbl">Fecha inicio</label>
             <input
               className="secInput"
@@ -1270,7 +1331,7 @@ const ProgramaSuperiorAdmin = () => {
           </button>
         </div>
 
-        <div className="secCount">Total: {inscripcionesUnicas.length}</div>
+        <div className="secCount">Total: {inscripcionesFiltradasPeriodo.length}</div>
 
         <div className="secTableWrap">
           <table className="secTable">
@@ -1293,7 +1354,7 @@ const ProgramaSuperiorAdmin = () => {
             </thead>
 
             <tbody>
-              {inscripcionesUnicas.map((i) => {
+              {inscripcionesFiltradasPeriodo.map((i) => {
                 const totalPrograma = Number(
                   i?.totalAPagar || getProgramaPrecio(i?.programa) || 0,
                 );
@@ -1336,19 +1397,23 @@ const ProgramaSuperiorAdmin = () => {
                       )}
                     </td>
 
-                    <td className="vpTdWrap">
+                    <td className="vpTdWrap vpPeriodoCell">
                       {editInscripcionId === i.id ? (
                         <select
-                          className="vpMiniInput"
+                          className="vpMiniInput vpPeriodoSelect"
                           {...registerEdit("periodo")}
                           defaultValue={i?.periodo || ""}
                         >
                           <option value="">Seleccionar</option>
-                          <option value="primero">Primero</option>
-                          <option value="segundo">Segundo</option>
+                          <option value="primero_2026">Primer Período 2026</option>
+                          <option value="segundo_2026">Segundo Período 2026</option>
+                          <option value="primero_2027">Primer Período 2027</option>
+                          <option value="segundo_2027">Segundo Período 2027</option>
                         </select>
                       ) : (
-                        i?.periodo || "-"
+                        <span className="vpPeriodoText" title={formatearPeriodo(i?.periodo)}>
+                          {formatearPeriodo(i?.periodo)}
+                        </span>
                       )}
                     </td>
 
