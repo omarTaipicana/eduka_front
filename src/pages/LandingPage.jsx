@@ -382,6 +382,23 @@ const LandingPage = () => {
                 </button>
               </article>
             </Link>
+
+            <Link to="/piat-dip-i" className="curso-link-piat">
+              <article className="curso-item curso-item-piat">
+                <img
+                  src="/images/piat/landing-piat-azul.png"
+                  alt="Programa de cuatro diplomados en inteligencia policial, análisis delictivo, operaciones tácticas y litigación"
+                  className="curso-icon curso-icon-piat"
+                  loading="lazy"
+                />
+                <h3 className="curso-name">
+                  Diplomado I: Inteligencia Policial y Captación de Fuentes de Información
+                </h3>
+                <button className="curso-cta" type="button">
+                  Conocer más <span>➜</span>
+                </button>
+              </article>
+            </Link>
           </div>
         </div>
       </motion.section>

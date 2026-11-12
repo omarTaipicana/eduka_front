@@ -25,6 +25,7 @@ export const RegistroPagos = () => {
   const [pagoExistente, setPagoExistente] = useState(null);
   const [certificadoPagado, setCertificadoPagado] = useState(false);
   const [total, setTotal] = useState(0);
+  const [cuentaCopiada, setCuentaCopiada] = useState(false);
 
   const [, , , , , , isLoading, , , , uploadPdf, newUpload] =
     useCrud();
@@ -77,14 +78,42 @@ export const RegistroPagos = () => {
 
     if (!certificadoPagado) {
       // si NO es pagado, depende del tipo
-      if (oProfesionales) baseCentavos = 3200; // $32.00
-      else baseCentavos = 1999; // $19.99 (default y también si sPolicial)
+      if (code === "piat-dip-i") {
+        baseCentavos = 3500; // $35.00 fijo para Diplomado I (PIAT)
+      } else if (oProfesionales) {
+        baseCentavos = 3200; // $32.00 para otros cursos
+      } else {
+        baseCentavos = 1999; // $19.99 para otros cursos
+      }
     } else {
       baseCentavos = 0; // certificado ya pagado
     }
 
     setTotal((baseCentavos + extrasCentavos) / 100);
-  }, [moneda, distintivo, sPolicial, oProfesionales, certificadoPagado]);
+  }, [moneda, distintivo, sPolicial, oProfesionales, certificadoPagado, code]);
+
+  const copiarCuenta = async () => {
+    const numeroCuenta = "2214723388"; // Banco Pichincha, cuenta de ahorros (imagen oficial)
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(numeroCuenta);
+      } else {
+        const campo = document.createElement("textarea");
+        campo.value = numeroCuenta;
+        campo.style.position = "fixed";
+        campo.style.opacity = "0";
+        document.body.appendChild(campo);
+        campo.select();
+        const copiado = document.execCommand("copy");
+        document.body.removeChild(campo);
+        if (!copiado) throw new Error("No se pudo copiar");
+      }
+      setCuentaCopiada(true);
+    } catch (error) {
+      setCuentaCopiada(false);
+      dispatch(showAlert({ message: "No se pudo copiar la cuenta. Número: 2214723388", alertType: 1 }));
+    }
+  };
 
   const cursoActivo = coursesData.find((c) => c.sigla === code);
 
@@ -349,6 +378,7 @@ export const RegistroPagos = () => {
                     <strong>Cédula:</strong> {usuario.cI}
                   </p>
 
+                  {code !== "piat-dip-i" && (
                   <div className="pagos_box_1">
                     <label className="pagos_check_row">
                       <span>Servidor Policial</span>
@@ -375,6 +405,7 @@ export const RegistroPagos = () => {
                       />
                     </label>
                   </div>
+                  )}
                 </div>
                 <div className="pagos_box">
                   <label className="pagos_check_row">
@@ -451,6 +482,11 @@ export const RegistroPagos = () => {
               alt="Información de pago"
               className="pagos_img_full"
             />
+            <div className="pagos_copiar_cuenta_wrap">
+              <button type="button" className="pagos_copiar_cuenta" onClick={copiarCuenta}>
+                {cuentaCopiada ? "✓ Cuenta copiada" : "📋 Copiar cuenta"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

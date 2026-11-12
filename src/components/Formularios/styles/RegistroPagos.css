@@ -483,3 +483,119 @@
     font-size: 0.92rem;
   }
 }
+
+/* Botón de copiado de la cuenta bancaria */
+.pagos_copiar_cuenta_wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px 20px; }
+.pagos_copiar_cuenta { border: 0; border-radius: 12px; padding: 13px 24px; background: #142e68; color: #fff; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 5px 15px rgba(20,46,104,.2); transition: transform .2s ease, background .2s ease, box-shadow .2s ease; }
+.pagos_copiar_cuenta:hover { transform: translateY(-2px); background: #234c9e; box-shadow: 0 8px 20px rgba(20,46,104,.3); }
+.pagos_copiar_cuenta:focus-visible { outline: 3px solid #e9b84a; outline-offset: 3px; }
+.pagos_copiar_cuenta_wrap small { color: #52617b; text-align: center; }
+@media (prefers-reduced-motion: reduce) { .pagos_copiar_cuenta { transition: none; } }
+
+/* V6: imagen bancaria y botón apilados, sin superposición lateral */
+.pagos_panel.solo_imagen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  height: auto;
+  min-height: 0;
+  padding: clamp(12px, 2vw, 26px);
+  box-sizing: border-box;
+}
+.pagos_panel.solo_imagen .pagos_img_full {
+  display: block;
+  flex: none;
+  width: min(100%, 560px);
+  max-width: 100%;
+  max-height: none;
+  height: auto;
+  object-fit: contain;
+  border-radius: 18px;
+}
+.pagos_panel.solo_imagen .pagos_copiar_cuenta_wrap {
+  position: static;
+  flex: none;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.pagos_panel.solo_imagen .pagos_copiar_cuenta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  min-width: min(100%, 280px);
+  padding: 14px 28px;
+  border: 1px solid #315aa4;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #10295f 0%, #1d4c9d 100%);
+  color: #fff;
+  font-size: 1.06rem;
+  font-weight: 800;
+  letter-spacing: .2px;
+  box-shadow: 0 10px 22px rgba(15,42,99,.25);
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+.pagos_panel.solo_imagen .pagos_copiar_cuenta:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.12);
+  box-shadow: 0 14px 28px rgba(15,42,99,.34);
+}
+.pagos_panel.solo_imagen .pagos_copiar_cuenta:active { transform: translateY(0) scale(.98); }
+.pagos_panel.solo_imagen .pagos_copiar_cuenta_wrap small {
+  color: #52617b;
+  font-size: .85rem;
+  text-align: center;
+}
+@media (max-width: 600px) {
+  .pagos_panel.solo_imagen { padding: 12px; }
+  .pagos_panel.solo_imagen .pagos_copiar_cuenta { width: 100%; min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pagos_panel.solo_imagen .pagos_copiar_cuenta { transition: none; }
+}
+
+/* V7: panel bancario compacto, imagen completa y botón debajo */
+.pagos_right.pagos_animate_right {
+  align-self: start;
+  height: auto;
+  min-height: 0;
+}
+.pagos_right .pagos_panel.solo_imagen {
+  width: 100%;
+  max-width: 590px;
+  min-height: 0;
+  height: auto;
+  margin: 0 auto;
+  padding: 12px 14px 14px;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  gap: 0;
+}
+.pagos_right .pagos_panel.solo_imagen .pagos_img_full {
+  width: min(100%, 530px);
+  max-width: 100%;
+  height: auto;
+  max-height: 465px;
+  object-fit: contain;
+  object-position: center;
+}
+.pagos_right .pagos_panel.solo_imagen .pagos_copiar_cuenta_wrap {
+  padding: 12px 0 0;
+  gap: 0;
+}
+.pagos_right .pagos_panel.solo_imagen .pagos_copiar_cuenta {
+  min-height: 48px;
+  padding: 11px 22px;
+}
+@media (max-width: 600px) {
+  .pagos_right .pagos_panel.solo_imagen { max-width: 100%; padding: 10px; }
+  .pagos_right .pagos_panel.solo_imagen .pagos_img_full { max-height: 390px; }
+}

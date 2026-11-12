@@ -1073,3 +1073,27 @@
     margin-bottom: 1.5rem;
   }
 }
+
+/* PIAT - cuarto programa de la landing */
+.cursos-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:1.8rem}
+.cursos-grid .curso-link-piat{min-width:0}
+.curso-item-piat .curso-icon-piat{width:100%;max-width:260px;aspect-ratio:16/9;object-fit:contain;border-radius:12px;box-shadow:0 6px 22px rgba(15,42,99,.13)}
+.curso-item-piat .curso-name{overflow-wrap:anywhere}
+@media(max-width:1100px){.cursos-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:2rem}}
+@media(max-width:700px){.cursos-grid{grid-template-columns:1fr;gap:2rem}.curso-item-piat .curso-icon-piat{max-width:360px}}
+
+/* V3 · Cuatro tarjetas alineadas y con hover */
+.cursos-grid{align-items:stretch}
+.cursos-grid>a{height:100%;min-width:0;display:flex;align-items:stretch;border-radius:18px;transition:transform .26s ease,filter .26s ease}
+.cursos-grid>a:hover{transform:translateY(-8px);filter:drop-shadow(0 12px 18px rgba(20,50,105,.12))}
+.cursos-grid>a:focus-visible{outline:3px solid #357ad5;outline-offset:5px}
+.cursos-grid .curso-item{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;gap:16px;padding:10px 8px 14px;border-radius:18px;transition:background .26s ease,box-shadow .26s ease}
+.cursos-grid>a:hover .curso-item{background:rgba(231,239,252,.58);box-shadow:0 10px 30px rgba(15,42,99,.09)}
+.cursos-grid .curso-icon{flex-shrink:0;transition:transform .28s ease,filter .28s ease}
+.cursos-grid>a:hover .curso-icon{transform:scale(1.045);filter:drop-shadow(0 5px 9px rgba(20,50,105,.12))}
+.cursos-grid .curso-name{margin:0;flex:1;display:flex;align-items:center;justify-content:center;line-height:1.35;font-size:clamp(1.03rem,1.45vw,1.38rem)}
+.cursos-grid .curso-cta{margin-top:auto;min-height:58px;white-space:nowrap;justify-content:center;font-size:clamp(.98rem,1.15vw,1.14rem);padding:.82rem 1.35rem;transition:transform .25s ease,background .25s ease,box-shadow .25s ease}
+.cursos-grid>a:hover .curso-cta{transform:translateY(-3px);background:#18458e;box-shadow:0 12px 25px rgba(15,42,99,.3)}
+.cursos-grid .curso-item-piat .curso-icon-piat{width:100%;max-width:280px;aspect-ratio:16/9;object-fit:contain;border-radius:12px}
+@media(max-width:700px){.cursos-grid>a{width:100%}.cursos-grid .curso-name{font-size:1.15rem}.cursos-grid .curso-cta{width:min(100%,290px)}}
+@media(prefers-reduced-motion:reduce){.cursos-grid>a,.cursos-grid .curso-item,.cursos-grid .curso-icon,.cursos-grid .curso-cta{transition:none!important}.cursos-grid>a:hover,.cursos-grid>a:hover .curso-icon,.cursos-grid>a:hover .curso-cta{transform:none}}

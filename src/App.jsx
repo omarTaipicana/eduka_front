@@ -14,6 +14,7 @@ import Giscopnsc from "./components/Cursos/Giscopnsc";
 import RegistroAlumnos from "./components/Formularios/RegistroAlumnos";
 import { RegistroPagos } from "./components/Formularios/RegistroPagos";
 import Accv from "./components/Cursos/Accv";
+import PiatDipI from "./components/Cursos/PiatDipI";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import ValidadorProtectedRoute from "./routes/ValidadorProtectedRoute";
 import SubAdminProtectedRoutes from "./routes/SubAdminProtectedRoutes";
@@ -66,6 +67,7 @@ const App = () => {
         <Route path="/giscopensc" element={<Giscopnsc />} />
         <Route path="/ciccenic" element={<Ciccenic />} />
         <Route path="/accv" element={<Accv />} />
+        <Route path="/piat-dip-i" element={<PiatDipI />} />
         <Route path="/login" element={<Login />} />
 
         <Route element={<ProtectedRoutes />}>
