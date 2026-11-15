@@ -40,6 +40,20 @@ const Instituto = () => {
   const [, , , , , , isLoading, , , , , , , , uploadCertificadosZip] =
     useCrud();
   const [courses, getCourses] = useCrud();
+  // II-IV son opciones de certificados, no cursos con inscripción/pago propios.
+  const cursosCertificacion = useMemo(() => {
+    const lista = Array.isArray(courses) ? [...courses] : [];
+    if (lista.some((c) => c.sigla === "piat-dip-i")) {
+      for (const [sigla, nombre] of [
+        ["piat-dip-ii", "PIAT - Diplomado II"],
+        ["piat-dip-iii", "PIAT - Diplomado III"],
+        ["piat-dip-iv", "PIAT - Diplomado IV"],
+      ]) {
+        if (!lista.some((c) => c.sigla === sigla)) lista.push({ id: sigla, sigla, nombre });
+      }
+    }
+    return lista;
+  }, [courses]);
 
   const [activeSection, setActiveSection] = useState("descargar");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -249,7 +263,7 @@ const Instituto = () => {
                         className="buscador_input secInput"
                       >
                         <option value="">Todos los cursos</option>
-                        {courses?.map((c) => (
+                        {cursosCertificacion.map((c) => (
                           <option key={c.id} value={c.sigla}>
                             {c.sigla}
                           </option>
@@ -357,7 +371,7 @@ const Instituto = () => {
                         className="buscador_input secInput"
                       >
                         <option value="">Todos los cursos</option>
-                        {courses?.map((c) => (
+                        {cursosCertificacion.map((c) => (
                           <option key={c.id} value={c.sigla}>
                             {c.sigla}
                           </option>
