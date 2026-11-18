@@ -29,3 +29,10 @@
 .piat-page .piat-flow-arrow{transition:transform .24s ease,color .24s ease}
 @media(max-width:720px){.piat-page .piat-actions{flex-direction:column;gap:12px}.piat-page .piat-button{width:100%;min-height:58px}.piat-page .piat-hero-body{text-align:center}}
 @media(prefers-reduced-motion:reduce){.piat-page .piat-button,.piat-page .piat-card,.piat-page .piat-button::after{transition:none!important}.piat-page .piat-button:hover,.piat-page .piat-card:hover{transform:none}}
+
+/* V12: aviso de matrícula destacado */
+.piat-page .piat-note{display:flex;align-items:flex-start;gap:14px;background:#fff1f2;border:1px solid #fecaca;border-left:5px solid #dc2626;color:#991b1b;font-weight:600;box-shadow:0 4px 16px rgba(153,27,27,.08)}
+.piat-page .piat-note strong{color:#b91c1c;font-weight:800}
+.piat-page .piat-note-icon{flex-shrink:0;font-size:1.5rem;line-height:1.3;color:#b91c1c}
+.piat-page .piat-section-title h2{max-width:1000px;margin:8px auto;line-height:1.25;overflow-wrap:break-word}
+@media(max-width:720px){.piat-page .piat-note{padding:15px;gap:10px}}

@@ -36,7 +36,7 @@ export default function PiatDipI() {
         </div>
       </section>
       <section className="piat-content">
-        <div className="piat-section-title"><span>RUTA FORMATIVA</span><h2>Conoce los cuatro diplomados</h2><p>Tu inscripción se realiza en el primero. Los siguientes se habilitan desde Moodle conforme avances.</p></div>
+        <div className="piat-section-title"><span>RUTA FORMATIVA</span><h2>Programa Integral de Especialización Operativa e Inteligencia Policial</h2><p>Tu inscripción se realiza en el primero. Los siguientes se habilitan desde Moodle conforme avances.</p></div>
         <div className="piat-flow" aria-label="Recorrido de los cuatro diplomados">
           {diplomados.map((d, i) => (
             <React.Fragment key={i}>
@@ -50,7 +50,7 @@ export default function PiatDipI() {
             </React.Fragment>
           ))}
         </div>
-        <div className="piat-note"><strong>Importante:</strong> EDUKA registra tu inscripción en el Diplomado I. La matrícula en los diplomados II, III y IV no se realiza desde esta página, sino mediante las condiciones configuradas en Moodle.</div>
+        <div className="piat-note"><span className="piat-note-icon" aria-hidden="true">⚠</span><div><strong>Importante:</strong> EDUKA registra tu inscripción en el Diplomado I. La matrícula en los diplomados II, III y IV no se realiza desde esta página, sino mediante las condiciones configuradas en Moodle.</div></div>
       </section>
     </div>
   );
