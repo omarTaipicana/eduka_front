@@ -36,7 +36,8 @@ const Instituto = () => {
   const PATH_COURSES = "/courses";
 
   const [certificados, getCertificados] = useCrud();
-  const [, , , , , , , , , , , , , postApiDownloadZip] = useCrud();
+  const [downloadProgress, setDownloadProgress] = useState(null);
+  const downloadLock = useRef(false);
   const [courses, getCourses] = useCrud();
   // II-IV son opciones de certificados, no cursos con inscripción/pago propios.
   const cursosCertificacion = useMemo(() => {
@@ -59,7 +60,7 @@ const Instituto = () => {
   const hamburgerRef = useRef();
 
   const [selectedArchivos, setSelectedArchivos] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
+
   const [archivoZip, setArchivoZip] = useState(null);
   const archivoInputRef = useRef(null);
   const [sendingDownload, setSendingDownload] = useState(false);
@@ -174,60 +175,28 @@ const Instituto = () => {
     setMenuOpen(false);
   };
 
-  const listaArchivos = certificados?.archivos || [];
-
-  // Mantener selectAll consistente si cambian archivos
-  useEffect(() => {
-    if (!listaArchivos.length) {
-      setSelectAll(false);
-      setSelectedArchivos([]);
-      return;
-    }
-    setSelectAll(selectedArchivos.length === listaArchivos.length);
-  }, [listaArchivos.length]);
-
-  const handleSelectAll = (e) => {
-    const checked = e.target.checked;
-    setSelectAll(checked);
-
-    if (checked) {
-      setSelectedArchivos(listaArchivos.map((a) => a.nombreArchivo));
-    } else {
-      setSelectedArchivos([]);
-    }
-  };
-
-  const handleSelectOne = (nombreArchivo) => {
-    setSelectedArchivos((prev) => {
-      if (prev.includes(nombreArchivo)) {
-        const nuevo = prev.filter((n) => n !== nombreArchivo);
-        setSelectAll(false);
-        return nuevo;
-      }
-      const nuevo = [...prev, nombreArchivo];
-      if (nuevo.length === listaArchivos.length) setSelectAll(true);
-      return nuevo;
-    });
-  };
-
+  const listaArchivos = certificados?.curso === rolePath ? (certificados.archivos || []) : [];
+  const visibles = selectedArchivos.filter(n => listaArchivos.some(a => a.nombreArchivo === n));
+  const selectAll = listaArchivos.length > 0 && visibles.length === listaArchivos.length;
+  useEffect(() => { setSelectedArchivos([]); setDownloadProgress(null); }, [rolePath]);
+  const handleSelectAll = e => setSelectedArchivos(e.target.checked ? listaArchivos.map(a=>a.nombreArchivo) : []);
+  const handleSelectOne = nombre => setSelectedArchivos(prev => prev.includes(nombre) ? prev.filter(n=>n!==nombre) : [...prev,nombre]);
   const handleDescargarSeleccionados = async () => {
-    if (selectedArchivos.length === 0) {
-      setModal("Selecciona al menos un certificado.");
-      return;
-    }
-
-    const data = { archivos: selectedArchivos };
-
+    if (downloadLock.current || !PATH_CERTIFICADOS_DESCARGAR || !visibles.length) return;
+    downloadLock.current=true; setSendingDownload(true); setDownloadProgress({loaded:0,total:0});
     try {
-      setSendingDownload(true);
-      await postApiDownloadZip(PATH_CERTIFICADOS_DESCARGAR, data);
-      setModal("Solicitud enviada. Se generará la descarga.");
-    } catch (err) {
-      console.error(err);
-      setModal("Error al solicitar descarga.");
-    } finally {
-      setSendingDownload(false);
-    }
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}${PATH_CERTIFICADOS_DESCARGAR}`, {archivos:visibles}, {
+        ...config(), responseType:"blob", onDownloadProgress:e=>setDownloadProgress({loaded:e.loaded,total:e.total||0})
+      });
+      const filename = /filename="?([^";]+)"?/i.exec(res.headers["content-disposition"]||"")?.[1] || `certificados_${rolePath}.zip`;
+      const url=URL.createObjectURL(res.data); const link=document.createElement("a"); link.href=url; link.download=filename; document.body.appendChild(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),30000);
+      setDownloadProgress({loaded:res.data.size,total:res.data.size});
+      setModal("ZIP recibido correctamente. Revisa las descargas del navegador.");
+    } catch(e) {
+      setDownloadProgress(null);
+      let msg=errorText(e); try {if(e.response?.data instanceof Blob) msg=JSON.parse(await e.response.data.text()).message||msg;}catch{}
+      setModal("No se pudo descargar: "+msg);
+    } finally {downloadLock.current=false;setSendingDownload(false);}
   };
 
   const handleFileChange = (e) => {
@@ -321,7 +290,8 @@ const Instituto = () => {
                     <div className="input_group secInputGroup">
                       <select
                         value={filtroCurso}
-                        onChange={(e) => setFiltroCurso(e.target.value)}
+                        disabled={sendingDownload}
+                        onChange={(e) => {setSelectedArchivos([]); setFiltroCurso(e.target.value);}}
                         className="buscador_input secInput"
                       >
                         <option value="">Todos los cursos</option>
@@ -339,12 +309,22 @@ const Instituto = () => {
                   </p>
 
                   <span className="instSelectedInfo">
-                    {selectedArchivos.length
-                      ? `${selectedArchivos.length} seleccionado(s)`
+                    {visibles.length
+                      ? `${visibles.length} seleccionado(s)`
                       : "Ninguno seleccionado"}{" "}
                     de {listaArchivos.length}
                   </span>
 
+                  <div className="instActions">
+                    <button className="instPrimaryBtn" onClick={handleDescargarSeleccionados} disabled={sendingDownload || !visibles.length}>
+                      {sendingDownload ? "Descargando..." : "Descargar seleccionados"}
+                    </button>
+                  </div>
+                  {downloadProgress && <div className="icPanel" role="status">
+                    <strong>{downloadProgress.total ? `Descarga: ${Math.min(sendingDownload?99:100,Math.floor(100*downloadProgress.loaded/downloadProgress.total))}%` : downloadProgress.loaded ? "Recibiendo ZIP..." : "Preparando ZIP en el servidor..."}</strong>
+                    <progress {...(downloadProgress.total ? {value:downloadProgress.loaded,max:downloadProgress.total} : {})}/>
+                    <p>{(downloadProgress.loaded/1048576).toFixed(2)} MB recibidos{downloadProgress.total ? ` de ${(downloadProgress.total/1048576).toFixed(2)} MB` : ""}</p>
+                  </div>}
                   <div className="instTableWrapper">
                     <table className="instTable">
                       <thead>
@@ -352,7 +332,7 @@ const Instituto = () => {
                           <th className="instCheckCell">
                             <input
                               type="checkbox"
-                              checked={selectAll}
+                              disabled={sendingDownload} checked={selectAll}
                               onChange={handleSelectAll}
                             />
                           </th>
@@ -368,7 +348,7 @@ const Instituto = () => {
                             <td className="instCheckCell">
                               <input
                                 type="checkbox"
-                                checked={selectedArchivos.includes(
+                                disabled={sendingDownload} checked={visibles.includes(
                                   item.nombreArchivo,
                                 )}
                                 onChange={() =>
@@ -396,29 +376,6 @@ const Instituto = () => {
                     </table>
                   </div>
 
-                  <div className="instActions">
-                    <button
-                      className="instPrimaryBtn"
-                      onClick={handleDescargarSeleccionados}
-                      disabled={
-                        sendingDownload || selectedArchivos.length === 0
-                      }
-                    >
-                      {sendingDownload
-                        ? "Generando..."
-                        : "Descargar seleccionados"}
-                    </button>
-
-                    <span className="instSelectedInfo">
-                      {selectedArchivos.length
-                        ? `${selectedArchivos.length} seleccionado(s)`
-                        : "Ninguno seleccionado"}
-                    </span>
-                  </div>
-
-                  <pre className="instJsonPreview">
-                    {JSON.stringify({ archivos: selectedArchivos }, null, 2)}
-                  </pre>
                 </>
               ) : (
                 <div>
@@ -429,7 +386,8 @@ const Instituto = () => {
                     <div className="input_group secInputGroup">
                       <select
                         value={filtroCurso}
-                        onChange={(e) => setFiltroCurso(e.target.value)}
+                        disabled={sendingDownload}
+                        onChange={(e) => {setSelectedArchivos([]); setFiltroCurso(e.target.value);}}
                         className="buscador_input secInput"
                       >
                         <option value="">Todos los cursos</option>
