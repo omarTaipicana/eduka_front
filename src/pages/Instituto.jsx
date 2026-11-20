@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import useCrud from "../hooks/useCrud";
-import IsLoadingUpload from "../components/shared/isLoadingUpload";
+import axios from "axios";
+import * as XLSX from "xlsx";
+import getConfigToken from "../services/getConfigToken";
+import "./styles/InstitutoCargas.css";
 import IsLoading from "../components/shared/isLoading";
 import "./styles/Instituto.css";
 import useAuth from "../hooks/useAuth";
@@ -30,15 +33,10 @@ const Instituto = () => {
     ? `/instituto/certificados/${rolePath}/descargar`
     : null;
 
-  const PATH_CERTIFICADOS_SUBIR = rolePath
-    ? `/instituto/certificados/${rolePath}/subir`
-    : null;
   const PATH_COURSES = "/courses";
 
   const [certificados, getCertificados] = useCrud();
   const [, , , , , , , , , , , , , postApiDownloadZip] = useCrud();
-  const [, , , , , , isLoading, , , , , , , , uploadCertificadosZip] =
-    useCrud();
   const [courses, getCourses] = useCrud();
   // II-IV son opciones de certificados, no cursos con inscripción/pago propios.
   const cursosCertificacion = useMemo(() => {
@@ -63,9 +61,86 @@ const Instituto = () => {
   const [selectedArchivos, setSelectedArchivos] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [archivoZip, setArchivoZip] = useState(null);
+  const archivoInputRef = useRef(null);
   const [sendingDownload, setSendingDownload] = useState(false);
   const [sendingUpload, setSendingUpload] = useState(false);
 
+  const [cursoCarga, setCursoCarga] = useState("auto");
+  const [job, setJob] = useState(null);
+  const [jobs, setJobs] = useState([]);
+  const [modal, setModal] = useState("");
+  const [uploadPct, setUploadPct] = useState(0);
+  const [pausarError, setPausarError] = useState(true);
+  const pause = useRef(false);
+  const busy = useRef(false);
+  const api = `${import.meta.env.VITE_API_URL}/instituto/cargas`;
+  const config = () => getConfigToken();
+  const errorText = e => e.response?.data?.message || e.message || "Error de conexión";
+  const refreshJobs = async () => {try {setJobs((await axios.get(api,config())).data);} catch(e){setModal(errorText(e));}};
+  useEffect(()=>{if(activeSection === "subir" && user?.id) refreshJobs();},[activeSection,user?.id]);
+  useEffect(()=>()=>{pause.current=true;},[]);
+  const counts = {total:job?.items.length||0, ok:0, duplicados:0, ignorados:0, error:0, pendiente:0, procesando:0};
+  for(const i of job?.items||[]) counts[i.status==="procesados"?"ok":i.status]++;
+  const done=counts.ok+counts.duplicados+counts.ignorados+counts.error;
+  const pct=counts.total?Math.round(100*done/counts.total):0;
+  const descargarReporteExcel = () => {
+    if (!job) return;
+    try {
+      const estados = {procesados:"Correo confirmado", duplicados:"Duplicado", ignorados:"Ignorado", error:"Error", pendiente:"Pendiente", procesando:"Procesando"};
+      const resumen = [
+        ["EDUKA - Reporte de certificados"],
+        ["Lote", job.id], ["Curso", job.curso === "auto" ? "Detección automática" : job.curso],
+        ["Fecha de exportación", new Date().toLocaleString("es-EC")],
+        ["Estado del lote", job.finished ? "Finalizado" : "No finalizado"],
+        ["Total", counts.total], ["Procesados", done], ["Avance (%)", pct],
+        ["Correos confirmados", counts.ok], ["Duplicados", counts.duplicados],
+        ["Ignorados", counts.ignorados], ["Errores", counts.error],
+        ["Pendientes", counts.pendiente], ["Procesando", counts.procesando],
+        ["Nota", "Correo confirmado indica aceptación SMTP, no entrega en bandeja."]
+      ];
+      const encabezados = ["Archivo", "Cédula", "Curso", "Grupo", "Estado", "Detalle"];
+      const fila = i => [String(i.archivo || ""), String(i.detalle?.cedula || String(i.archivo || "").match(/\d{10}/)?.[0] || ""), String(i.sigla || ""), String(i.detalle?.grupo || String(i.archivo || "").match(/_g(\d+)/i)?.[1] || ""), estados[i.status] || String(i.status || ""), String(i.motivo || i.detalle?.motivo || "")];
+      const libro = XLSX.utils.book_new();
+      const hojaResumen = XLSX.utils.aoa_to_sheet(resumen);
+      hojaResumen["!cols"] = [{wch:32},{wch:76}];
+      XLSX.utils.book_append_sheet(libro, hojaResumen, "Resumen");
+      const agregarDetalle = (nombre, items) => {
+        const hoja = XLSX.utils.aoa_to_sheet([encabezados, ...items.map(fila)]);
+        hoja["!cols"] = [55,15,23,10,24,80].map(wch=>({wch}));
+        hoja["!autofilter"] = {ref: `A1:F${items.length+1}`};
+        XLSX.utils.book_append_sheet(libro, hoja, nombre);
+      };
+      agregarDetalle("Detalle", job.items);
+      agregarDetalle("Errores", job.items.filter(i=>i.status === "error"));
+      XLSX.writeFile(libro, `EDUKA-certificados-${job.id}.xlsx`, {compression:true});
+    } catch(e) { setModal("No fue posible exportar el reporte: " + errorText(e)); }
+  };
+  const cerrarCarga = () => {
+    if (busy.current || !job?.finished) return;
+    setJobs(prev => prev.filter(j => j.id !== job.id));
+    setJob(null);
+    setArchivoZip(null);
+    setCursoCarga("auto");
+    setUploadPct(0);
+    setPausarError(true);
+    setModal("");
+    pause.current = false;
+    if (archivoInputRef.current) archivoInputRef.current.value = "";
+  };
+  const run = async (initial, retry=false, finish=false) => {
+    if(busy.current)return; busy.current=true; pause.current=false; setSendingUpload(true);
+    let j=initial;
+    try {
+      if(retry){j=(await axios.post(`${api}/${j.id}/reintentar`,{},config())).data;setJob(j);}
+      if(finish){j=(await axios.post(`${api}/${j.id}/paso`,{finalizar:true},config())).data;setJob(j);setModal("Lote finalizado. Puedes descargar el reporte Excel y luego cerrar la carga para iniciar otra.");}
+      else while(!pause.current && j.items.some(i=>["pendiente","procesando"].includes(i.status))){
+        const errors=j.items.filter(i=>i.status==="error").length;
+        j=(await axios.post(`${api}/${j.id}/paso`,{},config())).data;setJob(j);
+        if(pausarError && j.items.filter(i=>i.status==="error").length>errors){setModal("Proceso pausado por un error. Revisa el detalle y elige continuar o reintentar.");break;}
+      }
+    } catch(e){setModal(errorText(e)+". El lote permanece guardado; puedes recuperarlo y continuar.");}
+    finally{busy.current=false;setSendingUpload(false);refreshJobs();if(PATH_CERTIFICADOS)getCertificados(PATH_CERTIFICADOS);}
+  };
   useEffect(() => {
     loggedUser();
     getCourses(PATH_COURSES);
@@ -137,7 +212,7 @@ const Instituto = () => {
 
   const handleDescargarSeleccionados = async () => {
     if (selectedArchivos.length === 0) {
-      alert("Selecciona al menos un certificado.");
+      setModal("Selecciona al menos un certificado.");
       return;
     }
 
@@ -146,10 +221,10 @@ const Instituto = () => {
     try {
       setSendingDownload(true);
       await postApiDownloadZip(PATH_CERTIFICADOS_DESCARGAR, data);
-      alert("Solicitud enviada. Se generará la descarga.");
+      setModal("Solicitud enviada. Se generará la descarga.");
     } catch (err) {
       console.error(err);
-      alert("Error al solicitar descarga.");
+      setModal("Error al solicitar descarga.");
     } finally {
       setSendingDownload(false);
     }
@@ -160,32 +235,18 @@ const Instituto = () => {
     setArchivoZip(file || null);
   };
 
-  const handleUpload = async (e) => {
-    e.preventDefault();
-
-    if (!archivoZip) {
-      alert("Selecciona un comprimido primero.");
-      return;
-    }
-
-    try {
-      setSendingUpload(true);
-      await uploadCertificadosZip(PATH_CERTIFICADOS_SUBIR, archivoZip);
-      alert("Archivo subido correctamente.");
-      setArchivoZip(null);
-      e.target.reset();
-      getCertificados(PATH_CERTIFICADOS);
-    } catch (err) {
-      console.error(err);
-      alert("Error al subir archivo.");
-    } finally {
-      setSendingUpload(false);
-    }
+  const handleUpload = async e => {
+    e.preventDefault(); if(!archivoZip||busy.current)return;
+    busy.current=true;setSendingUpload(true);setUploadPct(0);
+    try {const form=new FormData();form.append("zip",archivoZip);form.append("curso",cursoCarga);
+      const j=(await axios.post(api,form,{...config(),onUploadProgress:e=>setUploadPct(e.total?Math.round(e.loaded/e.total*100):0)})).data;
+      setJob(j);setArchivoZip(null); e.target.reset();busy.current=false; if(pausarError && j.items.some(i=>i.status==="error")){setSendingUpload(false);setModal("Hay archivos con curso inválido o no autorizado. Revisa los detalles antes de continuar.");refreshJobs();}else await run(j);
+    }catch(e){setModal(errorText(e));busy.current=false;setSendingUpload(false);}
   };
 
   return (
     <div className="institutoPage">
-      {isLoading && <IsLoadingUpload />}
+      {modal && <div className="icOverlay"><div className="icModal" role="dialog" aria-modal="true"><h2>EDUKA · Certificados</h2><p>{modal}</p><button className="instPrimaryBtn" onClick={()=>setModal("")}>Aceptar</button></div></div>}
 
       <div className="institutoShell">
         {/* Botón hamburguesa mobile */}
@@ -227,6 +288,7 @@ const Instituto = () => {
             className={`institutoMenuBtn ${
               activeSection === "descargar" ? "active" : ""
             }`}
+            disabled={sendingUpload}
             onClick={() => handleSelect("descargar")}
           >
             📥 Descargar certificados
@@ -394,16 +456,23 @@ const Instituto = () => {
               </div>
 
               <p className="institutoDescription">
-                Sube un archivo comprimido (ZIP/RAR/7Z) con los certificados
-                firmados.
+                Sube un ZIP con los certificados firmados. Selecciona el curso o permite que EDUKA lo detecte por el nombre de cada PDF.
               </p>
 
               <form className="instUploadForm" onSubmit={handleUpload}>
+                <label className="instFileLabel">Curso de certificación
+                  <select className="icSelect" value={cursoCarga} onChange={e=>setCursoCarga(e.target.value)} disabled={sendingUpload}>
+                    <option value="auto">Detectar automáticamente por nombre</option>
+                    {(user?.cI===superAdmin?cursosCertificacion:[{sigla:user?.role?.replace("instituto_","")}]).filter(c=>c.sigla).map(c=><option key={c.sigla} value={c.sigla}>{c.sigla}</option>)}
+                  </select>
+                </label>
                 <label className="instFileLabel">
                   <span>Archivo comprimido</span>
                   <input
                     type="file"
-                    accept=".zip,.rar,.7z"
+                    ref={archivoInputRef}
+                    accept=".zip"
+                    disabled={sendingUpload}
                     onChange={handleFileChange}
                     className="instFileInput"
                   />
@@ -418,11 +487,28 @@ const Instituto = () => {
                 <button
                   type="submit"
                   className="instPrimaryBtn"
-                  disabled={sendingUpload}
+                  disabled={sendingUpload || !archivoZip}
                 >
-                  {sendingUpload ? "Subiendo..." : "Subir"}
+                  {sendingUpload ? "Procesando..." : "Subir ZIP e iniciar"}
                 </button>
               </form>
+              {sendingUpload && !job && <p>Transferencia del ZIP: {uploadPct}%</p>}
+              <div className="icPanel">
+                <label><input type="checkbox" checked={pausarError} disabled={sendingUpload} onChange={e=>setPausarError(e.target.checked)}/> Pausar automáticamente si falla un certificado</label>
+                {jobs.filter(j=>j.id!==job?.id).map(j=><div className="icActions" key={j.id}><span>Lote pendiente · {j.curso} · {j.items.length} PDF</span><button disabled={sendingUpload} onClick={()=>setJob(j)}>Recuperar lote</button></div>)}
+                {job && <><h3>Avance del procesamiento · {pct}%</h3><progress value={done} max={counts.total||1}/><p>{done} de {counts.total} certificados procesados</p>
+                  <div className="icStats">{[["Correos confirmados",counts.ok],["Duplicados",counts.duplicados],["Ignorados",counts.ignorados],["Errores",counts.error],["Pendientes",counts.pendiente+counts.procesando]].map(([label,n])=><div key={label}><strong>{n}</strong><span>{label}</span></div>)}</div>
+                  <div className="icActions">
+                    <button disabled={!sendingUpload} onClick={()=>{pause.current=true}}>Pausar</button>
+                    <button disabled={sendingUpload||job.finished||!(counts.pendiente+counts.procesando)} onClick={()=>run(job)}>Continuar</button>
+                    <button disabled={sendingUpload||job.finished||!job.items.some(i=>i.status==="error"&&i.sigla)} onClick={()=>run(job,true)}>Reintentar errores</button>
+                    <button disabled={sendingUpload||job.finished||done!==counts.total} onClick={()=>run(job,false,true)}>Finalizar y enviar resumen</button>
+                    <button type="button" onClick={descargarReporteExcel}>Descargar reporte Excel</button>
+                    {job.finished && <button type="button" disabled={sendingUpload} onClick={cerrarCarga}>Finalizar carga</button>}
+                  </div>
+                  <div className="icTable"><table className="instTable"><thead><tr><th>Archivo</th><th>Curso</th><th>Estado</th><th>Detalle</th></tr></thead><tbody>{job.items.map(i=><tr key={i.index}><td>{i.archivo}</td><td>{i.sigla||"—"}</td><td>{i.status}</td><td>{i.motivo||"—"}</td></tr>)}</tbody></table></div>
+                </>}
+              </div>
             </section>
           )}
         </main>
